@@ -84,13 +84,14 @@ class Player:
             # walk, jump, attack, shadow_strike, hurt: 128x32 (4 frames of 32x32)
             
             # Load sprite sheets - assuming horizontal sprite sheets
-            # For idle, we'll load just the first frame manually to avoid animation jitter
+            # For idle, load just the first frame as a static sprite (no animation)
             import os
             idle_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'sprites', 'characters', 'ninja_idle.png')
-            idle_img = pygame.image.load(idle_path)
-            # Extract just the first 64x64 frame as a static pose
-            self.idle_sprite = idle_img.subsurface((0, 0, 64, 64))
-            self.idle_sprite = pygame.transform.scale(self.idle_sprite, (64, 64))
+            idle_img = pygame.image.load(idle_path).convert_alpha()
+            # Extract only the first 64x64 frame as a completely static pose
+            self.idle_sprite = pygame.Surface((64, 64), pygame.SRCALPHA)
+            self.idle_sprite.blit(idle_img, (0, 0), pygame.Rect(0, 0, 64, 64))
+            # Keep it at original size, no animation
             
             walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (64, 64))
             jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (64, 64))
