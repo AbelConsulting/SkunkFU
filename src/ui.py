@@ -56,12 +56,16 @@ class UI:
     
     def render_hud(self, screen, health, lives, score, player=None):
         """Render HUD during gameplay"""
-        # Health bar
+        # Health bar scaled to player's real max health
         health_text = self.hud_font.render("Health:", True, WHITE)
         screen.blit(health_text, (20, 20))
-        
+
+        max_health = player.max_health if player and hasattr(player, "max_health") else 100
+        clamped_health = max(0, min(health, max_health))
+        health_ratio = clamped_health / max_health if max_health else 0
+
         pygame.draw.rect(screen, RED, (140, 25, 200, 30))
-        pygame.draw.rect(screen, GREEN, (140, 25, int(200 * (health / 100)), 30))
+        pygame.draw.rect(screen, GREEN, (140, 25, int(200 * health_ratio), 30))
         pygame.draw.rect(screen, WHITE, (140, 25, 200, 30), 2)
         
         # Lives

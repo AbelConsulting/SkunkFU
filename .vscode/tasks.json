@@ -5,6 +5,18 @@
 			"label": "Run SkunkFU Game",
 			"type": "shell",
 			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe src/main.py"
+		},
+		{
+			"label": "Sprite Smoke Test",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe",
+			"args": [
+				"test_sprites.py"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
 		}
 	]
 }

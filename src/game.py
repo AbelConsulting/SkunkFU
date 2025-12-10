@@ -114,7 +114,8 @@ class Game:
         """Check for collisions between game objects"""
         # Player attacks hitting enemies
         if self.player.is_attacking:
-            for enemy in self.enemy_manager.enemies:
+            to_remove = []
+            for enemy in list(self.enemy_manager.enemies):
                 # Only hit each enemy once per attack
                 if enemy not in self.player.hit_enemies:
                     if self.player.attack_hitbox.colliderect(enemy.rect):
@@ -156,7 +157,11 @@ class Game:
                             # Bonus points for combos
                             combo_bonus = (self.player.combo_count - 1) * 50
                             self.score += enemy.points + combo_bonus
-                            self.enemy_manager.remove_enemy(enemy)
+                            to_remove.append(enemy)
+        
+            # Remove defeated enemies after processing to avoid mutation during iteration
+            for enemy in to_remove:
+                self.enemy_manager.remove_enemy(enemy)
         
         # Enemy attacks hitting player
         for enemy in self.enemy_manager.enemies:

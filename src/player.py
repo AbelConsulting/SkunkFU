@@ -51,7 +51,9 @@ class Player:
         self.attack_duration = 0.3
         self.attack_cooldown = 0.3  # Reduced for faster combos
         self.attack_cooldown_timer = 0
-        self.attack_hitbox = pygame.Rect(0, 0, 60, 40)
+        self.default_attack_width = 60
+        self.default_attack_height = 40
+        self.attack_hitbox = pygame.Rect(0, 0, self.default_attack_width, self.default_attack_height)
         self.hit_enemies = set()  # Track enemies hit in current attack
         
         # Combo system
@@ -259,6 +261,9 @@ class Player:
             self.attack_timer -= dt
             if self.attack_timer <= 0:
                 self.is_attacking = False
+                # Restore default hitbox size after any attack concludes
+                self.attack_hitbox.width = self.default_attack_width
+                self.attack_hitbox.height = self.default_attack_height
         
         if self.attack_cooldown_timer > 0:
             self.attack_cooldown_timer -= dt
@@ -307,6 +312,9 @@ class Player:
     def attack(self):
         """Perform basic attack with combo system"""
         if self.attack_cooldown_timer <= 0 and not self.is_attacking:
+            # Ensure hitbox is reset for normal attacks
+            self.attack_hitbox.width = self.default_attack_width
+            self.attack_hitbox.height = self.default_attack_height
             self.is_attacking = True
             self.attack_timer = self.attack_duration
             self.attack_cooldown_timer = self.attack_cooldown
