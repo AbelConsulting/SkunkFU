@@ -91,6 +91,8 @@ class Player:
             # Extract only the first 64x64 frame as a completely static pose
             self.idle_sprite = pygame.Surface((64, 64), pygame.SRCALPHA)
             self.idle_sprite.blit(idle_img, (0, 0), pygame.Rect(0, 0, 64, 64))
+            # Pre-create flipped version to avoid recreating every frame
+            self.idle_sprite_flipped = pygame.transform.flip(self.idle_sprite, True, False)
             # Keep it at original size, no animation
             
             walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (64, 64))
@@ -414,17 +416,17 @@ class Player:
         # Get current animation frame
         # Handle idle as special case - static sprite with no animation
         if self.last_anim_state == "idle" and hasattr(self, 'idle_sprite'):
-            sprite = self.idle_sprite
+            # Use pre-cached sprite to avoid any transformations per frame
+            sprite = self.idle_sprite_flipped if not self.facing_right else self.idle_sprite
         elif self.animations and self.current_anim:
             sprite = self.current_anim.get_current_frame()
+            # Flip sprite if facing left
+            if not self.facing_right:
+                sprite = pygame.transform.flip(sprite, True, False)
         else:
             sprite = None
         
         if sprite:
-            # Flip sprite if facing left
-            if not self.facing_right:
-                sprite = pygame.transform.flip(sprite, True, False)
-            
             # Center sprite on player position
             sprite_rect = sprite.get_rect()
             sprite_rect.center = (screen_x + self.width // 2, screen_y + self.height // 2)
