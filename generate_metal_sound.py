@@ -19,28 +19,25 @@ def generate_metal_guitar(duration=30, sample_rate=44100):
     # Create time array
     t = np.linspace(0, duration, int(duration * sample_rate))
     
-    # Ninja metal riff - slower BPM (95 instead of 120) with Eastern-inspired melody
+    # Ninja metal riff - slower BPM (68 instead of 85) with Eastern-inspired melody
     # Each tuple: (base_freq, duration_in_beats)
-    # BPM = 95, so each beat = 0.631 seconds
+    # BPM = 68, so each beat = 0.882 seconds
     
     audio = np.zeros_like(t)
     
-    # Define the ninja-themed metal guitar riff (slower, more atmospheric)
-    # Using pentatonic/modal scales for Eastern feel with metal power chords
+    # Define the ninja-themed metal guitar riff - SIMPLIFIED for cohesion
+    # Uses sparse, complementary pattern that doesn't compete with main melody
     riff_pattern = [
-        (98, 1.0),    # B1 - quarter note (low, menacing)
-        (147, 1.0),   # D3 (pentatonic - Eastern feel)
-        (196, 0.5),   # G3 - power chord root
-        (147, 0.5),   # D3 (minor sound)
-        (98, 1.5),    # B1 - longer hold
-        (165, 0.5),   # E3 (Eastern modal)
-        (110, 0.5),   # A2 - power chord
-        (165, 1.0),   # E3
-        (98, 2.0),    # B1 - sustained (rest/hold)
+        (98, 2.0),    # B1 - low, sustained (2 beats)
+        (98, 1.0),    # B1
+        (147, 1.5),   # D3 - occasional accent
+        (98, 2.0),    # B1 - return to root
+        (110, 1.5),   # A2 - subtle variation
+        (98, 4.0),    # B1 - long sustain (rest/hold)
     ]
     
     # Build the riff multiple times to fill the duration
-    beat_duration = 0.631  # 95 BPM = 0.631 seconds per beat
+    beat_duration = 0.882  # 68 BPM = 0.882 seconds per beat
     current_time = 0
     
     while current_time < duration:
@@ -59,25 +56,22 @@ def generate_metal_guitar(duration=30, sample_rate=44100):
             
             # Generate the note with distortion
             # Power chord: fundamental + harmonics (Eastern-influenced)
-            fundamental = np.sin(2 * np.pi * base_freq * note_t) * 0.35
+            fundamental = np.sin(2 * np.pi * base_freq * note_t) * 0.3
             
-            # Add harmonics for fullness (reduced for more atmospheric feel)
-            harmonic_2 = np.sin(2 * np.pi * base_freq * 2 * note_t) * 0.15
-            harmonic_3 = np.sin(2 * np.pi * base_freq * 3 * note_t) * 0.08
-            
-            # Add subtle 7th for Eastern modal feel
-            harmonic_7 = np.sin(2 * np.pi * base_freq * 1.875 * note_t) * 0.05
+            # Add harmonics for fullness (minimal for clarity)
+            harmonic_2 = np.sin(2 * np.pi * base_freq * 2 * note_t) * 0.1
+            harmonic_3 = np.sin(2 * np.pi * base_freq * 3 * note_t) * 0.05
             
             # Combine
-            note_signal = fundamental + harmonic_2 + harmonic_3 + harmonic_7
+            note_signal = fundamental + harmonic_2 + harmonic_3
             
-            # Apply distortion (lighter for ninja atmosphere)
-            # Soft clipping for aggressive tone but more controlled
-            distortion = np.tanh(note_signal * 2.5)  # Reduced distortion for elegance
+            # Apply LIGHT distortion (barely any for cohesion with main track)
+            # Soft clipping - very minimal
+            distortion = np.tanh(note_signal * 1.2)  # Very light touch
             
             # Add envelope (slower attack for ninja atmosphere)
             envelope_samples = len(note_t)
-            attack_samples = min(int(0.05 * sample_rate), envelope_samples // 3)  # Cap attack to 1/3 of note
+            attack_samples = min(int(0.08 * sample_rate), envelope_samples // 4)  # Slower attack
             decay_start = attack_samples
             decay_samples = max(1, envelope_samples - decay_start)
             
@@ -85,9 +79,9 @@ def generate_metal_guitar(duration=30, sample_rate=44100):
             # Attack
             if attack_samples > 0 and envelope_samples > 0:
                 envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
-            # Decay (slower, more sustained)
+            # Decay (very slow, sustaining)
             if decay_samples > 0:
-                envelope[decay_start:] = np.linspace(1, 0.2, decay_samples)
+                envelope[decay_start:] = np.linspace(1, 0.15, decay_samples)
             
             # Apply envelope
             note_with_envelope = distortion * envelope
