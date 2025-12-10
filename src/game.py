@@ -40,6 +40,8 @@ class Game:
             elif event.key == pygame.K_RETURN:
                 if self.state == "MENU":
                     self.start_game()
+                elif self.state == "GAME_OVER":
+                    self.start_game()  # Restart game
         
         if self.state == "PLAYING":
             self.player.handle_event(event)
@@ -75,9 +77,13 @@ class Game:
         if self.player.is_attacking:
             for enemy in self.enemy_manager.enemies:
                 if self.player.attack_hitbox.colliderect(enemy.rect):
-                    enemy.take_damage(self.player.attack_damage)
+                    # Use combo-modified damage
+                    damage = getattr(self.player, 'current_attack_damage', self.player.attack_damage)
+                    enemy.take_damage(damage)
                     if enemy.health <= 0:
-                        self.score += enemy.points
+                        # Bonus points for combos
+                        combo_bonus = (self.player.combo_count - 1) * 50
+                        self.score += enemy.points + combo_bonus
                         self.enemy_manager.remove_enemy(enemy)
         
         # Enemy attacks hitting player
@@ -127,7 +133,7 @@ class Game:
         self.player.render(self.screen, self.camera_x)
         
         # Render UI
-        self.ui.render_hud(self.screen, self.player.health, self.lives, self.score)
+        self.ui.render_hud(self.screen, self.player.health, self.lives, self.score, self.player)
     
     def render_pause(self):
         """Render pause overlay"""

@@ -3,6 +3,7 @@ Enemy character class
 """
 import pygame
 from config import *
+from sprite_loader import sprite_loader, Animation
 
 class Enemy:
     """Base enemy class"""
@@ -10,8 +11,25 @@ class Enemy:
     def __init__(self, x, y, enemy_type="BASIC"):
         self.x = x
         self.y = y
-        self.width = 50
-        self.height = 70
+        self.enemy_type = enemy_type
+        
+        # Load sprites based on enemy type
+        self.load_sprites()
+        
+        # Set size based on type
+        if enemy_type == "BASIC":
+            self.width = 48
+            self.height = 48
+        elif enemy_type == "FLYING":
+            self.width = 40
+            self.height = 40
+        elif enemy_type == "BOSS":
+            self.width = 128
+            self.height = 128
+        else:
+            self.width = 50
+            self.height = 70
+            
         self.rect = pygame.Rect(x, y, self.width, self.height)
         
         # Stats
@@ -40,6 +58,42 @@ class Enemy:
         # AI state
         self.state = "PATROL"  # PATROL, CHASE, ATTACK
         self.detection_range = 300
+        
+        # Animation
+        self.current_animation = "idle"
+        self.animation_timer = 0
+    
+    def load_sprites(self):
+        """Load sprites based on enemy type"""
+        prefix = "basic" if self.enemy_type == "BASIC" else "fly" if self.enemy_type == "FLYING" else "boss"
+        
+        try:
+            if self.enemy_type == "BASIC":
+                self.sprites = {
+                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (48, 48)),
+                    "walk": sprite_loader.load_sprite(f"enemies/{prefix}_walk.png", (48, 48)),
+                    "attack": sprite_loader.load_sprite(f"enemies/{prefix}_attack.png", (48, 48)),
+                    "hurt": sprite_loader.load_sprite(f"enemies/{prefix}_hurt.png", (48, 48))
+                }
+            elif self.enemy_type == "FLYING":
+                self.sprites = {
+                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (40, 40)),
+                    "move": sprite_loader.load_sprite(f"enemies/{prefix}_move.png", (40, 40)),
+                    "attack": sprite_loader.load_sprite(f"enemies/{prefix}_attack.png", (40, 40))
+                }
+            elif self.enemy_type == "BOSS":
+                self.sprites = {
+                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (128, 128)),
+                    "walk": sprite_loader.load_sprite(f"enemies/{prefix}_walk.png", (128, 128)),
+                    "attack1": sprite_loader.load_sprite(f"enemies/{prefix}_attack1.png", (128, 128)),
+                    "attack2": sprite_loader.load_sprite(f"enemies/{prefix}_attack2.png", (128, 128)),
+                    "special": sprite_loader.load_sprite(f"enemies/{prefix}_special.png", (128, 128))
+                }
+            print(f"✓ Loaded {self.enemy_type} enemy sprites")
+        except Exception as e:
+            print(f"Error loading enemy sprites: {e}")
+            # Fallback to colored rectangles
+            self.sprites = None
     
     def update(self, dt, level, player):
         """Update enemy behavior"""
@@ -96,6 +150,18 @@ class Enemy:
             else:
                 self.attack_hitbox.x = self.rect.left - self.attack_hitbox.width
             self.attack_hitbox.y = self.rect.y + 20
+        
+        # Update animation state
+        self.update_animation_state(dt)
+    
+    def update_animation_state(self, dt):
+        """Update which animation to show"""
+        if self.is_attacking:
+            self.current_animation = "attack"
+        elif abs(self.velocity_x) > 0:
+            self.current_animation = "walk" if self.enemy_type != "FLYING" else "move"
+        else:
+            self.current_animation = "idle"
     
     def patrol(self, dt):
         """Patrol back and forth"""
@@ -134,17 +200,32 @@ class Enemy:
         screen_x = int(self.x - camera_x)
         screen_y = int(self.y)
         
-        # Draw enemy (placeholder)
-        color = RED if self.state == "ATTACK" else YELLOW if self.state == "CHASE" else GRAY
-        pygame.draw.rect(screen, color, (screen_x, screen_y, self.width, self.height))
+        # Try to render sprite
+        if self.sprites and self.current_animation in self.sprites:
+            sprite = self.sprites[self.current_animation]
+            
+            # Flip sprite if facing left
+            if not self.facing_right:
+                sprite = pygame.transform.flip(sprite, True, False)
+            
+            # Center sprite on enemy position
+            sprite_rect = sprite.get_rect()
+            sprite_rect.center = (screen_x + self.width // 2, screen_y + self.height // 2)
+            screen.blit(sprite, sprite_rect)
+        else:
+            # Fallback to colored rectangles
+            color = RED if self.state == "ATTACK" else YELLOW if self.state == "CHASE" else GRAY
+            pygame.draw.rect(screen, color, (screen_x, screen_y, self.width, self.height))
         
         # Health bar
         health_ratio = self.health / self.max_health
-        pygame.draw.rect(screen, RED, (screen_x, screen_y - 10, self.width, 5))
-        pygame.draw.rect(screen, GREEN, (screen_x, screen_y - 10, int(self.width * health_ratio), 5))
+        bar_width = max(self.width, 50)
+        bar_x = screen_x + (self.width - bar_width) // 2
+        pygame.draw.rect(screen, RED, (bar_x, screen_y - 10, bar_width, 5))
+        pygame.draw.rect(screen, GREEN, (bar_x, screen_y - 10, int(bar_width * health_ratio), 5))
         
-        # Attack hitbox when attacking
-        if self.is_attacking:
+        # Attack hitbox when attacking (debug)
+        if self.is_attacking and False:  # Set to True to see hitboxes
             hitbox_screen_x = int(self.attack_hitbox.x - camera_x)
             pygame.draw.rect(screen, RED,
                            (hitbox_screen_x, self.attack_hitbox.y,

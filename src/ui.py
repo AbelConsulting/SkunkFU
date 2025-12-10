@@ -54,7 +54,7 @@ class UI:
             screen.blit(text, text_rect)
             y_offset += 35
     
-    def render_hud(self, screen, health, lives, score):
+    def render_hud(self, screen, health, lives, score, player=None):
         """Render HUD during gameplay"""
         # Health bar
         health_text = self.hud_font.render("Health:", True, WHITE)
@@ -72,6 +72,13 @@ class UI:
         score_text = self.hud_font.render(f"Score: {score}", True, YELLOW)
         score_rect = score_text.get_rect(topright=(self.width - 20, 20))
         screen.blit(score_text, score_rect)
+        
+        # Combo counter
+        if player and player.combo_count > 1:
+            combo_color = YELLOW if player.combo_count == 2 else RED
+            combo_text = self.menu_font.render(f"{player.combo_count}x COMBO!", True, combo_color)
+            combo_rect = combo_text.get_rect(center=(self.width // 2, 60))
+            screen.blit(combo_text, combo_rect)
     
     def render_pause(self, screen):
         """Render pause overlay"""
