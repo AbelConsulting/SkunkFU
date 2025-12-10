@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run SkunkFU Game",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe src/main.py"
+		}
+	]
+}
