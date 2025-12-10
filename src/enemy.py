@@ -152,18 +152,44 @@ class Enemy:
         if self.velocity_y > MAX_FALL_SPEED:
             self.velocity_y = MAX_FALL_SPEED
         
-        # Update position
+        # Update horizontal position
         self.x += self.velocity_x * dt
-        self.y += self.velocity_y * dt
-        
-        # Ground collision (simplified)
-        if self.y >= 500:
-            self.y = 500
-            self.velocity_y = 0
-        
-        # Update rect
         self.rect.x = int(self.x)
+        
+        # Check horizontal collisions with platforms
+        for platform in level.platforms:
+            if self.rect.colliderect(platform):
+                # Push out of platform and turn around
+                if self.velocity_x > 0:  # Moving right
+                    self.x = platform.left - self.width
+                    self.velocity_x = -self.speed
+                    self.facing_right = False
+                elif self.velocity_x < 0:  # Moving left
+                    self.x = platform.right
+                    self.velocity_x = self.speed
+                    self.facing_right = True
+                self.rect.x = int(self.x)
+        
+        # Update vertical position
+        self.y += self.velocity_y * dt
         self.rect.y = int(self.y)
+        
+        # Check vertical collisions with platforms
+        on_ground = False
+        for platform in level.platforms:
+            if self.rect.colliderect(platform):
+                if self.velocity_y > 0:  # Falling down
+                    # Land on platform
+                    self.y = platform.top - self.height
+                    self.rect.y = int(self.y)
+                    self.velocity_y = 0
+                    on_ground = True
+                    break
+                elif self.velocity_y < 0:  # Jumping up
+                    # Hit head on platform
+                    self.y = platform.bottom
+                    self.rect.y = int(self.y)
+                    self.velocity_y = 0
         
         # Update attack
         if self.is_attacking:

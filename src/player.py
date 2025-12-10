@@ -180,24 +180,51 @@ class Player:
         if self.velocity_y > MAX_FALL_SPEED:
             self.velocity_y = MAX_FALL_SPEED
         
-        # Update position
+        # Update horizontal position
         self.x += self.velocity_x * dt
-        self.y += self.velocity_y * dt
+        self.rect.x = int(self.x)
         
-        # Collision with ground
-        if self.y >= 500:  # Temporary ground level
-            # Check if we just landed (for sound)
-            just_landed = not was_on_ground and self.velocity_y > 200
-            
-            self.y = 500
-            self.velocity_y = 0
-            self.on_ground = True
-            
-            # Play landing sound if significant fall
-            if just_landed and self.audio_manager:
-                self.audio_manager.play_sound('land', volume=0.5)
-        else:
-            self.on_ground = False
+        # Check horizontal collisions with platforms
+        for platform in level.platforms:
+            if self.rect.colliderect(platform):
+                # Push out of platform
+                if self.velocity_x > 0:  # Moving right
+                    self.x = platform.left - self.width
+                elif self.velocity_x < 0:  # Moving left
+                    self.x = platform.right
+                self.rect.x = int(self.x)
+        
+        # Update vertical position
+        self.y += self.velocity_y * dt
+        self.rect.y = int(self.y)
+        
+        # Check vertical collisions with platforms
+        self.on_ground = False
+        just_landed = False
+        
+        for platform in level.platforms:
+            if self.rect.colliderect(platform):
+                if self.velocity_y > 0:  # Falling down
+                    # Land on platform
+                    self.y = platform.top - self.height
+                    self.rect.y = int(self.y)
+                    
+                    # Check if we just landed (for sound)
+                    if not was_on_ground and self.velocity_y > 200:
+                        just_landed = True
+                    
+                    self.velocity_y = 0
+                    self.on_ground = True
+                    break
+                elif self.velocity_y < 0:  # Jumping up
+                    # Hit head on platform
+                    self.y = platform.bottom
+                    self.rect.y = int(self.y)
+                    self.velocity_y = 0
+        
+        # Play landing sound if significant fall
+        if just_landed and self.audio_manager:
+            self.audio_manager.play_sound('land', volume=0.5)
         
         # Update coyote timer
         if was_on_ground and not self.on_ground:
@@ -209,10 +236,6 @@ class Player:
         if self.jump_buffer_timer > 0 and (self.on_ground or self.coyote_timer > 0):
             self.jump()
             self.jump_buffer_timer = 0
-        
-        # Update rect
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
         
         # Update attack
         if self.is_attacking:
