@@ -79,17 +79,17 @@ class Player:
         """Load Ninja Skunk sprites"""
         print("Loading Ninja Skunk sprites...")
         try:
-            # Define frame counts for each animation
-            # Adjust these numbers based on your actual sprite sheets
-            frame_size = 64  # Each frame is 64x64
+            # Actual sprite sheet frame sizes:
+            # idle: 256x64 (4 frames of 64x64)
+            # walk, jump, attack, shadow_strike, hurt: 128x32 (4 frames of 32x32)
             
             # Load sprite sheets - assuming horizontal sprite sheets
-            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", frame_size, frame_size, 4, (64, 64))
-            walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", frame_size, frame_size, 6, (64, 64))
-            jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", frame_size, frame_size, 4, (64, 64))
-            attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", frame_size, frame_size, 6, (64, 64))
-            shadow_strike_frames = sprite_loader.load_spritesheet("characters/ninja_shadow_strike.png", frame_size, frame_size, 8, (64, 64))
-            hurt_frames = sprite_loader.load_spritesheet("characters/ninja_hurt.png", frame_size, frame_size, 2, (64, 64))
+            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", 64, 64, 4, (64, 64))
+            walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (64, 64))
+            jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (64, 64))
+            attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", 32, 32, 4, (64, 64))
+            shadow_strike_frames = sprite_loader.load_spritesheet("characters/ninja_shadow_strike.png", 32, 32, 4, (64, 64))
+            hurt_frames = sprite_loader.load_spritesheet("characters/ninja_hurt.png", 32, 32, 2, (64, 64))
             
             # Create animations from frames
             self.animations = {

@@ -17,6 +17,21 @@
 				"kind": "test",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "Convert Quadrants to Horizontal",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe convert_quadrants_to_horizontal.py"
+		},
+		{
+			"label": "Remove Sprite Backgrounds",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe remove_sprite_backgrounds.py"
+		},
+		{
+			"label": "Cleanup Sprites",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe cleanup_sprites.py"
 		}
 	]
 }

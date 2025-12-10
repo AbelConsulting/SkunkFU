@@ -75,12 +75,11 @@ class Enemy:
         
         try:
             if self.enemy_type == "BASIC":
-                # Load sprite sheets for basic enemy
-                frame_size = 48
-                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (48, 48))
-                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", frame_size, frame_size, 6, (48, 48))
-                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", frame_size, frame_size, 4, (48, 48))
-                hurt_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_hurt.png", frame_size, frame_size, 2, (48, 48))
+                # Load sprite sheets for basic enemy (24x24 per frame in 96x24 sheets)
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", 24, 24, 4, (48, 48))
+                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", 24, 24, 4, (48, 48))
+                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", 24, 24, 4, (48, 48))
+                hurt_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_hurt.png", 24, 24, 4, (48, 48))
                 
                 self.animations = {
                     "idle": Animation(idle_frames, 0.2, True),
