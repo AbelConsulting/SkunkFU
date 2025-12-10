@@ -84,7 +84,15 @@ class Player:
             # walk, jump, attack, shadow_strike, hurt: 128x32 (4 frames of 32x32)
             
             # Load sprite sheets - assuming horizontal sprite sheets
-            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", 64, 64, 1, (64, 64))
+            # For idle, we'll load just the first frame manually to avoid animation jitter
+            import os
+            idle_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'sprites', 'characters', 'ninja_idle.png')
+            idle_img = pygame.image.load(idle_path)
+            # Extract just the first 64x64 frame
+            idle_frame = idle_img.subsurface((0, 0, 64, 64))
+            idle_frame = pygame.transform.scale(idle_frame, (64, 64))
+            idle_frames = [idle_frame]  # Single static frame
+            
             walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (64, 64))
             jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (64, 64))
             attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", 32, 32, 4, (64, 64))
@@ -289,7 +297,7 @@ class Player:
             anim_state = "shadow_strike" if self.attack_hitbox.width > 60 else "attack"
         elif not self.on_ground:
             anim_state = "jump"
-        elif abs(self.velocity_x) > 0:
+        elif abs(self.velocity_x) > 1.0:  # Dead zone: ignore tiny velocities
             anim_state = "walk"
         
         # Switch animation if state changed
