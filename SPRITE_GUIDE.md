@@ -112,6 +112,41 @@ python sprite_stitcher.py ninja
 4. Anticipation frame before big actions
 5. Follow-through frame after impacts
 
+## Workflow Options
+
+### Option A: Using the Sprite Stitcher Tool (Recommended)
+
+1. **Create frame folders (optional but organized):**
+   ```bash
+   python create_frame_folders.py ninja
+   python create_frame_folders.py enemy basic
+   ```
+   This creates `raw_frames/` folders with README files showing requirements.
+
+2. **Draw your frames** in your favorite pixel art tool (Aseprite, Piskel, etc.)
+
+3. **Save individual frames** as PNG files:
+   ```
+   raw_frames/ninja/idle/idle_0.png
+   raw_frames/ninja/idle/idle_1.png
+   raw_frames/ninja/idle/idle_2.png
+   raw_frames/ninja/idle/idle_3.png
+   ```
+
+4. **Run the stitcher:**
+   ```bash
+   python sprite_stitcher.py ninja
+   ```
+
+5. **Sheets are created** in `assets/sprites/characters/ninja/` ready to use!
+
+### Option B: Manual Creation
+
+1. Create a canvas with the correct width: `frame_width × num_frames`
+2. Paste each frame side-by-side left to right
+3. Save as PNG with transparency
+4. Place in correct asset folder
+
 ## Using Custom Sprite Sheets
 
 Once your sprite sheets are created and placed in the correct folders, the game will automatically:
