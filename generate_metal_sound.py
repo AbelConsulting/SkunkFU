@@ -1,13 +1,12 @@
 """
-Generate a metal element to add to the background music
-Creates a metallic synth pad/drone sound
+Generate a metal guitar riff to add to the background music
+Creates distorted power chord stabs with aggressive tone
 """
 import numpy as np
 import wave
-import struct
 
-def generate_metal_synth(duration=30, sample_rate=44100):
-    """Generate a metallic synth sound
+def generate_metal_guitar(duration=30, sample_rate=44100):
+    """Generate a metal guitar riff with power chords
     
     Args:
         duration: Length in seconds
@@ -20,46 +19,77 @@ def generate_metal_synth(duration=30, sample_rate=44100):
     # Create time array
     t = np.linspace(0, duration, int(duration * sample_rate))
     
-    # Base frequencies for metallic sound (minor pentatonic with octaves)
-    # Tuned for a dark, industrial metal feel
-    frequencies = [
-        110,   # A2 - deep bass
-        165,   # E3 - mid bass
-        220,   # A3 - main note
-        330,   # E4 - high note
-        440,   # A4 - bright note
-    ]
+    # Metal guitar riff pattern - power chords with rhythm
+    # Each tuple: (base_freq, duration_in_beats)
+    # BPM = 120, so each beat = 0.5 seconds
     
-    # Generate harmonics with slight detuning for metallic effect
     audio = np.zeros_like(t)
     
-    for i, freq in enumerate(frequencies):
-        # Slightly detune each harmonic for more metallic texture
-        detune = 1 + (i * 0.01)  # 1% detune per harmonic
-        detune_freq = freq * detune
-        
-        # Use combination of sine and square waves for metallic timbre
-        sine_component = np.sin(2 * np.pi * detune_freq * t) * 0.3
-        
-        # Add harmonics
-        harmonic_freq = detune_freq * 2
-        harmonic = np.sin(2 * np.pi * harmonic_freq * t) * 0.15
-        
-        # Combine with envelope (slower attack, long sustain)
-        envelope = np.ones_like(t)
-        attack_time = int(0.5 * sample_rate)
-        release_time = int(2 * sample_rate)
-        
-        # Attack envelope
-        envelope[:attack_time] = np.linspace(0, 1, attack_time)
-        # Release at end
-        envelope[-release_time:] = np.linspace(1, 0, release_time)
-        
-        audio += (sine_component + harmonic) * envelope * (1 / len(frequencies))
+    # Define the metal guitar riff (repeating pattern)
+    riff_pattern = [
+        (110, 0.5),   # E2 - quarter note
+        (110, 0.5),   # E2
+        (165, 0.5),   # E3 (octave up)
+        (220, 0.5),   # A3 (power chord)
+        (165, 0.25),  # E3 - eighth note
+        (110, 0.25),  # E2
+        (220, 0.5),   # A3
+        (165, 0.5),   # E3
+        (110, 1.0),   # E2 - half note (rest)
+    ]
     
-    # Add some modulation for interest
-    lfo = np.sin(2 * np.pi * 0.3 * t) * 0.1 + 0.9  # 0.3 Hz LFO
-    audio *= lfo
+    # Build the riff multiple times to fill the duration
+    beat_duration = 0.5  # 120 BPM = 0.5 seconds per beat
+    current_time = 0
+    
+    while current_time < duration:
+        for base_freq, num_beats in riff_pattern:
+            if current_time >= duration:
+                break
+            
+            note_duration = num_beats * beat_duration
+            start_sample = int(current_time * sample_rate)
+            end_sample = int((current_time + note_duration) * sample_rate)
+            
+            if end_sample > len(t):
+                end_sample = len(t)
+            
+            note_t = t[start_sample:end_sample]
+            
+            # Generate the note with distortion
+            # Power chord: fundamental + harmonics
+            fundamental = np.sin(2 * np.pi * base_freq * note_t) * 0.4
+            
+            # Add harmonics for fullness
+            harmonic_2 = np.sin(2 * np.pi * base_freq * 2 * note_t) * 0.2
+            harmonic_3 = np.sin(2 * np.pi * base_freq * 3 * note_t) * 0.1
+            
+            # Combine
+            note_signal = fundamental + harmonic_2 + harmonic_3
+            
+            # Apply distortion (guitar amp overdrive)
+            # Soft clipping for aggressive tone
+            distortion = np.tanh(note_signal * 3.5)  # Increase for more distortion
+            
+            # Add envelope (percussive attack, gradual decay)
+            envelope_samples = len(note_t)
+            attack_samples = int(0.01 * sample_rate)  # 10ms sharp attack
+            decay_samples = max(1, envelope_samples - attack_samples)
+            
+            envelope = np.ones(envelope_samples)
+            # Attack
+            if attack_samples > 0:
+                envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
+            # Decay
+            envelope[attack_samples:] = np.linspace(1, 0.3, decay_samples)
+            
+            # Apply envelope
+            note_with_envelope = distortion * envelope
+            
+            # Add to audio
+            audio[start_sample:end_sample] = note_with_envelope * 0.7
+            
+            current_time += note_duration
     
     # Normalize to prevent clipping
     max_val = np.max(np.abs(audio))
@@ -92,41 +122,37 @@ def save_wav(audio, filename, sample_rate=44100):
 
 
 def main():
-    print("🎸 Generating metal synth sound...")
+    print("🎸 Generating metal guitar riff...")
     print("=" * 60)
     
-    # Generate metal synth
-    print("Generating metallic synth pad (30 seconds)...")
-    metal_audio = generate_metal_synth(duration=30, sample_rate=44100)
+    # Generate metal guitar
+    print("Generating metal guitar riff (30 seconds)...")
+    guitar_audio = generate_metal_guitar(duration=30, sample_rate=44100)
     
     # Save as SFX file that can be layered with music
     output_path = "assets/audio/sfx/metal_pad.wav"
-    save_wav(metal_audio, output_path, sample_rate=44100)
+    save_wav(guitar_audio, output_path, sample_rate=44100)
     print(f"✅ Saved: {output_path}")
     
     print("\n" + "=" * 60)
-    print("✨ Metal element generated!")
+    print("✨ Metal guitar generated!")
     print("=" * 60)
     print("""
-NEXT STEPS:
-1. The metal synth has been saved as: assets/audio/sfx/metal_pad.wav
+FEATURES:
+- Aggressive power chord riff
+- Heavy distortion with soft clipping
+- Sharp attack for percussive guitar tone
+- Repeating pattern synced to 120 BPM
+- Rich harmonics for thickness
 
-2. To use it as a background layer:
-   - Open the audio_manager.py file
-   - Modify play_music() to also play metal_pad.wav quietly in the background
-   - Or use an audio editor to mix it with your existing music
+The metal guitar now layers with your background music!
+You'll hear it when you start gameplay.
 
-3. To customize the metal sound:
-   - Adjust frequencies array for different notes
-   - Change duration parameter for longer/shorter loops
-   - Modify the envelope attack/release times
-   - Adjust the LFO rate and depth for different modulation
-
-The generated sound is a metallic synth pad with:
-- Deep bass and high notes for fullness
-- Slight detuning for metallic texture
-- LFO modulation for movement
-- Smooth envelope for pad-like sustain
+To customize:
+- Adjust 'riff_pattern' for different chord progressions
+- Change distortion amount (multiply factor before tanh)
+- Modify BPM by changing beat_duration (0.5 for 120 BPM)
+- Add more frequencies for different power chords
 """)
 
 
