@@ -24,3 +24,7 @@ This directory contains sprite assets for the Ninja Skunk character.
 - Optional ninja headband or mask
 - Motion blur effects for Shadow Strike ability
 - Swift, fluid movement animations
+
+v
+
+
