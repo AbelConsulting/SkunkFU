@@ -27,15 +27,28 @@ class SpriteLoader:
             return surf
     
     def load_spritesheet(self, path, frame_width, frame_height, num_frames, scale=None):
-        """Load a sprite sheet and split it into frames"""
+        """Load a sprite sheet and split it into frames
+        
+        Args:
+            path: Path to sprite sheet image
+            frame_width: Width of each frame in pixels
+            frame_height: Height of each frame in pixels
+            num_frames: Number of frames in the sheet (horizontal)
+            scale: Optional tuple (width, height) to scale each frame
+        """
         try:
             full_path = os.path.join(self.base_path, path)
             sheet = pygame.image.load(full_path).convert_alpha()
             frames = []
             
             for i in range(num_frames):
+                # Create a surface for this frame with alpha channel
                 frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
-                frame.blit(sheet, (0, 0), (i * frame_width, 0, frame_width, frame_height))
+                # Blit the portion of the sheet for this frame
+                source_rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
+                frame.blit(sheet, (0, 0), source_rect)
+                
+                # Scale if requested
                 if scale:
                     frame = pygame.transform.scale(frame, scale)
                 frames.append(frame)
@@ -44,7 +57,8 @@ class SpriteLoader:
         except pygame.error as e:
             print(f"Warning: Could not load spritesheet {path}: {e}")
             # Return placeholder frames
-            surf = pygame.Surface((frame_width, frame_height))
+            size = scale if scale else (frame_width, frame_height)
+            surf = pygame.Surface(size, pygame.SRCALPHA)
             surf.fill((255, 0, 255))
             return [surf]
 

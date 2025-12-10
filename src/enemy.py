@@ -61,7 +61,8 @@ class Enemy:
         
         # Animation
         self.current_animation = "idle"
-        self.animation_timer = 0
+        self.current_anim = None
+        self.last_anim_state = "idle"
     
     def load_sprites(self):
         """Load sprites based on enemy type"""
@@ -69,31 +70,60 @@ class Enemy:
         
         try:
             if self.enemy_type == "BASIC":
-                self.sprites = {
-                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (48, 48)),
-                    "walk": sprite_loader.load_sprite(f"enemies/{prefix}_walk.png", (48, 48)),
-                    "attack": sprite_loader.load_sprite(f"enemies/{prefix}_attack.png", (48, 48)),
-                    "hurt": sprite_loader.load_sprite(f"enemies/{prefix}_hurt.png", (48, 48))
+                # Load sprite sheets for basic enemy
+                frame_size = 48
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (48, 48))
+                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", frame_size, frame_size, 6, (48, 48))
+                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", frame_size, frame_size, 4, (48, 48))
+                hurt_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_hurt.png", frame_size, frame_size, 2, (48, 48))
+                
+                self.animations = {
+                    "idle": Animation(idle_frames, 0.2, True),
+                    "walk": Animation(walk_frames, 0.15, True),
+                    "attack": Animation(attack_frames, 0.1, False),
+                    "hurt": Animation(hurt_frames, 0.1, False)
                 }
             elif self.enemy_type == "FLYING":
-                self.sprites = {
-                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (40, 40)),
-                    "move": sprite_loader.load_sprite(f"enemies/{prefix}_move.png", (40, 40)),
-                    "attack": sprite_loader.load_sprite(f"enemies/{prefix}_attack.png", (40, 40))
+                # Load sprite sheets for flying enemy
+                frame_size = 40
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (40, 40))
+                move_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_move.png", frame_size, frame_size, 6, (40, 40))
+                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", frame_size, frame_size, 4, (40, 40))
+                
+                self.animations = {
+                    "idle": Animation(idle_frames, 0.2, True),
+                    "move": Animation(move_frames, 0.12, True),
+                    "attack": Animation(attack_frames, 0.1, False)
                 }
             elif self.enemy_type == "BOSS":
-                self.sprites = {
-                    "idle": sprite_loader.load_sprite(f"enemies/{prefix}_idle.png", (128, 128)),
-                    "walk": sprite_loader.load_sprite(f"enemies/{prefix}_walk.png", (128, 128)),
-                    "attack1": sprite_loader.load_sprite(f"enemies/{prefix}_attack1.png", (128, 128)),
-                    "attack2": sprite_loader.load_sprite(f"enemies/{prefix}_attack2.png", (128, 128)),
-                    "special": sprite_loader.load_sprite(f"enemies/{prefix}_special.png", (128, 128))
+                # Load sprite sheets for boss enemy
+                frame_size = 128
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (128, 128))
+                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", frame_size, frame_size, 6, (128, 128))
+                attack1_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack1.png", frame_size, frame_size, 6, (128, 128))
+                attack2_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack2.png", frame_size, frame_size, 6, (128, 128))
+                special_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_special.png", frame_size, frame_size, 8, (128, 128))
+                
+                self.animations = {
+                    "idle": Animation(idle_frames, 0.2, True),
+                    "walk": Animation(walk_frames, 0.15, True),
+                    "attack1": Animation(attack1_frames, 0.1, False),
+                    "attack2": Animation(attack2_frames, 0.1, False),
+                    "special": Animation(special_frames, 0.08, False)
                 }
-            print(f"✓ Loaded {self.enemy_type} enemy sprites")
+            
+            # Set current animation and keep backward compatibility
+            self.sprites = {key: anim.frames[0] for key, anim in self.animations.items()}
+            self.current_anim = self.animations["idle"]
+            
+            print(f"✓ Loaded {self.enemy_type} enemy sprites with animations")
         except Exception as e:
             print(f"Error loading enemy sprites: {e}")
+            import traceback
+            traceback.print_exc()
             # Fallback to colored rectangles
             self.sprites = None
+            self.animations = None
     
     def update(self, dt, level, player):
         """Update enemy behavior"""
@@ -153,15 +183,22 @@ class Enemy:
         
         # Update animation state
         self.update_animation_state(dt)
+        if self.animations and self.current_anim:
+            self.current_anim.update(dt)
     
     def update_animation_state(self, dt):
         """Update which animation to show"""
+        anim_state = "idle"
         if self.is_attacking:
-            self.current_animation = "attack"
+            anim_state = "attack"
         elif abs(self.velocity_x) > 0:
-            self.current_animation = "walk" if self.enemy_type != "FLYING" else "move"
-        else:
-            self.current_animation = "idle"
+            anim_state = "walk" if self.enemy_type != "FLYING" else "move"
+        
+        # Switch animation if state changed
+        if anim_state != self.last_anim_state and self.animations:
+            self.current_anim = self.animations[anim_state]
+            self.current_anim.reset()
+            self.last_anim_state = anim_state
     
     def patrol(self, dt):
         """Patrol back and forth"""
@@ -200,9 +237,9 @@ class Enemy:
         screen_x = int(self.x - camera_x)
         screen_y = int(self.y)
         
-        # Try to render sprite
-        if self.sprites and self.current_animation in self.sprites:
-            sprite = self.sprites[self.current_animation]
+        # Try to render animated sprite
+        if self.animations and self.current_anim:
+            sprite = self.current_anim.get_current_frame()
             
             # Flip sprite if facing left
             if not self.facing_right:

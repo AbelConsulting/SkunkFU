@@ -3,7 +3,7 @@ Player character class
 """
 import pygame
 from config import *
-from sprite_loader import sprite_loader
+from sprite_loader import sprite_loader, Animation
 
 class Player:
     """Player character with combat and platforming abilities"""
@@ -75,18 +75,42 @@ class Player:
         """Load Ninja Skunk sprites"""
         print("Loading Ninja Skunk sprites...")
         try:
-            self.sprites = {
-                "idle": sprite_loader.load_sprite("characters/ninja_idle.png", (64, 64)),
-                "walk": sprite_loader.load_sprite("characters/ninja_walk.png", (64, 64)),
-                "jump": sprite_loader.load_sprite("characters/ninja_jump.png", (64, 64)),
-                "attack": sprite_loader.load_sprite("characters/ninja_attack.png", (64, 64)),
-                "shadow_strike": sprite_loader.load_sprite("characters/ninja_shadow_strike.png", (64, 64)),
-                "hurt": sprite_loader.load_sprite("characters/ninja_hurt.png", (64, 64))
+            # Define frame counts for each animation
+            # Adjust these numbers based on your actual sprite sheets
+            frame_size = 64  # Each frame is 64x64
+            
+            # Load sprite sheets - assuming horizontal sprite sheets
+            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", frame_size, frame_size, 4, (64, 64))
+            walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", frame_size, frame_size, 6, (64, 64))
+            jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", frame_size, frame_size, 4, (64, 64))
+            attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", frame_size, frame_size, 6, (64, 64))
+            shadow_strike_frames = sprite_loader.load_spritesheet("characters/ninja_shadow_strike.png", frame_size, frame_size, 8, (64, 64))
+            hurt_frames = sprite_loader.load_spritesheet("characters/ninja_hurt.png", frame_size, frame_size, 2, (64, 64))
+            
+            # Create animations from frames
+            self.animations = {
+                "idle": Animation(idle_frames, 0.15, True),
+                "walk": Animation(walk_frames, 0.1, True),
+                "jump": Animation(jump_frames, 0.12, False),
+                "attack": Animation(attack_frames, 0.08, False),
+                "shadow_strike": Animation(shadow_strike_frames, 0.05, False),
+                "hurt": Animation(hurt_frames, 0.1, False)
             }
-            print(f"✓ Loaded {len(self.sprites)} Ninja Skunk sprites")
+            
+            # Keep reference for backward compatibility
+            self.sprites = {key: anim.frames[0] for key, anim in self.animations.items()}
+            
+            # Current animation
+            self.current_anim = self.animations["idle"]
+            self.last_anim_state = "idle"
+            
+            print(f"✓ Loaded {len(self.animations)} Ninja Skunk animations with multiple frames")
         except Exception as e:
             print(f"Warning: Could not load player sprites: {e}")
+            import traceback
+            traceback.print_exc()
             self.sprites = None
+            self.animations = None
     
     def handle_event(self, event):
         """Handle player input events"""
@@ -199,19 +223,27 @@ class Player:
                 self.attack_hitbox.x = self.rect.left - self.attack_hitbox.width
             self.attack_hitbox.y = self.rect.y + 20
         
-        # Update animation state
+        # Update animation state and animate
         self.update_animation_state()
+        if self.animations:
+            self.current_anim.update(dt)
     
     def update_animation_state(self):
         """Update current animation state"""
+        # Determine which animation should play
+        anim_state = "idle"
         if self.is_attacking:
-            self.animation_state = "ATTACK"
+            anim_state = "shadow_strike" if self.attack_hitbox.width > 60 else "attack"
         elif not self.on_ground:
-            self.animation_state = "JUMP"
-        elif self.velocity_x != 0:
-            self.animation_state = "WALK"
-        else:
-            self.animation_state = "IDLE"
+            anim_state = "jump"
+        elif abs(self.velocity_x) > 0:
+            anim_state = "walk"
+        
+        # Switch animation if state changed
+        if anim_state != self.last_anim_state and self.animations:
+            self.current_anim = self.animations[anim_state]
+            self.current_anim.reset()
+            self.last_anim_state = anim_state
     
     def jump(self):
         """Make the player jump"""
@@ -286,18 +318,15 @@ class Player:
         screen_x = int(self.x - camera_x)
         screen_y = int(self.y)
         
-        # Determine which sprite to show
-        sprite_key = "idle"
-        if self.is_attacking:
-            sprite_key = "shadow_strike" if self.attack_hitbox.width > 60 else "attack"
-        elif not self.on_ground:
-            sprite_key = "jump"
-        elif abs(self.velocity_x) > 0:
-            sprite_key = "walk"
+        # Flicker during invulnerability
+        if self.invulnerable_timer > 0:
+            # Flash effect - skip rendering every other frame
+            if int(self.invulnerable_timer * 20) % 2 == 0:
+                return  # Don't render this frame
         
-        # Try to render sprite
-        if self.sprites and sprite_key in self.sprites:
-            sprite = self.sprites[sprite_key]
+        # Get current animation frame
+        if self.animations and self.current_anim:
+            sprite = self.current_anim.get_current_frame()
             
             # Flip sprite if facing left
             if not self.facing_right:
@@ -320,7 +349,7 @@ class Player:
                 screen.blit(overlay, (screen_x, screen_y))
         
         # Direction indicator (for placeholder mode)
-        if not self.sprites:
+        if not self.animations:
             if self.facing_right:
                 pygame.draw.circle(screen, BLACK, (screen_x + self.width - 10, screen_y + 20), 5)
             else:
