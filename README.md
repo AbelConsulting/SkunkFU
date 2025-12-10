@@ -136,11 +136,32 @@ Contributions are welcome! Feel free to:
 
 ## Asset Requirements
 
-The game currently uses placeholder graphics. To add custom sprites:
-- Check `assets/sprites/*/README.md` for sprite specifications
-- Character sprites: 64x64 pixels
-- Enemy sprites: 48x48 pixels
-- PNG format with transparency
+### Creating Animated Sprites
+
+The game uses **horizontal sprite sheets** where animation frames are arranged side-by-side.
+
+**Quick Setup:**
+1. Create individual frame images (64x64 for Ninja Skunk)
+2. Use the sprite stitcher tool: `python sprite_stitcher.py ninja`
+3. Sprite sheets are automatically placed in `assets/sprites/characters/`
+
+**Sprite Sheet Format:**
+```
+ninja_walk.png = [Frame0][Frame1][Frame2][Frame3][Frame4][Frame5]
+Total: 384×64 pixels (6 frames @ 64x64 each)
+```
+
+**See [SPRITE_GUIDE.md](SPRITE_GUIDE.md) for detailed instructions!**
+
+### Frame Counts
+- **Idle**: 4 frames | **Walk**: 6 frames | **Jump**: 4 frames
+- **Attack**: 6 frames | **Shadow Strike**: 8 frames | **Hurt**: 2 frames
+
+### Tools Provided
+- `sprite_stitcher.py` - Combines individual frames into sprite sheets
+- `test_sprites.py` - Verifies all sprites are properly loaded
+
+**Current Status**: Sprite sheets supported - animations will play automatically when you add multi-frame sheets!
 
 ## License
 
