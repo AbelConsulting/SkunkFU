@@ -110,8 +110,8 @@ class Player:
             # Keep reference for backward compatibility
             self.sprites = {key: anim.frames[0] for key, anim in self.animations.items()}
             
-            # Current animation
-            self.current_anim = self.animations["idle"]
+            # Current animation (start with idle, but handled separately)
+            self.current_anim = None
             self.last_anim_state = "idle"
             
             print(f"✓ Loaded {len(self.animations)} Ninja Skunk animations with multiple frames")
