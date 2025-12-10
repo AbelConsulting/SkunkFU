@@ -56,6 +56,11 @@ class Player:
         self.attack_hitbox = pygame.Rect(0, 0, self.default_attack_width, self.default_attack_height)
         self.hit_enemies = set()  # Track enemies hit in current attack
         
+        # Shadow strike state
+        self.is_shadow_striking = False
+        self.shadow_strike_duration = 0.25  # Animation duration
+        self.shadow_strike_speed = 600  # Dash speed in pixels/second
+        
         # Combo system
         self.combo_count = 0
         self.combo_window = 0.4  # Time to continue combo
@@ -281,15 +286,22 @@ class Player:
             self.attack_timer -= dt
             if self.attack_timer <= 0:
                 self.is_attacking = False
+                self.is_shadow_striking = False
                 # Restore default hitbox size after any attack concludes
                 self.attack_hitbox.width = self.default_attack_width
                 self.attack_hitbox.height = self.default_attack_height
+                # Stop dash momentum from shadow strike
+                if abs(self.velocity_x) > self.speed:
+                    self.velocity_x = 0
+                # Move hitbox off-screen to prevent lingering hits
+                self.attack_hitbox.x = -1000
+                self.attack_hitbox.y = -1000
         
         if self.attack_cooldown_timer > 0:
             self.attack_cooldown_timer -= dt
         
-        # Update attack hitbox
-        if self.is_attacking:
+        # Update attack hitbox position (only while actively attacking)
+        if self.is_attacking and self.attack_timer > 0:
             if self.facing_right:
                 self.attack_hitbox.x = self.rect.right
             else:
@@ -306,7 +318,7 @@ class Player:
         # Determine which animation should play
         anim_state = "idle"
         if self.is_attacking:
-            anim_state = "shadow_strike" if self.attack_hitbox.width > 60 else "attack"
+            anim_state = "shadow_strike" if self.is_shadow_striking else "attack"
         elif not self.on_ground:
             anim_state = "jump"
         elif abs(self.velocity_x) > 10.0:  # Higher dead zone to prevent idle->walk jitter
@@ -367,16 +379,17 @@ class Player:
         """Perform Shadow Strike - fast dash attack"""
         if not self.is_attacking and self.on_ground:
             self.is_attacking = True
-            self.attack_timer = self.attack_duration
-            self.attack_cooldown_timer = self.attack_cooldown
+            self.is_shadow_striking = True
+            self.attack_timer = self.shadow_strike_duration
+            self.attack_cooldown_timer = self.attack_cooldown * 1.5  # Longer cooldown for special
             self.hit_enemies.clear()  # Clear hit tracking
             
-            # Dash forward
-            dash_distance = 150
+            # Set dash velocity instead of instant teleport
+            dash_speed = self.shadow_strike_speed
             if self.facing_right:
-                self.x += dash_distance
+                self.velocity_x = dash_speed
             else:
-                self.x -= dash_distance
+                self.velocity_x = -dash_speed
             
             # Larger hitbox for special
             self.attack_hitbox.width = 80
