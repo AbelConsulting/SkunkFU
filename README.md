@@ -136,6 +136,29 @@ Contributions are welcome! Feel free to:
 
 ## Asset Requirements
 
+### Sound Effects & Music
+
+The game includes a complete audio system with procedurally generated placeholder sounds.
+
+**Generated Sounds:**
+- Player: jump, attacks (3 variants), shadow strike, hit, land
+- Enemies: hit, death
+- UI: menu navigation, pause, combo, game over
+- Music: Gameplay background track
+
+**Quick Setup:**
+1. **Generate sounds**: `python generate_sounds.py`
+2. **Generate music**: `python generate_music.py`
+3. All audio files placed in `assets/audio/sfx/` and `assets/audio/music/`
+
+**Replace with Custom Audio:**
+Simply drop your own `.wav` files into `assets/audio/sfx/` or music files (`.ogg`, `.wav`, `.mp3`) into `assets/audio/music/` with matching names.
+
+**Recommended Resources:**
+- [OpenGameArt.org](https://opengameart.org) - Free game audio
+- [Freesound.org](https://freesound.org) - Sound effects library
+- [Incompetech.com](https://incompetech.com) - Royalty-free music
+
 ### Creating Animated Sprites
 
 The game uses **horizontal sprite sheets** where animation frames are arranged side-by-side.
@@ -158,10 +181,15 @@ Total: 384×64 pixels (6 frames @ 64x64 each)
 - **Attack**: 6 frames | **Shadow Strike**: 8 frames | **Hurt**: 2 frames
 
 ### Tools Provided
+- `generate_sounds.py` - Creates all placeholder sound effects
+- `generate_music.py` - Creates background music
 - `sprite_stitcher.py` - Combines individual frames into sprite sheets
+- `create_frame_folders.py` - Creates organized folders for sprite creation
 - `test_sprites.py` - Verifies all sprites are properly loaded
 
-**Current Status**: Sprite sheets supported - animations will play automatically when you add multi-frame sheets!
+**Current Status**: 
+- ✅ **Audio System**: Complete with 14 sound effects and gameplay music!
+- ✅ **Sprite System**: Sprite sheets supported - animations will play automatically when you add multi-frame sheets!
 
 ## License
 

@@ -110,9 +110,15 @@ class AudioManager:
             music_name: Name of the music file (without extension)
             loop: Number of times to loop (-1 for infinite)
         """
-        music_file = os.path.join(self.music_path, f"{music_name}.ogg")
+        # Try OGG first, then WAV
+        music_file = None
+        for ext in ['.ogg', '.wav', '.mp3']:
+            test_file = os.path.join(self.music_path, f"{music_name}{ext}")
+            if os.path.exists(test_file):
+                music_file = test_file
+                break
         
-        if os.path.exists(music_file):
+        if music_file:
             try:
                 pygame.mixer.music.load(music_file)
                 pygame.mixer.music.set_volume(self.music_volume)
@@ -123,7 +129,7 @@ class AudioManager:
             except pygame.error as e:
                 print(f"✗ Failed to load music {music_name}: {e}")
         else:
-            print(f"✗ Music file not found: {music_file}")
+            print(f"✗ Music file not found: {music_name} (tried .ogg, .wav, .mp3)")
     
     def stop_music(self):
         """Stop the currently playing music"""

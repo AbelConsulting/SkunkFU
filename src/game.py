@@ -62,6 +62,9 @@ class Game:
         self.lives = 3
         self.player.reset()
         self.enemy_manager.reset()
+        
+        # Start gameplay music
+        self.audio_manager.play_music('gameplay', loop=-1)
     
     def update(self, dt):
         """Update game state"""
