@@ -84,7 +84,7 @@ class Player:
             # walk, jump, attack, shadow_strike, hurt: 128x32 (4 frames of 32x32)
             
             # Load sprite sheets - assuming horizontal sprite sheets
-            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", 64, 64, 4, (64, 64))
+            idle_frames = sprite_loader.load_spritesheet("characters/ninja_idle.png", 64, 64, 1, (64, 64))
             walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (64, 64))
             jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (64, 64))
             attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", 32, 32, 4, (64, 64))
@@ -392,9 +392,9 @@ class Player:
     
     def render(self, screen, camera_x):
         """Render the player"""
-        # Calculate screen position
-        screen_x = int(self.x - camera_x)
-        screen_y = int(self.y)
+        # Calculate screen position with smooth rounding
+        screen_x = round(self.x - camera_x)
+        screen_y = round(self.y)
         
         # Flicker during invulnerability
         if self.invulnerable_timer > 0:
