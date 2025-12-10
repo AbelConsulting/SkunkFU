@@ -315,8 +315,9 @@ class Enemy:
         if self.animations and self.current_anim:
             sprite = self.current_anim.get_current_frame()
             
-            # Flip sprite if facing left
-            if not self.facing_right:
+            # Flip sprite based on facing direction
+            # Enemy sprites face left by default, so flip when facing_right
+            if self.facing_right:
                 sprite = pygame.transform.flip(sprite, True, False)
             
             # Hit flash effect

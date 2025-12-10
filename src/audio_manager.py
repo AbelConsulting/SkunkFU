@@ -33,6 +33,11 @@ class AudioManager:
         # Music state
         self.current_music = None
         self.music_playing = False
+        
+        # Metal pad layer for background music
+        self.metal_pad_channel = None
+        self.metal_pad_sound = None
+        self.load_metal_pad()
     
     def load_sounds(self):
         """Load all sound effects"""
@@ -74,6 +79,18 @@ class AudioManager:
                 # Create a silent placeholder
                 self.sounds[name] = None
     
+    def load_metal_pad(self):
+        """Load the metal pad sound for background layering"""
+        metal_path = os.path.join(self.sfx_path, 'metal_pad.wav')
+        if os.path.exists(metal_path):
+            try:
+                self.metal_pad_sound = pygame.mixer.Sound(metal_path)
+                self.metal_pad_sound.set_volume(0.3)  # Quieter than main music
+                print(f"✓ Loaded metal pad layer")
+            except pygame.error as e:
+                print(f"✗ Failed to load metal pad: {e}")
+                self.metal_pad_sound = None
+    
     def play_sound(self, sound_name, volume=1.0):
         """
         Play a sound effect
@@ -104,7 +121,7 @@ class AudioManager:
     
     def play_music(self, music_name, loop=-1):
         """
-        Play background music
+        Play background music with optional metal pad layer
         
         Args:
             music_name: Name of the music file (without extension)
@@ -126,23 +143,35 @@ class AudioManager:
                 self.current_music = music_name
                 self.music_playing = True
                 print(f"♪ Playing music: {music_name}")
+                
+                # Layer metal pad for gameplay music
+                if music_name == "gameplay" and self.metal_pad_sound:
+                    self.metal_pad_channel = self.metal_pad_sound.play(-1)  # Loop indefinitely
+                    print(f"🎸 Metal pad layer added")
             except pygame.error as e:
                 print(f"✗ Failed to load music {music_name}: {e}")
         else:
             print(f"✗ Music file not found: {music_name} (tried .ogg, .wav, .mp3)")
     
     def stop_music(self):
-        """Stop the currently playing music"""
+        """Stop the currently playing music and metal pad layer"""
         pygame.mixer.music.stop()
+        if self.metal_pad_channel:
+            self.metal_pad_channel.stop()
+            self.metal_pad_channel = None
         self.music_playing = False
     
     def pause_music(self):
-        """Pause the currently playing music"""
+        """Pause the currently playing music and metal pad"""
         pygame.mixer.music.pause()
+        if self.metal_pad_channel:
+            self.metal_pad_channel.pause()
     
     def unpause_music(self):
-        """Resume paused music"""
+        """Resume paused music and metal pad"""
         pygame.mixer.music.unpause()
+        if self.metal_pad_channel:
+            self.metal_pad_channel.unpause()
     
     def set_sfx_volume(self, volume):
         """

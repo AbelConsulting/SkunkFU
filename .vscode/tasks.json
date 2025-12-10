@@ -32,6 +32,11 @@
 			"label": "Cleanup Sprites",
 			"type": "shell",
 			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe cleanup_sprites.py"
+		},
+		{
+			"label": "Generate Metal Sound",
+			"type": "shell",
+			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe generate_metal_sound.py"
 		}
 	]
 }
