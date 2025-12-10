@@ -22,9 +22,11 @@ def generate_note(frequency, duration, sample_rate=22050, volume=0.15, distortio
     wave += np.sin(frequency * 3 * 2 * np.pi * t) * (volume * 0.4)
     wave += np.sin(frequency * 5 * 2 * np.pi * t) * (volume * 0.25)  # 5th harmonic
     
-    # Add distortion/overdrive for metal guitar tone
+    # Add heavy distortion/overdrive for crushing metal guitar tone
     if distortion:
-        wave = np.tanh(wave * 3.5) * 0.7  # Soft clipping distortion
+        wave = np.tanh(wave * 5.0) * 0.75  # Hard clipping distortion for maximum aggression
+        # Add sub-harmonics for thickness
+        wave += np.sin(frequency * 0.5 * 2 * np.pi * t) * (volume * 0.15)
     
     # Apply ADSR envelope (faster attack for metal)
     attack_samples = int(0.01 * sample_rate)  # Very fast attack
@@ -118,13 +120,14 @@ def create_beat(bpm=120, beats=4, sample_rate=22050):
     
     return beat
 
-def create_gameplay_music(duration=60, bpm=50.4):
-    """Create energetic metal-infused gameplay music"""
+def create_gameplay_music(duration=60, bpm=120):
+    """Create heavy, groovy metal gameplay music"""
     sample_rate = 22050
     
     # Chord progression: Am - F - C - G (in A minor - darker metal sound)
-    # Lower tuning for heavier sound
+    # Drop tuning for maximum heaviness
     notes = {
+        'C2': 65.41,   # Drop C tuning
         'E2': 82.41,   # Low E for power chords
         'A2': 110.00,
         'D3': 146.83,
@@ -251,9 +254,9 @@ def create_all_music():
     """Generate all music tracks"""
     print("🎵 Generating metal-infused background music...\n")
     
-    # Gameplay music - fast and aggressive with metal elements
-    print("Creating gameplay music (50.4 BPM metal style)...")
-    gameplay, sr = create_gameplay_music(duration=60, bpm=50.4)
+    # Gameplay music - heavy and groovy with crushing metal elements
+    print("Creating gameplay music (120 BPM heavy metal style)...")
+    gameplay, sr = create_gameplay_music(duration=60, bpm=120)
     save_music_as_ogg(gameplay, sr, 'gameplay.ogg')
     
     print("\n✅ Music generated successfully!")

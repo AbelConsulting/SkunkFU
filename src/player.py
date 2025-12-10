@@ -91,16 +91,16 @@ class Player:
             # Extract only the first 64x64 frame as a completely static pose
             temp_surface = pygame.Surface((64, 64), pygame.SRCALPHA)
             temp_surface.blit(idle_img, (0, 0), pygame.Rect(0, 0, 64, 64))
-            # Scale up to 128x128 to match the scale of movement sprites better
-            self.idle_sprite = pygame.transform.scale(temp_surface, (128, 128))
+            # Scale to 96x96 for good visibility without being too large
+            self.idle_sprite = pygame.transform.scale(temp_surface, (96, 96))
             # Pre-create flipped version to avoid recreating every frame
             self.idle_sprite_flipped = pygame.transform.flip(self.idle_sprite, True, False)
             
-            walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (128, 128))
-            jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (128, 128))
-            attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", 32, 32, 4, (128, 128))
-            shadow_strike_frames = sprite_loader.load_spritesheet("characters/ninja_shadow_strike.png", 32, 32, 4, (128, 128))
-            hurt_frames = sprite_loader.load_spritesheet("characters/ninja_hurt.png", 32, 32, 2, (128, 128))
+            walk_frames = sprite_loader.load_spritesheet("characters/ninja_walk.png", 32, 32, 4, (96, 96))
+            jump_frames = sprite_loader.load_spritesheet("characters/ninja_jump.png", 32, 32, 4, (96, 96))
+            attack_frames = sprite_loader.load_spritesheet("characters/ninja_attack.png", 32, 32, 4, (96, 96))
+            shadow_strike_frames = sprite_loader.load_spritesheet("characters/ninja_shadow_strike.png", 32, 32, 4, (96, 96))
+            hurt_frames = sprite_loader.load_spritesheet("characters/ninja_hurt.png", 32, 32, 2, (96, 96))
             
             # Create animations from frames (idle is handled separately as static sprite)
             self.animations = {
