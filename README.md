@@ -201,7 +201,7 @@ This project is open source. See LICENSE file for details.
 
 **Development**: Built with Python and Pygame by MontanaDad
 
-**Characters**: Based on Skunk Squad by MontanaDad
+**Characters**: Based on Skunk Squad by MontanaDad  
 
 ---
 
