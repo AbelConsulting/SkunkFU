@@ -21,12 +21,18 @@ class Enemy:
         if enemy_type == "BASIC":
             self.width = 48
             self.height = 48
+            self.sprite_width = 48
+            self.sprite_height = 48
         elif enemy_type == "FLYING":
             self.width = 64
             self.height = 64
+            self.sprite_width = 64
+            self.sprite_height = 64
         elif enemy_type == "BOSS":
             self.width = 128
             self.height = 128
+            self.sprite_width = 128
+            self.sprite_height = 128
         else:
             self.width = 50
             self.height = 70
@@ -84,11 +90,11 @@ class Enemy:
         
         try:
             if self.enemy_type == "BASIC":
-                # Load sprite sheets for basic enemy (24x24 per frame in 96x24 sheets)
-                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", 24, 24, 4, (48, 48))
-                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", 24, 24, 4, (48, 48))
-                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", 24, 24, 4, (48, 48))
-                hurt_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_hurt.png", 24, 24, 4, (48, 48))
+                # Load sprite sheets for basic enemy (48x48 per frame in 192x48 sheets)
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", 48, 48, 4, (48, 48))
+                walk_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_walk.png", 48, 48, 4, (48, 48))
+                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", 48, 48, 4, (48, 48))
+                hurt_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_hurt.png", 48, 48, 4, (48, 48))
                 
                 self.animations = {
                     "idle": Animation(idle_frames, 0.2, True),
@@ -395,7 +401,7 @@ class Enemy:
         pygame.draw.rect(screen, GREEN, (bar_x, screen_y - 10, int(bar_width * health_ratio), 5))
         
         # Debug: Draw collision box outline to see sprite alignment (TEMPORARY)
-        if True:  # Set to False to disable debug
+        if False:  # Set to False to disable debug
             pygame.draw.rect(screen, (0, 255, 255), (screen_x, screen_y, self.width, self.height), 2)
             # Draw sprite bounds if sprite exists
             if self.animations and self.current_anim:
