@@ -13,6 +13,10 @@ class Level:
         self.platforms = []
         self.boundaries = []  # Invisible walls
         
+        # Background elements (clouds, mountains)
+        self.clouds = self.create_clouds()
+        self.mountains = self.create_mountains()
+        
         # Create platforms
         self.create_platforms()
         self.create_boundaries()
@@ -46,6 +50,40 @@ class Level:
         # Final area - accessible from staircase with gap
         self.platforms.append(pygame.Rect(3000, 400, 0, 20))  # At boundary (no actual platform needed here)
     
+    def create_clouds(self):
+        """Create parallax clouds across the level"""
+        clouds = []
+        # Layer 1 - Far clouds (slower parallax)
+        for i in range(8):
+            x = i * 400 + 100
+            y = 80 + (i % 3) * 30
+            width = 80 + (i % 2) * 40
+            height = 40 + (i % 2) * 15
+            clouds.append({'x': x, 'y': y, 'width': width, 'height': height, 'layer': 1})
+        
+        # Layer 2 - Near clouds (faster parallax)
+        for i in range(10):
+            x = i * 350 + 200
+            y = 120 + (i % 4) * 25
+            width = 100 + (i % 3) * 30
+            height = 50 + (i % 2) * 10
+            clouds.append({'x': x, 'y': y, 'width': width, 'height': height, 'layer': 2})
+        
+        return clouds
+    
+    def create_mountains(self):
+        """Create distant mountain silhouettes"""
+        mountains = []
+        # Create 5 mountain ranges
+        for i in range(5):
+            x = i * 650
+            base_y = 400
+            height = 180 + (i % 3) * 60
+            width = 500 + (i % 2) * 150
+            mountains.append({'x': x, 'y': base_y, 'width': width, 'height': height})
+        
+        return mountains
+    
     def create_boundaries(self):
         """Create invisible walls at level edges"""
         # Left wall
@@ -68,10 +106,56 @@ class Level:
     def render(self, screen, camera_x):
         """Render the level"""
         # Sky background with gradient effect
-        screen.fill((135, 206, 235))  # Sky blue
+        for y in range(0, 400, 20):
+            # Gradient from light blue at top to lighter at horizon
+            ratio = y / 400
+            r = int(135 + (200 - 135) * ratio)
+            g = int(206 + (230 - 206) * ratio)
+            b = int(250)
+            pygame.draw.rect(screen, (r, g, b), (0, y, SCREEN_WIDTH, 20))
         
-        # Draw clouds (simple decoration)
-        cloud_color = (255, 255, 255, 128)
+        # Draw distant mountains (parallax layer 0.2x)
+        for mountain in self.mountains:
+            screen_x = mountain['x'] - (camera_x * 0.2)
+            if -mountain['width'] < screen_x < SCREEN_WIDTH:
+                # Mountain peak as triangle
+                peak_x = screen_x + mountain['width'] // 2
+                peak_y = mountain['y'] - mountain['height']
+                base_left = screen_x
+                base_right = screen_x + mountain['width']
+                base_y = mountain['y']
+                
+                # Mountain silhouette (dark blue-gray)
+                points = [(peak_x, peak_y), (base_left, base_y), (base_right, base_y)]
+                pygame.draw.polygon(screen, (60, 80, 100), points)
+                
+                # Snow cap (top 20% of mountain)
+                snow_height = mountain['height'] * 0.2
+                snow_left_x = peak_x - snow_height * 0.5
+                snow_right_x = peak_x + snow_height * 0.5
+                snow_y = peak_y + snow_height
+                snow_points = [(peak_x, peak_y), (snow_left_x, snow_y), (snow_right_x, snow_y)]
+                pygame.draw.polygon(screen, (240, 248, 255), snow_points)
+        
+        # Draw clouds with parallax
+        for cloud in self.clouds:
+            # Different parallax speeds for different layers
+            parallax = 0.3 if cloud['layer'] == 1 else 0.5
+            screen_x = cloud['x'] - (camera_x * parallax)
+            
+            if -cloud['width'] < screen_x < SCREEN_WIDTH:
+                # Draw cloud as overlapping circles
+                color = (255, 255, 255, 180) if cloud['layer'] == 1 else (255, 255, 255, 220)
+                # Main cloud body
+                pygame.draw.ellipse(screen, (255, 255, 255), 
+                                  (screen_x, cloud['y'], cloud['width'], cloud['height']))
+                # Additional puffs for depth
+                pygame.draw.ellipse(screen, (255, 255, 255), 
+                                  (screen_x + cloud['width'] * 0.2, cloud['y'] - cloud['height'] * 0.2, 
+                                   cloud['width'] * 0.5, cloud['height'] * 0.8))
+                pygame.draw.ellipse(screen, (255, 255, 255), 
+                                  (screen_x + cloud['width'] * 0.5, cloud['y'] - cloud['height'] * 0.15, 
+                                   cloud['width'] * 0.6, cloud['height'] * 0.9))
         
         # Draw platforms
         for platform in self.platforms:
@@ -79,28 +163,56 @@ class Level:
             
             # Different colors for ground vs floating platforms
             if platform.y >= 580:
-                # Ground - grass green
-                top_color = (34, 139, 34)
-                side_color = (101, 67, 33)
+                # Ground - vibrant grass green with texture
+                grass_green = (60, 179, 113)  # Medium sea green
+                dirt_brown = (101, 67, 33)
+                
+                # Draw dirt/earth base
+                pygame.draw.rect(screen, dirt_brown,
+                               (screen_x, platform.y + 8, platform.width, platform.height - 8))
+                
+                # Draw grass top layer
+                pygame.draw.rect(screen, grass_green,
+                               (screen_x, platform.y, platform.width, 8))
+                
+                # Add grass texture (lighter green blades)
+                light_grass = (124, 252, 0)  # Lawn green
+                for i in range(0, platform.width, 8):
+                    # Draw small grass blades
+                    blade_x = screen_x + i
+                    pygame.draw.line(screen, light_grass, 
+                                   (blade_x + 2, platform.y + 7), 
+                                   (blade_x + 2, platform.y + 2), 2)
+                    pygame.draw.line(screen, light_grass,
+                                   (blade_x + 5, platform.y + 7),
+                                   (blade_x + 5, platform.y + 3), 2)
+                
+                # Grass top highlight
+                pygame.draw.rect(screen, light_grass,
+                               (screen_x, platform.y, platform.width, 2))
             else:
-                # Floating platforms - stone gray
-                top_color = (120, 120, 120)
-                side_color = (80, 80, 80)
-            
-            # Draw platform with depth effect
-            # Main platform surface
-            pygame.draw.rect(screen, top_color,
-                           (screen_x, platform.y, platform.width, platform.height))
-            
-            # Top highlight (lighter)
-            highlight_color = tuple(min(255, c + 30) for c in top_color)
-            pygame.draw.rect(screen, highlight_color,
-                           (screen_x, platform.y, platform.width, 3))
-            
-            # Side shadow (darker)
-            if platform.height > 10:
-                pygame.draw.rect(screen, side_color,
-                               (screen_x, platform.y + 3, platform.width, platform.height - 3))
+                # Floating platforms - stone gray with moss accents
+                stone_gray = (120, 120, 120)
+                dark_gray = (80, 80, 80)
+                moss_green = (107, 142, 35)
+                
+                # Main stone platform
+                pygame.draw.rect(screen, stone_gray,
+                               (screen_x, platform.y, platform.width, platform.height))
+                
+                # Moss accent on top
+                pygame.draw.rect(screen, moss_green,
+                               (screen_x, platform.y, platform.width, 3))
+                
+                # Stone shadow/depth
+                if platform.height > 10:
+                    pygame.draw.rect(screen, dark_gray,
+                                   (screen_x, platform.y + 3, platform.width, platform.height - 3))
+                
+                # Top highlight (lighter)
+                highlight_color = (140, 140, 140)
+                pygame.draw.rect(screen, highlight_color,
+                               (screen_x, platform.y, platform.width, 2))
             
             # Platform outline
             pygame.draw.rect(screen, BLACK,
