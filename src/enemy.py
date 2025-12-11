@@ -375,9 +375,10 @@ class Enemy:
                 flash_sprite.fill((255, 255, 255, 180), special_flags=pygame.BLEND_RGB_ADD)
                 sprite = flash_sprite
             
-            # Center sprite on enemy position
+            # Position sprite - align bottom with collision box bottom, center horizontally
             sprite_rect = sprite.get_rect()
-            sprite_rect.center = (screen_x + self.width // 2, screen_y + self.height // 2)
+            sprite_rect.centerx = screen_x + self.width // 2
+            sprite_rect.bottom = screen_y + self.height
             screen.blit(sprite, sprite_rect)
         else:
             # Fallback to colored rectangles with hit flash
