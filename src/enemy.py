@@ -22,8 +22,8 @@ class Enemy:
             self.width = 48
             self.height = 48
         elif enemy_type == "FLYING":
-            self.width = 40
-            self.height = 40
+            self.width = 64
+            self.height = 64
         elif enemy_type == "BOSS":
             self.width = 128
             self.height = 128
@@ -99,9 +99,9 @@ class Enemy:
             elif self.enemy_type == "FLYING":
                 # Load sprite sheets for flying enemy
                 frame_size = 40
-                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (40, 40))
-                move_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_move.png", frame_size, frame_size, 6, (40, 40))
-                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", frame_size, frame_size, 4, (40, 40))
+                idle_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_idle.png", frame_size, frame_size, 4, (64, 64))
+                move_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_move.png", frame_size, frame_size, 6, (64, 64))
+                attack_frames = sprite_loader.load_spritesheet(f"enemies/{prefix}_attack.png", frame_size, frame_size, 4, (64, 64))
                 
                 self.animations = {
                     "idle": Animation(idle_frames, 0.2, True),
