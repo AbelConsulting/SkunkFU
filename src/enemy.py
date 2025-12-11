@@ -311,30 +311,53 @@ class Enemy:
     def chase(self, dt, player):
         """Chase the player"""
         if self.enemy_type == "FLYING":
-            # Flying chase - move towards player in both axes
-            if player.x > self.x:
-                self.velocity_x = self.speed * 1.2
-                self.facing_right = True
+            # Check if player is directly below (and close vertically)
+            horizontal_dist = abs(player.x - self.x)
+            vertical_dist = player.y - self.y
+            
+            # If player is below and we're close horizontally, just hover in place
+            if vertical_dist > 60 and horizontal_dist < 40:
+                self.velocity_x = 0
+                # Keep hovering vertically
+                target_y = player.y - 50
+                y_diff = target_y - self.y
+                self.velocity_y = y_diff * 3
+                if abs(self.velocity_y) > 300:
+                    self.velocity_y = 300 if self.velocity_y > 0 else -300
             else:
-                self.velocity_x = -self.speed * 1.2
-                self.facing_right = False
-            
-            # Vertical chase - try to match player height
-            target_y = player.y - 50  # Fly slightly above player
-            y_diff = target_y - self.y
-            self.velocity_y = y_diff * 3  # Smooth vertical movement
-            
-            # Clamp vertical speed
-            if abs(self.velocity_y) > 300:
-                self.velocity_y = 300 if self.velocity_y > 0 else -300
+                # Flying chase - move towards player in both axes
+                if player.x > self.x:
+                    self.velocity_x = self.speed * 1.2
+                    self.facing_right = True
+                else:
+                    self.velocity_x = -self.speed * 1.2
+                    self.facing_right = False
+                
+                # Vertical chase - try to match player height
+                target_y = player.y - 50  # Fly slightly above player
+                y_diff = target_y - self.y
+                self.velocity_y = y_diff * 3  # Smooth vertical movement
+                
+                # Clamp vertical speed
+                if abs(self.velocity_y) > 300:
+                    self.velocity_y = 300 if self.velocity_y > 0 else -300
         else:
             # Ground enemy chase
-            if player.x > self.x:
-                self.velocity_x = self.speed
-                self.facing_right = True
+            # Check if player is directly above
+            horizontal_dist = abs(player.x - self.x)
+            vertical_dist = self.y - player.y
+            
+            # If player is above and we're close horizontally, stop and idle
+            if vertical_dist > 30 and horizontal_dist < 40:
+                self.velocity_x = 0
             else:
-                self.velocity_x = -self.speed
-                self.facing_right = False
+                # Normal chase
+                if player.x > self.x:
+                    self.velocity_x = self.speed
+                    self.facing_right = True
+                else:
+                    self.velocity_x = -self.speed
+                    self.facing_right = False
     
     def attack_player(self, dt, player):
         """Attack the player"""
