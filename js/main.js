@@ -49,9 +49,28 @@ class GameApp {
         this.updateLoadingProgress(50);
         this.loadingText.textContent = 'Loading audio...';
 
+
         // Load audio
         const audioManager = new AudioManager();
-        await audioManager.loadAllAudio();
+        const soundList = [
+            ['jump', 'assets/audio/sfx/jump.wav'],
+            ['attack1', 'assets/audio/sfx/attack1.wav'],
+            ['attack2', 'assets/audio/sfx/attack2.wav'],
+            ['attack3', 'assets/audio/sfx/attack3.wav'],
+            ['shadow_strike', 'assets/audio/sfx/shadow_strike.wav'],
+            ['player_hit', 'assets/audio/sfx/player_hit.wav'],
+            ['land', 'assets/audio/sfx/land.wav'],
+            ['enemy_hit', 'assets/audio/sfx/enemy_hit.wav'],
+            ['enemy_death', 'assets/audio/sfx/enemy_death.wav'],
+            ['menu_select', 'assets/audio/sfx/menu_select.wav'],
+            ['pause', 'assets/audio/sfx/pause.wav'],
+            ['combo', 'assets/audio/sfx/combo.wav'],
+            ['game_over', 'assets/audio/sfx/game_over.wav']
+        ];
+        const musicList = [
+            ['gameplay', 'assets/audio/music/gameplay.ogg']
+        ];
+        await audioManager.loadAssets(soundList, musicList);
 
         // Update progress
         this.updateLoadingProgress(100);

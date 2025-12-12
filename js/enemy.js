@@ -159,12 +159,16 @@ class Enemy {
             this.velocityY = Config.MAX_FALL_SPEED;
         }
 
+
+        // Store previous rect before moving
+        const prevRect = { x: this.x, y: this.y, width: this.width, height: this.height };
+
         // Update vertical position
         this.y += this.velocityY * dt;
 
-        // Check platform collisions
+        // Check platform collisions (pass prevRect)
         const rect = { x: this.x, y: this.y, width: this.width, height: this.height };
-        const collision = level.checkPlatformCollision(rect, this.velocityY);
+        const collision = level.checkPlatformCollision(rect, prevRect, this.velocityY);
 
         if (collision.collided) {
             this.y = collision.landingY;

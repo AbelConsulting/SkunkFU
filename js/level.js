@@ -5,14 +5,15 @@ class Level {
         this.platforms = [];
         this.backgroundGradient = null;
         
-        // Default style config
+        // Cyberpunk style config
         this.theme = {
-            bgTop: '#2C1A4A',
-            bgMid: '#3D2963',
-            bgBot: '#1A0F2E',
-            platTop: '#5A4A6A',
-            platBot: '#3A2A4A',
-            border: '#7A6A8A'
+            bgTop: '#0f0026',      // Deep purple/blue night sky
+            bgMid: '#2d0a4b',      // Neon purple
+            bgBot: '#0a0a23',      // Dark blue/black
+            platTop: '#00fff7',    // Neon cyan
+            platBot: '#ff00ea',    // Neon magenta
+            border: '#fffb00',     // Bright yellow border
+            glow: '#00fff7',       // Neon cyan glow
         };
     }
 
@@ -116,31 +117,35 @@ class Level {
     }
 
     drawPlatform(ctx, p) {
-        // Shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(p.x + 5, p.y + 5, p.width, p.height);
+           // Cyberpunk neon shadow/glow
+           ctx.save();
+           ctx.shadowColor = this.theme.glow;
+           ctx.shadowBlur = 20;
+           ctx.fillStyle = 'rgba(0,255,247,0.15)';
+           ctx.fillRect(p.x - 8, p.y - 8, p.width + 16, p.height + 16);
+           ctx.restore();
 
-        // Gradient Fill
-        const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
-        grad.addColorStop(0, this.theme.platTop);
-        grad.addColorStop(1, this.theme.platBot);
-        ctx.fillStyle = grad;
-        
-        // Rounded corners for moving platforms?
-        if (p.type === 'moving') {
-             // You could change color here to indicate it moves
-             ctx.fillStyle = '#6A5A8A'; 
-        }
+           // Neon gradient fill
+           const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+           grad.addColorStop(0, this.theme.platTop);
+           grad.addColorStop(1, this.theme.platBot);
+           ctx.fillStyle = grad;
+           ctx.fillRect(p.x, p.y, p.width, p.height);
 
-        ctx.fillRect(p.x, p.y, p.width, p.height);
+           // Neon border
+           ctx.save();
+           ctx.shadowColor = this.theme.border;
+           ctx.shadowBlur = 10;
+           ctx.strokeStyle = this.theme.border;
+           ctx.lineWidth = 3;
+           ctx.strokeRect(p.x, p.y, p.width, p.height);
+           ctx.restore();
 
-        // Border
-        ctx.strokeStyle = this.theme.border;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(p.x, p.y, p.width, p.height);
-
-        // Highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-        ctx.fillRect(p.x, p.y, p.width, 5);
+           // Neon highlight
+           ctx.save();
+           ctx.globalAlpha = 0.25;
+           ctx.fillStyle = '#fff';
+           ctx.fillRect(p.x, p.y, p.width, 6);
+           ctx.restore();
     }
 }

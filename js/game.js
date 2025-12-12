@@ -26,6 +26,18 @@ class Game {
         // Initialize game components
         this.player = new Player(100, 500, this.audioManager);
         this.level = new Level(this.width, this.height);
+        // Default level data with platforms
+        const levelData = {
+            width: this.width,
+            height: this.height,
+            platforms: [
+                { x: 100, y: 600, width: 400, height: 32, type: 'static' },
+                { x: 600, y: 500, width: 200, height: 32, type: 'static' },
+                { x: 900, y: 400, width: 250, height: 32, type: 'static' },
+                { x: 0, y: 700, width: 1280, height: 40, type: 'static' } // ground
+            ]
+        };
+        this.level.loadLevel(levelData);
         this.enemyManager = new EnemyManager(this.audioManager);
         this.ui = new UI(this.width, this.height);
 
