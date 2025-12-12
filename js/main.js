@@ -68,7 +68,7 @@ class GameApp {
             ['game_over', 'assets/audio/sfx/game_over.wav']
         ];
         const musicList = [
-            ['gameplay', 'assets/audio/music/gameplay.ogg']
+            ['gameplay', 'assets/audio/music/gameplay.wav']
         ];
         
             // Enable audio on first user interaction (required by browsers)
