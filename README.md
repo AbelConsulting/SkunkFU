@@ -99,7 +99,7 @@ python main.py
 
 ## Project Structure
 
-ninja_walk.png = [Frame0][Frame1][Frame2][Frame3]
+
 Total: 128×32 pixels (4 frames @ 32x32 each, scaled to 64x64 in-game)
 SkunkFU/
 ├── index.html              # HTML5 game entry point (NEW!)
