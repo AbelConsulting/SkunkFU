@@ -107,6 +107,17 @@
             font-weight: bold;
         }
 
+        #mobile-restart-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: #4dff4d;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
         /* --- ORIENTATION CHECK --- */
         #rotate-message { display: none; }
         
@@ -151,6 +162,10 @@
         <div id="mobile-start-overlay" style="display:none;">
             <button id="mobile-start-btn">Tap to Start</button>
         </div>
+
+        <div id="mobile-restart-overlay" style="display:none;">
+            <button id="mobile-restart-btn">Tap to Restart</button>
+        </div>
     </div>
 
     <script src="js/config.js"></script>
@@ -163,7 +178,7 @@
     <script src="js/enemy.js"></script>
     <script src="js/enemyManager.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/game.js?v=2"></script>
+    <script src="js/game.js?v=3"></script>
     <script src="js/main.js"></script>
 
 <script>
@@ -213,12 +228,21 @@ if (isMobile()) {
 // --- MOBILE START & FULLSCREEN ---
 const mobileStartOverlay = document.getElementById('mobile-start-overlay');
 const mobileStartBtn = document.getElementById('mobile-start-btn');
+const mobileRestartOverlay = document.getElementById('mobile-restart-overlay');
+const mobileRestartBtn = document.getElementById('mobile-restart-btn');
 
 function showMobileStartOverlay() {
     if (mobileStartOverlay) mobileStartOverlay.style.display = 'flex';
 }
 function hideMobileStartOverlay() {
     if (mobileStartOverlay) mobileStartOverlay.style.display = 'none';
+}
+
+function showMobileRestartOverlay() {
+    if (mobileRestartOverlay) mobileRestartOverlay.style.display = 'flex';
+}
+function hideMobileRestartOverlay() {
+    if (mobileRestartOverlay) mobileRestartOverlay.style.display = 'none';
 }
 
 function requestFullscreen() {
@@ -252,10 +276,33 @@ if (isMobile() && mobileStartBtn) {
 
     // Re-show overlay if game goes back to Menu
     window.addEventListener('gameStateChange', function(e) {
-        if (e.detail && (e.detail.state === 'MENU' || e.detail.state === 'GAME_OVER')) {
+        if (e.detail && e.detail.state === 'MENU') {
             showMobileStartOverlay();
         } else {
             hideMobileStartOverlay();
+        }
+    });
+}
+
+if (isMobile() && mobileRestartBtn) {
+    mobileRestartBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        
+        if (!window.gameReady) return; // Wait for game to load
+        
+        // Restart Game Logic
+        triggerKeyEvent('Enter', 'keydown');
+        setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
+        
+        hideMobileRestartOverlay();
+    });
+
+    // Show restart overlay on game over
+    window.addEventListener('gameStateChange', function(e) {
+        if (e.detail && e.detail.state === 'GAME_OVER') {
+            showMobileRestartOverlay();
+        } else {
+            hideMobileRestartOverlay();
         }
     });
 }

@@ -2,6 +2,8 @@
  * Game class - Main game controller
  */
 
+console.log('game.js loaded');
+
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
@@ -94,6 +96,11 @@ class Game {
         if (this.state === "PLAYING") {
             this.player.handleInput(key, false);
         }
+    }
+
+    dispatchGameStateChange() {
+        const event = new CustomEvent('gameStateChange', { detail: { state: this.state } });
+        window.dispatchEvent(event);
     }
 
     startGame() {
