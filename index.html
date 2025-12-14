@@ -18,6 +18,13 @@ base<!DOCTYPE html>
                 <p id="loading-text">Loading assets...</p>
             </div>
         </div>
+        <!-- Touch Controls for Mobile -->
+        <div id="touch-controls">
+            <button class="touch-btn" id="btn-left">&#8592;</button>
+            <button class="touch-btn" id="btn-right">&#8594;</button>
+            <button class="touch-btn" id="btn-jump">&#8593;</button>
+            <button class="touch-btn" id="btn-attack">&#x2694;</button>
+        </div>
     </div>
 
     <!-- Game scripts -->
@@ -33,5 +40,29 @@ base<!DOCTYPE html>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
+</body>
+<script>
+// Touch controls event mapping
+const leftBtn = document.getElementById('btn-left');
+const rightBtn = document.getElementById('btn-right');
+const jumpBtn = document.getElementById('btn-jump');
+const attackBtn = document.getElementById('btn-attack');
+
+function triggerKeyEvent(key, type) {
+    const event = new KeyboardEvent(type, { key });
+    window.dispatchEvent(event);
+}
+
+if (leftBtn && rightBtn && jumpBtn && attackBtn) {
+    leftBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('ArrowLeft', 'keydown'); });
+    leftBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('ArrowLeft', 'keyup'); });
+    rightBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('ArrowRight', 'keydown'); });
+    rightBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('ArrowRight', 'keyup'); });
+    jumpBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent(' ', 'keydown'); triggerKeyEvent('ArrowUp', 'keydown'); });
+    jumpBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent(' ', 'keyup'); triggerKeyEvent('ArrowUp', 'keyup'); });
+    attackBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('z', 'keydown'); });
+    attackBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('z', 'keyup'); });
+}
+</script>
 </body>
 </html>
