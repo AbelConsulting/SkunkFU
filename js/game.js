@@ -54,7 +54,7 @@ class Game {
 
             // Prevent default for game keys
             if ([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
-                e.preventDefault();
+                event.preventDefault();
             }
 
             // Global controls
