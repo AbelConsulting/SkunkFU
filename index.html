@@ -25,6 +25,10 @@ base<!DOCTYPE html>
             <button class="touch-btn" id="btn-jump">&#8593;</button>
             <button class="touch-btn" id="btn-attack">&#x2694;</button>
         </div>
+        <!-- Mobile Start Overlay -->
+        <div id="mobile-start-overlay" style="display:none;">
+            <button id="mobile-start-btn">Tap to Start</button>
+        </div>
     </div>
 
     <!-- Game scripts -->
@@ -40,6 +44,63 @@ base<!DOCTYPE html>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
+<script>
+// Touch controls event mapping
+const leftBtn = document.getElementById('btn-left');
+const rightBtn = document.getElementById('btn-right');
+const jumpBtn = document.getElementById('btn-jump');
+const attackBtn = document.getElementById('btn-attack');
+
+function triggerKeyEvent(key, type) {
+    const event = new KeyboardEvent(type, { key });
+    window.dispatchEvent(event);
+}
+
+if (leftBtn && rightBtn && jumpBtn && attackBtn) {
+    leftBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('ArrowLeft', 'keydown'); });
+    leftBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('ArrowLeft', 'keyup'); });
+    rightBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('ArrowRight', 'keydown'); });
+    rightBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('ArrowRight', 'keyup'); });
+    jumpBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent(' ', 'keydown'); triggerKeyEvent('ArrowUp', 'keydown'); });
+    jumpBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent(' ', 'keyup'); triggerKeyEvent('ArrowUp', 'keyup'); });
+    attackBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerKeyEvent('z', 'keydown'); });
+    attackBtn.addEventListener('touchend', e => { e.preventDefault(); triggerKeyEvent('z', 'keyup'); });
+}
+
+// Mobile Start Overlay logic
+function isMobile() {
+    return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+const mobileStartOverlay = document.getElementById('mobile-start-overlay');
+const mobileStartBtn = document.getElementById('mobile-start-btn');
+
+function showMobileStartOverlay() {
+    if (mobileStartOverlay) mobileStartOverlay.style.display = 'flex';
+}
+function hideMobileStartOverlay() {
+    if (mobileStartOverlay) mobileStartOverlay.style.display = 'none';
+}
+
+if (isMobile() && mobileStartBtn) {
+    // Show overlay on load
+    showMobileStartOverlay();
+    // Tap to start (simulate ENTER)
+    mobileStartBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        triggerKeyEvent('Enter', 'keydown');
+        triggerKeyEvent('Enter', 'keyup');
+        hideMobileStartOverlay();
+    });
+    // Listen for game state changes to show/hide overlay
+    window.addEventListener('gameStateChange', function(e) {
+        if (e.detail && (e.detail.state === 'MENU' || e.detail.state === 'GAME_OVER')) {
+            showMobileStartOverlay();
+        } else {
+            hideMobileStartOverlay();
+        }
+    });
+}
+</script>
 </body>
 <script>
 // Touch controls event mapping

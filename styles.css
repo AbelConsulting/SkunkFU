@@ -1,3 +1,31 @@
+#mobile-start-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+#mobile-start-btn {
+    font-size: 2rem;
+    padding: 1.2em 2.5em;
+    border-radius: 1.5em;
+    border: none;
+    background: #4CAF50;
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    transition: background 0.2s;
+}
+#mobile-start-btn:active {
+    background: #388E3C;
+}
 * {
     margin: 0;
     padding: 0;

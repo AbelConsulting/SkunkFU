@@ -50,39 +50,48 @@ class Game {
 
     setupInput() {
         window.addEventListener('keydown', (e) => {
-            this.handleKeyDown(e);
-        });
+            handleKeyDown(event) {
+                const key = event.key;
 
-        window.addEventListener('keyup', (e) => {
-            this.handleKeyUp(e);
-        });
-    }
+                // Prevent default for game keys
+                if ([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
+                    event.preventDefault();
+                }
 
-    handleKeyDown(event) {
-        const key = event.key;
+                // Global controls
+                if (key === 'Escape') {
+                    if (this.state === "PLAYING") {
+                        this.state = "PAUSED";
+                        this.audioManager.playSound('pause');
+                        this.audioManager.pauseMusic();
+                        this.dispatchGameStateChange();
+                    } else if (this.state === "PAUSED") {
+                        this.state = "PLAYING";
+                        this.audioManager.unpauseMusic();
+                        this.dispatchGameStateChange();
+                    }
+                } else if (key === 'Enter') {
+                    if (this.state === "MENU") {
+                        this.audioManager.playSound('menu_select');
+                        this.startGame();
+                        this.dispatchGameStateChange();
+                    } else if (this.state === "GAME_OVER") {
+                        this.audioManager.playSound('menu_select');
+                        this.startGame();
+                        this.dispatchGameStateChange();
+                    }
+                }
 
-        // Prevent default for game keys
-        if ([' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) {
-            event.preventDefault();
-        }
-
-        // Global controls
-        if (key === 'Escape') {
-            if (this.state === "PLAYING") {
-                this.state = "PAUSED";
-                this.audioManager.playSound('pause');
-                this.audioManager.pauseMusic();
-            } else if (this.state === "PAUSED") {
-                this.state = "PLAYING";
-                this.audioManager.unpauseMusic();
+                // Gameplay controls
+                if (this.state === "PLAYING") {
+                    this.player.handleInput(key, true);
+                }
             }
-        } else if (key === 'Enter') {
-            if (this.state === "MENU") {
-                this.audioManager.playSound('menu_select');
-                this.startGame();
-            } else if (this.state === "GAME_OVER") {
-                this.audioManager.playSound('menu_select');
-                this.startGame();
+
+            dispatchGameStateChange() {
+                const event = new CustomEvent('gameStateChange', { detail: { state: this.state } });
+                window.dispatchEvent(event);
+            }
             }
         }
 
