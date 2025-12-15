@@ -1,5 +1,6 @@
 const http = require('http');
-const url = process.env.TEST_SERVER || 'http://localhost:8001';
+// Default to the Python CSP dev server port (8000)
+const url = process.env.TEST_SERVER || 'http://localhost:8000';
 
 (async () => {
   try {

@@ -52,8 +52,10 @@ class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return http.server.SimpleHTTPRequestHandler.send_head(self)
             # Ensure nonce is generated (end_headers sets it)
             nonce = base64.b64encode(os.urandom(16)).decode('ascii')
+            # Include script-src-elem to explicitly allow external <script> elements
             csp = (
                 "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com; "
+                "script-src-elem 'self' https://static.cloudflareinsights.com; "
                 "object-src 'none'; base-uri 'self';"
             )
             self.send_response(200)
