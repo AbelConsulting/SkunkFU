@@ -411,7 +411,7 @@ class Game {
         }
 
         // Render game world (level, player, enemies) using logical coordinates
-        this.level.draw(this.ctx, this.cameraX, this.cameraY);
+        this.level.draw(this.ctx, this.cameraX, this.cameraY, this.viewWidth, this.viewHeight);
         this.player.draw(this.ctx, this.cameraX, this.cameraY);
         this.enemyManager.draw(this.ctx, this.cameraX, this.cameraY);
 

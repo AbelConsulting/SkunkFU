@@ -92,7 +92,7 @@ class Level {
         return { collided: false };
     }
 
-    draw(ctx, cameraX = 0, cameraY = 0) {
+    draw(ctx, cameraX = 0, cameraY = 0, viewWidth = null, viewHeight = null) {
         // 1. Draw Background (Optimized)
         if (!this.backgroundGradient) {
             this.backgroundGradient = ctx.createLinearGradient(0, 0, 0, this.height);
@@ -102,8 +102,13 @@ class Level {
         }
         
         ctx.fillStyle = this.backgroundGradient;
-        // Draw bg relative to camera or fixed? usually fixed or parallax
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
+        // Draw the background using logical view dimensions when provided so
+        // it matches the scaled world coordinates and doesn't depend on
+        // the canvas pixel buffer size (avoids intermittent visual jumps
+        // when pixel buffer is resized during asset loads).
+        const w = viewWidth || this.width || ctx.canvas.width;
+        const h = viewHeight || this.height || ctx.canvas.height;
+        ctx.fillRect(cameraX, cameraY, w, h);
 
         ctx.save();
         ctx.translate(-cameraX, -cameraY);
