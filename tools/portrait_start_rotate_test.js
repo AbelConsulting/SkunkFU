@@ -6,7 +6,8 @@ const { chromium } = require('playwright');
   const page = await context.newPage();
   const SERVER = process.env.TEST_SERVER || 'http://localhost:8001';
   await page.goto(SERVER);
-  await page.waitForSelector('#game-canvas');
+  // Ensure the canvas is present in the DOM (may be hidden until PLAYING)
+  await page.waitForSelector('#game-canvas', { state: 'attached' });
 
   // Ensure start overlay exists
   const hasBtn = await page.$('#mobile-start-btn');
@@ -29,6 +30,20 @@ const { chromium } = require('playwright');
   await page.setViewportSize({ width: 640, height: 360 });
   await page.evaluate(() => { window.dispatchEvent(new Event('orientationchange')); window.dispatchEvent(new Event('resize')); });
 
+  // Give the UI time to react and log intermediate state for diagnostics
+  await page.waitForTimeout(250);
+  const midState = await page.evaluate(() => ({
+    landscape: (typeof isLandscape === 'function' ? isLandscape() : null),
+    innerW: window.innerWidth,
+    innerH: window.innerHeight,
+    pending: !!window._pendingStartGesture,
+    gameReady: !!window.gameReady,
+    state: window.game && window.game.state,
+    mobileStartVisible: (function(){ const el=document.getElementById('mobile-start-overlay'); return el ? getComputedStyle(el).display : 'missing' })(),
+    touchControlsVisible: (function(){ const el=document.getElementById('touch-controls'); return el ? getComputedStyle(el).display : 'missing' })()
+  }));
+  console.log('midState after rotate:', midState);
+
   // Wait for the game to enter PLAYING state
   let started = false;
   try {
@@ -42,8 +57,8 @@ const { chromium } = require('playwright');
     gameReady: !!window.gameReady,
     state: window.game && window.game.state,
     pending: !!window._pendingStartGesture,
-    mobileStartVisible: getComputedStyle(document.getElementById('mobile-start-overlay')).display,
-    touchControlsVisible: getComputedStyle(document.getElementById('touch-controls')).display
+    mobileStartVisible: (function(){ const el=document.getElementById('mobile-start-overlay'); return el ? getComputedStyle(el).display : 'missing' })(),
+    touchControlsVisible: (function(){ const el=document.getElementById('touch-controls'); return el ? getComputedStyle(el).display : 'missing' })()
   }));
 
   console.log('started:', started);
