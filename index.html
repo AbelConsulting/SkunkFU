@@ -370,10 +370,12 @@ function showMobileStartOverlay() {
     // trigger transition
     void mobileStartOverlay.offsetWidth;
     mobileStartOverlay.classList.add('visible');
+    try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStartShown', {}); } catch (e) {}
 }
 function hideMobileStartOverlay() {
     if (!mobileStartOverlay) return;
     mobileStartOverlay.classList.remove('visible');
+    try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStartHidden', {}); } catch (e) {}
     // Use transitionend to hide after animation, but add a timeout fallback
     let cleared = false;
     const onEnd = (ev) => {
@@ -416,6 +418,7 @@ if (isMobile() && mobileStartBtn) {
     showMobileStartOverlay();
     const startHandler = (e) => {
         try { e && e.preventDefault(); } catch (_) {}
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStartPressed', {}); } catch (e) {}
 
         const proceed = () => {
             // Enter Fullscreen and start the game in the same user gesture
@@ -423,6 +426,7 @@ if (isMobile() && mobileStartBtn) {
             triggerKeyEvent('Enter', 'keydown');
             setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
             hideMobileStartOverlay();
+            try { window && window.logTouchControlEvent && window.logTouchControlEvent('startGestureDispatched', {}); } catch (e) {}
         };
 
         if (window.gameReady) {
@@ -447,6 +451,7 @@ if (isMobile() && mobileStartBtn) {
 
     // Re-show overlay if game goes back to Menu
     window.addEventListener('gameStateChange', function(e) {
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('gameStateChange_menu', { state: e && e.detail && e.detail.state }); } catch (e) {}
         if (e.detail && e.detail.state === 'MENU') {
             showMobileStartOverlay();
         } else {
@@ -463,6 +468,8 @@ function isLandscape() {
 function updateMobileUI() {
     if (!isMobile()) return;
 
+    try { window && window.logTouchControlEvent && window.logTouchControlEvent('updateMobileUI', { landscape: isLandscape(), width: window.innerWidth, height: window.innerHeight }); } catch (e) {}
+
     if (!isLandscape()) {
         // Portrait: force rotate message, hide controls and start overlay
         const rotate = document.getElementById('rotate-message');
@@ -470,7 +477,11 @@ function updateMobileUI() {
         hideMobileStartOverlay();
         hideMobileRestartOverlay();
         const tc = document.getElementById('touch-controls');
-        if (tc) tc.style.display = 'none';
+        if (tc) {
+            tc.style.display = 'none';
+            tc.style.pointerEvents = 'none';
+            try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_portrait', {}); } catch (e) {}
+        }
     } else {
         // Landscape: allow overlays if appropriate
         const rotate = document.getElementById('rotate-message');
@@ -484,6 +495,7 @@ function updateMobileUI() {
         if (tc) {
             tc.style.display = 'none';
             initTouchControls();
+            try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_init', { exists: true }); } catch (e) {}
         }
     }
 }
