@@ -400,9 +400,11 @@ function updateMobileUI() {
             showMobileStartOverlay();
         }
         const tc = document.getElementById('touch-controls');
-        if (tc) tc.style.display = 'flex';
-        // Ensure controls have listeners
-        initTouchControls();
+        // Ensure controls exist and have listeners, but keep them hidden until gameplay starts
+        if (tc) {
+            tc.style.display = 'none';
+            initTouchControls();
+        }
     }
 }
 
@@ -411,6 +413,19 @@ window.addEventListener('orientationchange', debouncedUpdateMobileUI);
 window.addEventListener('resize', debouncedUpdateMobileUI);
 // run once on load (use non-debounced immediate call so layout is correct)
 updateMobileUI();
+
+// Show/hide touch controls based on game state: only visible during PLAYING on mobile landscape
+window.addEventListener('gameStateChange', function(e) {
+    const tc = document.getElementById('touch-controls');
+    if (!tc) return;
+    if (!isMobile()) { tc.style.display = 'none'; return; }
+    if (!isLandscape()) { tc.style.display = 'none'; return; }
+    if (e && e.detail && e.detail.state === 'PLAYING') {
+        tc.style.display = 'flex';
+    } else {
+        tc.style.display = 'none';
+    }
+});
 
 // --- RUNTIME ERROR CAPTURE ---
 (function () {
@@ -445,7 +460,7 @@ updateMobileUI();
 /* Re-insert touch controls as a fixed overlay so transforms on #game-container don't affect layout */
 (function() {
     const html = `
-    <div id="touch-controls" style="position:fixed; bottom:calc(20px + var(--safe-bottom)); left:0; right:0; transform:none; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 calc(20px + var(--safe-right));">
+    <div id="touch-controls" style="position:fixed; bottom:calc(20px + var(--safe-bottom)); left:0; right:0; transform:none; display:none; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 calc(20px + var(--safe-right));">
         <div id="d-pad" class="control-group" style="pointer-events:auto; display:flex; gap:8px;">
             <button class="touch-btn" id="btn-left">&#8592;</button>
             <button class="touch-btn" id="btn-right">&#8594;</button>
@@ -462,6 +477,8 @@ updateMobileUI();
     </div>
     `;
     document.body.insertAdjacentHTML('beforeend', html);
+    // Ensure touch control handlers are bound now that elements exist
+    if (typeof initTouchControls === 'function') initTouchControls();
 })();
 
 /* --- DEBUG OVERLAY (toggle with 'd') --- */
