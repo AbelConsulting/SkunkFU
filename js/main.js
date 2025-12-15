@@ -29,12 +29,29 @@ class GameApp {
         const scaleReduction = isMobileDevice ? 0.7 : 1.0;
         const pixelScale = finalDpr * scaleReduction;
 
-        // Set internal canvas pixel size lower for mobile to save GPU/CPU
-        this.canvas.width = Math.floor(Config.SCREEN_WIDTH * pixelScale);
-        this.canvas.height = Math.floor(Config.SCREEN_HEIGHT * pixelScale);
-        // Keep CSS size consistent so layout is unchanged
-        this.canvas.style.width = Config.SCREEN_WIDTH + 'px';
-        this.canvas.style.height = Config.SCREEN_HEIGHT + 'px';
+        // Compute CSS size so the canvas fits within the current viewport
+        // Use the smaller scale between width and height to preserve aspect ratio
+        // Read safe-area insets exposed as CSS variables (values like '20px')
+        const cs = getComputedStyle(document.documentElement);
+        const safeTop = parseFloat(cs.getPropertyValue('--safe-top')) || 0;
+        const safeBottom = parseFloat(cs.getPropertyValue('--safe-bottom')) || 0;
+        const safeLeft = parseFloat(cs.getPropertyValue('--safe-left')) || 0;
+        const safeRight = parseFloat(cs.getPropertyValue('--safe-right')) || 0;
+
+        // Available viewport area excluding safe-area insets
+        const vw = (window.innerWidth || document.documentElement.clientWidth) - (safeLeft + safeRight);
+        const vh = (window.innerHeight || document.documentElement.clientHeight) - (safeTop + safeBottom);
+        const cssScale = Math.min(vw / Config.SCREEN_WIDTH, vh / Config.SCREEN_HEIGHT, 1);
+        const cssWidth = Math.max(1, Math.floor(Config.SCREEN_WIDTH * cssScale));
+        const cssHeight = Math.max(1, Math.floor(Config.SCREEN_HEIGHT * cssScale));
+
+        // Set CSS size so the canvas visually fits the viewport (prevents cutoff)
+        this.canvas.style.width = cssWidth + 'px';
+        this.canvas.style.height = cssHeight + 'px';
+
+        // Set internal pixel buffer according to CSS size and capped DPR
+        this.canvas.width = Math.floor(cssWidth * pixelScale);
+        this.canvas.height = Math.floor(cssHeight * pixelScale);
 
         const ctx = this.canvas.getContext('2d');
         if (ctx) ctx.imageSmoothingEnabled = false;

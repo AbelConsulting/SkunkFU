@@ -16,6 +16,13 @@
     <link rel="stylesheet" href="styles.css">
 
     <style>
+        /* expose safe-area insets as CSS variables so JS can read them */
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
         /* INLINE STYLES FOR MOBILE OPTIMIZATION */
         body, html {
             margin: 0;
@@ -39,10 +46,12 @@
             touch-action: none; 
         }
 
+        /* Ensure canvas respects device safe areas (notches) */
         canvas {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: calc(100vw - var(--safe-left) - var(--safe-right));
+            max-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
             object-fit: contain;
+            display: block;
         }
 
         /* --- TOUCH CONTROLS UI --- */
@@ -185,7 +194,7 @@
     <script src="js/game.js?v=6"></script>
     <script src="js/main.js"></script>
 
-<script nonce="%CSP_NONCE%">
+    <script nonce="%CSP_NONCE%">
 // --- UTILITIES ---
 function isMobile() {
     return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
@@ -426,7 +435,7 @@ updateMobileUI();
 /* Re-insert touch controls as a fixed overlay so transforms on #game-container don't affect layout */
 (function() {
     const html = `
-    <div id="touch-controls" style="position:fixed; bottom:20px; left:0; right:0; transform:none; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 20px;">
+    <div id="touch-controls" style="position:fixed; bottom:calc(20px + var(--safe-bottom)); left:0; right:0; transform:none; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 calc(20px + var(--safe-right));">
         <div id="d-pad" class="control-group" style="pointer-events:auto; display:flex; gap:8px;">
             <button class="touch-btn" id="btn-left">&#8592;</button>
             <button class="touch-btn" id="btn-right">&#8594;</button>
