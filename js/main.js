@@ -10,6 +10,7 @@ class GameApp {
         this.loadingText = document.getElementById('loading-text');
         
         this.game = null;
+        this.audioManager = null;
         this.lastTime = 0;
         this.running = false;
 
@@ -25,7 +26,9 @@ class GameApp {
             this.loadingScreen.classList.add('hidden');
 
             // Create game instance
-            this.game = new Game(this.canvas);
+            this.game = new Game(this.canvas, this.audioManager);
+            // Mark game as ready for UI layers (mobile start, restart, etc.)
+            window.gameReady = true;
 
             // Start game loop
             this.running = true;
@@ -35,6 +38,7 @@ class GameApp {
         } catch (error) {
             console.error('Failed to initialize game:', error);
             this.loadingText.textContent = 'Error loading game. Please refresh.';
+            window.gameReady = false;
         }
     }
 
@@ -51,7 +55,7 @@ class GameApp {
 
 
         // Load audio
-        const audioManager = new AudioManager();
+        this.audioManager = new AudioManager();
         const soundList = [
             ['jump', 'assets/audio/sfx/jump.wav'],
             ['attack1', 'assets/audio/sfx/attack1.wav'],
@@ -63,18 +67,20 @@ class GameApp {
             ['enemy_hit', 'assets/audio/sfx/enemy_hit.wav'],
             ['enemy_death', 'assets/audio/sfx/enemy_death.wav'],
             ['menu_select', 'assets/audio/sfx/menu_select.wav'],
+            ['menu_move', 'assets/audio/sfx/menu_move.wav'],
             ['pause', 'assets/audio/sfx/pause.wav'],
             ['combo', 'assets/audio/sfx/combo.wav'],
-            ['game_over', 'assets/audio/sfx/game_over.wav']
+            ['game_over', 'assets/audio/sfx/game_over.wav'],
+            ['metal_pad', 'assets/audio/sfx/metal_pad.wav']
         ];
         const musicList = [
             ['gameplay', 'assets/audio/music/gameplay.wav']
         ];
         
             // Enable audio on first user interaction (required by browsers)
-            window.addEventListener('keydown', () => audioManager.initialize(), { once: true });
-            window.addEventListener('mousedown', () => audioManager.initialize(), { once: true });
-        await audioManager.loadAssets(soundList, musicList);
+            window.addEventListener('keydown', () => this.audioManager.initialize(), { once: true });
+            window.addEventListener('mousedown', () => this.audioManager.initialize(), { once: true });
+        await this.audioManager.loadAssets(soundList, musicList);
 
         // Update progress
         this.updateLoadingProgress(100);
@@ -113,4 +119,5 @@ class GameApp {
 // Start the game when DOM is loaded
 window.addEventListener('DOMContentLoaded', () => {
     const gameApp = new GameApp();
+    window.gameReady = true; // Flag for mobile start button
 });

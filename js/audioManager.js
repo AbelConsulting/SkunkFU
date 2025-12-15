@@ -28,8 +28,12 @@ class AudioManager {
      * to unlock the browser's audio engine.
      */
     async initialize() {
+        console.log('AudioManager: Initializing audio context...');
         if (this.audioCtx.state === 'suspended') {
             await this.audioCtx.resume();
+            console.log('AudioManager: Audio context resumed.');
+        } else {
+            console.log('AudioManager: Audio context already running.');
         }
     }
 
@@ -56,6 +60,7 @@ class AudioManager {
         return new Promise((resolve) => {
             const audio = new Audio();
             audio.oncanplaythrough = () => {
+                console.log(`AudioManager: Music '${name}' loaded successfully`);
                 this.musicElements[name] = audio;
                 resolve(audio);
             };
@@ -72,16 +77,21 @@ class AudioManager {
      * Load all assets (Accepts lists as arguments for reusability)
      */
     async loadAssets(soundList, musicList) {
+        console.log('AudioManager: Loading audio assets...');
         const soundPromises = soundList.map(([name, path]) => this.loadSound(name, path));
         const musicPromises = musicList.map(([name, path]) => this.loadMusic(name, path));
         await Promise.all([...soundPromises, ...musicPromises]);
+        console.log('AudioManager: All audio assets loaded.');
     }
 
     /**
      * Play a SFX with low latency and automatic overlapping
      */
     playSound(name, volumeScale = 1.0) {
-        if (!this.soundEnabled || !this.sfxBuffers[name]) return;
+        if (!this.soundEnabled || !this.sfxBuffers[name]) {
+            console.warn(`AudioManager: Cannot play sound '${name}' - soundEnabled: ${this.soundEnabled}, buffer exists: ${!!this.sfxBuffers[name]}`);
+            return;
+        }
 
         // Create a source node for this specific instance of the sound
         const source = this.audioCtx.createBufferSource();
@@ -96,10 +106,14 @@ class AudioManager {
         gainNode.connect(this.sfxGain);
 
         source.start(0);
+        console.log(`AudioManager: Playing sound '${name}'`);
     }
 
     playMusic(name, loop = true) {
-        if (!this.musicEnabled || !this.musicElements[name]) return;
+        if (!this.musicEnabled || !this.musicElements[name]) {
+            console.warn(`AudioManager: Cannot play music '${name}' - musicEnabled: ${this.musicEnabled}, element exists: ${!!this.musicElements[name]}`);
+            return;
+        }
 
         // If same track is requested, just ensure it's playing
         if (this.currentMusic === this.musicElements[name]) {
@@ -117,6 +131,7 @@ class AudioManager {
         if (playPromise !== undefined) {
             playPromise.catch(e => console.warn(`Auto-play blocked for music ${name}:`, e));
         }
+        console.log(`AudioManager: Playing music '${name}'`);
     }
 
     stopMusic() {

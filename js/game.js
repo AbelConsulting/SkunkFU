@@ -2,15 +2,17 @@
  * Game class - Main game controller
  */
 
+console.log('game.js loaded');
+
 class Game {
-    constructor(canvas) {
+    constructor(canvas, audioManager) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.width = Config.SCREEN_WIDTH;
         this.height = Config.SCREEN_HEIGHT;
 
-        // Initialize audio
-        this.audioManager = new AudioManager();
+        // Initialize audio (use provided AudioManager if available)
+        this.audioManager = audioManager || new AudioManager();
 
         // Game state
         this.state = "MENU"; // MENU, PLAYING, PAUSED, GAME_OVER
@@ -34,7 +36,7 @@ class Game {
                 { x: 100, y: 600, width: 400, height: 32, type: 'static' },
                 { x: 600, y: 500, width: 200, height: 32, type: 'static' },
                 { x: 900, y: 400, width: 250, height: 32, type: 'static' },
-                { x: 0, y: 700, width: 1280, height: 40, type: 'static' } // ground
+                { x: 0, y: 700, width: 1280, height: 40, type: 'static' }
             ]
         };
         this.level.loadLevel(levelData);
@@ -48,75 +50,50 @@ class Game {
         this.setupInput();
     }
 
-    setupInput() {
-        // Key down handler
-        window.addEventListener('keydown', (event) => {
-            const key = event.key;
+    
+        setupInput() {
+            // Key down handler
+            window.addEventListener('keydown', (event) => {
+                const key = event.key;
 
-            // Prevent default for game keys
-            if ([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
-                event.preventDefault();
-            }
-
-            // Global controls
-            if (key === 'Escape') {
-                if (this.state === "PLAYING") {
-                    this.state = "PAUSED";
-                    this.audioManager.playSound('pause');
-                    this.audioManager.pauseMusic();
-                    this.dispatchGameStateChange();
-                } else if (this.state === "PAUSED") {
-                    this.state = "PLAYING";
-                    this.audioManager.unpauseMusic();
-                    this.dispatchGameStateChange();
+                // Prevent default for game keys
+                if ([' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) {
+                    event.preventDefault();
                 }
-            } else if (key === 'Enter') {
-                if (this.state === "MENU" || this.state === "GAME_OVER") {
-                    this.audioManager.playSound('menu_select');
-                    this.startGame();
-                    this.dispatchGameStateChange();
+
+                // Global controls
+                if (key === 'Escape') {
+                    if (this.state === 'PLAYING') {
+                        this.state = 'PAUSED';
+                        this.audioManager.playSound('pause');
+                        this.audioManager.pauseMusic();
+                        this.dispatchGameStateChange();
+                    } else if (this.state === 'PAUSED') {
+                        this.state = 'PLAYING';
+                        this.audioManager.unpauseMusic();
+                        this.dispatchGameStateChange();
+                    }
+                } else if (key === 'Enter') {
+                    if (this.state === 'MENU' || this.state === 'GAME_OVER') {
+                        this.audioManager.playSound('menu_select');
+                        this.startGame();
+                        this.dispatchGameStateChange();
+                    }
                 }
+
+                // Gameplay controls
+                if (this.state === 'PLAYING') {
+                    this.player.handleInput(key, true);
+                }
+            });
+
+                // Key up handler (delegates to existing method)
+                window.addEventListener('keyup', (event) => this.handleKeyUp(event));
             }
 
-            // Gameplay controls
-            if (this.state === "PLAYING") {
-                this.player.handleInput(key, true);
-            }
-        });
-
-        // Key up handler (delegates to existing method)
-        window.addEventListener('keyup', (event) => this.handleKeyUp(event));
-    }
-
-    dispatchGameStateChange() {
-        const event = new CustomEvent('gameStateChange', { detail: { state: this.state } });
-        window.dispatchEvent(event);
-    }
-
-    handleKeyUp(event) {
-        const key = event.key;
-
-        if (this.state === "PLAYING") {
-            this.player.handleInput(key, false);
-        }
-    }
-
-    startGame() {
-        this.state = "PLAYING";
-        this.score = 0;
-        this.lives = 3;
-        this.player.reset();
-        this.enemyManager.reset();
-        this.damageNumbers = [];
-        this.hitSparks = [];
-
-        // Start gameplay music
-        this.audioManager.playMusic('gameplay', true);
-    }
-
-    update(dt) {
-        if (this.state !== "PLAYING") {
-            return;
+        update(dt) {
+            if (this.state !== "PLAYING") {
+                return;
         }
 
         // Update screen shake
@@ -247,3 +224,5 @@ class Game {
         }
     }
 }
+
+console.log('Game class defined');

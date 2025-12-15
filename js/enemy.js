@@ -267,7 +267,7 @@ class Enemy {
 
         // Draw sprite or colored rectangle
         if (this.currentAnimation) {
-            this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
+            this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, this.facingRight);
         } else {
             ctx.fillStyle = '#FF4444';
             ctx.fillRect(this.x, this.y, this.width, this.height);
