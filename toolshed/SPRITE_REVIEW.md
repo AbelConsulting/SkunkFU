@@ -158,7 +158,6 @@ However, there are some optimization opportunities regarding file sizes and dime
 
 ### Recommendations for Optimization
 
-
 1. **File Size Reduction** (Optional but Recommended)
    - Current sprites are uncompressed or minimally compressed PNGs
    - Can reduce to ~10-20% of current size with better PNG compression
@@ -204,14 +203,13 @@ To use the loaded sprites in the game, you'll need to:
 
 5. **Example implementation structure:**
 
-# Pseudo-code for sprite loading
+### Pseudo-code for sprite loading
 
 self.sprites = {
     'idle': load_sprite_sheet('ninja_idle.png', frame_width=64, frame_height=64),
     'walk': load_sprite_sheet('ninja_walk.png', frame_width=64, frame_height=64),
     # ... etc
 }
-
 
 ---
 
