@@ -6,10 +6,15 @@ import http.server
 import socketserver
 import base64
 import os
+import logging
+import traceback
 from urllib.parse import unquote, urlparse
 
 PORT = 8000
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Enable basic logging
+logging.basicConfig(level=logging.INFO, format='[CSP SERVER] %(message)s')
 
 class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
@@ -33,6 +38,7 @@ class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Security-Policy', csp)
             # Also expose nonce to downstream (not required, we inject into body)
             self.server.current_nonce = nonce
+            logging.info(f"Set CSP header on {self.path}: {csp}")
         super().end_headers()
 
     def send_head(self):
@@ -61,6 +67,7 @@ class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.send_header('Content-Security-Policy', csp)
+            logging.info(f"Injected nonce into index and set CSP: {csp}")
             self.end_headers()
             body = data.replace('%CSP_NONCE%', nonce)
             return io.BytesIO(body.encode('utf-8'))
@@ -69,10 +76,16 @@ class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     import io
     Handler = CSPRequestHandler
+    # Allow quick restarts on the same port
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Serving on port {PORT} with header-based CSP and per-request nonce")
+        logging.info(f"Serving on port {PORT} with header-based CSP and per-request nonce")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print('\nShutting down')
+            logging.info('Shutting down (KeyboardInterrupt)')
+            httpd.server_close()
+        except Exception as e:
+            logging.info('Server crashed with exception:')
+            traceback.print_exc()
             httpd.server_close()
