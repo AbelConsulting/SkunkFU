@@ -463,6 +463,73 @@ updateMobileUI();
     `;
     document.body.insertAdjacentHTML('beforeend', html);
 })();
+
+/* --- DEBUG OVERLAY (toggle with 'd') --- */
+(function() {
+    const css = `
+    #debug-overlay { position: fixed; right: 12px; top: 12px; background: rgba(0,0,0,0.7); color: #0f0; font-family: monospace; font-size:12px; padding:8px 10px; border-radius:6px; z-index:9999; display:none; pointer-events:none; max-width:260px; }
+    #debug-overlay b { color: #fff; }
+    `;
+    const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
+
+    const overlay = document.createElement('div');
+    overlay.id = 'debug-overlay';
+    overlay.innerHTML = '<div><b>Debug</b></div><div id="dbg-info"></div>';
+    document.body.appendChild(overlay);
+
+    const info = overlay.querySelector('#dbg-info');
+    const canvas = document.getElementById('game-canvas');
+    function fmt(n) { return (n===undefined || n===null) ? '-' : n; }
+
+    function readSafe(name) {
+        const v = getComputedStyle(document.documentElement).getPropertyValue('--safe-' + name) || '0px';
+        return parseFloat(v) || 0;
+    }
+
+    let rafId = null;
+    function render() {
+        const cs = getComputedStyle(canvas);
+        const cssW = cs.width;
+        const cssH = cs.height;
+        const intW = canvas.width;
+        const intH = canvas.height;
+        const dpr = window.devicePixelRatio || 1;
+        const safeTop = readSafe('top');
+        const safeBottom = readSafe('bottom');
+        const safeLeft = readSafe('left');
+        const safeRight = readSafe('right');
+
+        info.innerHTML = `CSS: ${cssW} × ${cssH}<br>Internal: ${intW} × ${intH}<br>DPR: ${dpr}<br>SafeInsets: top ${safeTop}px bottom ${safeBottom}px left ${safeLeft}px right ${safeRight}px`;
+        rafId = requestAnimationFrame(render);
+    }
+
+    function show() {
+        overlay.style.display = 'block';
+        if (!rafId) render();
+    }
+    function hide() {
+        overlay.style.display = 'none';
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    }
+
+    // toggle with `d`
+    window.addEventListener('keydown', (e) => {
+        if (e.key && e.key.toLowerCase() === 'd') {
+            if (overlay.style.display === 'none' || overlay.style.display === '') show(); else hide();
+        }
+    });
+
+    // Update overlay after debounced UI updates
+    const deb = debounce(() => {
+        if (overlay.style.display !== 'none') {
+            // force one immediate re-render
+            if (rafId) cancelAnimationFrame(rafId);
+            render();
+        }
+    }, 200);
+    window.addEventListener('resize', deb);
+    window.addEventListener('orientationchange', deb);
+})();
 </script>
 </body>
 </html>
