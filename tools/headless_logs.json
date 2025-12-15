@@ -1,0 +1,29 @@
+{
+  "logs": [
+    {
+      "type": "log",
+      "text": "game.js loaded"
+    },
+    {
+      "type": "log",
+      "text": "Game class defined"
+    },
+    {
+      "type": "log",
+      "text": "AudioManager: Loading audio assets..."
+    },
+    {
+      "type": "log",
+      "text": "AudioManager: Initializing audio context..."
+    },
+    {
+      "type": "log",
+      "text": "AudioManager: All audio assets loaded."
+    },
+    {
+      "type": "log",
+      "text": "AudioManager: Audio context resumed."
+    }
+  ],
+  "fps": 60
+}
