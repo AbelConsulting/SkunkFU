@@ -12,6 +12,7 @@ class GameApp {
         this.game = null;
         this.audioManager = null;
         this.lastTime = 0;
+        this.lastRenderTime = 0;
         this.running = false;
         this._accumulator = 0;
 
@@ -127,18 +128,23 @@ class GameApp {
             const debouncedAdjust = this.debounce(() => this.adjustCanvasForMobile(), 150);
             window.addEventListener('resize', debouncedAdjust);
 
-            // Create on-screen touch UI if available
+            // Create on-screen touch UI if available. Don't instantiate the
+            // TouchControls class if there's already a declared `#touch-controls`
+            // element (index.html may have inserted a static one to avoid race
+            // conditions during load). This prevents duplicate elements and
+            // broken event wiring on mobile.
             try {
-                if (this.isMobile && window.TouchControls) {
+                if (this.isMobile && window.TouchControls && !document.getElementById('touch-controls')) {
                     this.touchControls = new TouchControls({ enabled: true, sensitivity: Config.TOUCH_UI.sensitivity });
-                    // Apply sensitivity changes globally
-                    window.addEventListener('touchSensitivityChanged', (e) => {
-                        const s = e.detail && e.detail.sensitivity ? e.detail.sensitivity : 1.0;
-                        Config.TOUCH_UI.sensitivity = s;
-                        // let player code adapt if needed via event
-                        window.dispatchEvent(new CustomEvent('globalTouchSensitivity', { detail: { sensitivity: s } }));
-                    });
                 }
+
+                // Apply sensitivity changes globally when available
+                window.addEventListener('touchSensitivityChanged', (e) => {
+                    const s = e.detail && e.detail.sensitivity ? e.detail.sensitivity : 1.0;
+                    Config.TOUCH_UI.sensitivity = s;
+                    // let player code adapt if needed via event
+                    window.dispatchEvent(new CustomEvent('globalTouchSensitivity', { detail: { sensitivity: s } }));
+                });
             } catch (e) {
                 if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('TouchControls init failed', e);
             }
@@ -243,8 +249,18 @@ class GameApp {
             steps++;
         }
 
-        // Render once with the current state
-        if (this.game) this.game.render();
+        // Render once with the current state. Throttle renders on mobile to
+        // reduce CPU/GPU load (keep updates running at fixed-step so
+        // gameplay remains deterministic).
+        if (this.game) {
+            const now = currentTime; // ms
+            const renderFps = (this.isMobile) ? Math.min(30, Config.FPS || 30) : (Config.FPS || 60);
+            const minRenderDt = 1000 / renderFps; // ms
+            if (!this.lastRenderTime || (now - this.lastRenderTime) >= minRenderDt) {
+                this.game.render();
+                this.lastRenderTime = now;
+            }
+        }
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
