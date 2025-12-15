@@ -237,6 +237,15 @@ function triggerKeyEvent(key, type) {
     window.dispatchEvent(event);
 }
 
+// Debounce helper for global UI handlers
+function debounce(func, wait = 150) {
+    let timeout = null;
+    return function(...args) {
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 // --- CONTROLS LOGIC ---
 function initTouchControls() {
     if (!isMobile()) return;
@@ -397,9 +406,10 @@ function updateMobileUI() {
     }
 }
 
-window.addEventListener('orientationchange', updateMobileUI);
-window.addEventListener('resize', updateMobileUI);
-// run once on load
+const debouncedUpdateMobileUI = debounce(updateMobileUI, 180);
+window.addEventListener('orientationchange', debouncedUpdateMobileUI);
+window.addEventListener('resize', debouncedUpdateMobileUI);
+// run once on load (use non-debounced immediate call so layout is correct)
 updateMobileUI();
 
 // --- RUNTIME ERROR CAPTURE ---
