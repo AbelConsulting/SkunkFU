@@ -48,6 +48,7 @@ class Game {
 
         // Camera
         this.cameraX = 0;
+        this.cameraY = 0;
 
         // Input handling
         this._touchKeys = new Set();
@@ -220,6 +221,16 @@ class Game {
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
+
+            // Place player on the floor on start/restart as well
+            if (this.level.platforms && this.level.platforms.length > 0) {
+                const floor = this.level.platforms.reduce((a, b) => (b.y > a.y ? b : a), this.level.platforms[0]);
+                this.player.x = Math.max(floor.x + 20, Math.min(this.player.x, floor.x + floor.width - this.player.width - 20));
+                this.player.y = floor.y - this.player.height - 1;
+            } else {
+                this.player.x = 100;
+                this.player.y = this.height - this.player.height - 1;
+            }
         
                 // Ensure gameplay music is loaded (deferred for mobile performance)
                 if (this.audioManager && !this.audioManager.musicElements['gameplay']) {
@@ -344,6 +355,11 @@ class Game {
         
         // Clamp camera to level bounds
         this.cameraX = Utils.clamp(this.cameraX, 0, Math.max(0, this.level.width - this.width));
+
+        // Vertical camera follow to keep player in view on short mobile viewports
+        const targetCameraY = this.player.y - this.height * 0.45;
+        this.cameraY = Utils.lerp(this.cameraY, targetCameraY, 0.1);
+        this.cameraY = Utils.clamp(this.cameraY, 0, Math.max(0, this.level.height - this.height));
     }
 
     render() {
@@ -367,13 +383,13 @@ class Game {
         }
 
         // Render game world (level, player, enemies) using logical coordinates
-        this.level.draw(this.ctx, this.cameraX);
-        this.player.draw(this.ctx, this.cameraX);
-        this.enemyManager.draw(this.ctx, this.cameraX);
+        this.level.draw(this.ctx, this.cameraX, this.cameraY);
+        this.player.draw(this.ctx, this.cameraX, this.cameraY);
+        this.enemyManager.draw(this.ctx, this.cameraX, this.cameraY);
 
         // Render visual effects
         this.ctx.save();
-        this.ctx.translate(-this.cameraX, 0);
+        this.ctx.translate(-this.cameraX, -this.cameraY);
         for (const dn of this.damageNumbers) {
             dn.draw(this.ctx);
         }
