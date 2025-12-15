@@ -65,12 +65,16 @@ class GameApp {
         // excludes the area covered by UI controls.
         const effectiveCssHeight = Math.max(1, cssHeight - overlayH);
 
+        // Keep the visual CSS size of the canvas unchanged to avoid
+        // interfering with layout/asset code that expects the normal
+        // CSS dimensions. Only adjust the logical `viewHeight` we pass
+        // into the game so camera/clamping avoids the overlay area.
         this.canvas.style.width = cssWidth + 'px';
-        this.canvas.style.height = effectiveCssHeight + 'px';
+        this.canvas.style.height = cssHeight + 'px';
 
         // Set internal pixel buffer according to CSS size and capped DPR
         this.canvas.width = Math.floor(cssWidth * pixelScale);
-        this.canvas.height = Math.floor(effectiveCssHeight * pixelScale);
+        this.canvas.height = Math.floor(cssHeight * pixelScale);
 
         const ctx = this.canvas.getContext('2d');
         if (ctx) ctx.imageSmoothingEnabled = false;
@@ -78,6 +82,10 @@ class GameApp {
         // Inform game about the visible logical viewport so camera clamping
         // can be computed correctly when the canvas is scaled down on mobile.
         if (this.game) {
+            // Keep `viewWidth` equal to the logical CSS width, but set
+            // `viewHeight` to the effective height excluding any
+            // bottom overlay so the camera won't position important
+            // content underneath it.
             this.game.viewWidth = cssWidth;
             this.game.viewHeight = effectiveCssHeight;
         }
