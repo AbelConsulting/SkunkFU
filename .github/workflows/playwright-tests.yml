@@ -1,0 +1,34 @@
+name: Playwright integration tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Playwright
+        run: |
+          npm install -g playwright@latest
+          npx playwright install --with-deps || true
+
+      - name: Start static server
+        run: |
+          nohup python3 -m http.server 8001 &
+          sleep 1
+
+      - name: Run touch controls landscape test
+        run: node tools/touch_controls_landscape_test.js
+
+      - name: Run slow-load pending-start test
+        run: node tools/integration_pending_start_slow_load.js
