@@ -66,6 +66,19 @@ class GameApp {
         // excludes the area covered by UI controls.
         const effectiveCssHeight = Math.max(1, cssHeight - overlayH);
 
+        // Prevent the overlay estimate from shrinking the viewport excessively
+        // on very small mobile screens: cap the overlay height to a fraction
+        // of the available CSS height and enforce a minimum visible fraction
+        // so field-of-view remains usable on phones.
+        const maxOverlayFraction = 0.35; // at most 35% of height
+        const cappedOverlayH = Math.min(overlayH, Math.floor(cssHeight * maxOverlayFraction));
+        const minViewFraction = 0.60; // at least 60% of cssHeight must remain visible
+        const minEffective = Math.floor(cssHeight * minViewFraction);
+        const finalEffectiveCssHeight = Math.max(Math.max(1, cssHeight - cappedOverlayH), minEffective);
+
+        // Log adjustments for diagnostics (non-intrusive)
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('adjustCanvas_mobile_viewClamp', { cssHeight, overlayH, cappedOverlayH, finalEffectiveCssHeight }); } catch (e) {}
+
         // Keep the visual CSS size of the canvas unchanged to avoid
         // interfering with layout/asset code that expects the normal
         // CSS dimensions. Only adjust the logical `viewHeight` we pass
@@ -88,7 +101,7 @@ class GameApp {
             // bottom overlay so the camera won't position important
             // content underneath it.
             this.game.viewWidth = cssWidth;
-            this.game.viewHeight = effectiveCssHeight;
+            this.game.viewHeight = (typeof finalEffectiveCssHeight !== 'undefined') ? finalEffectiveCssHeight : effectiveCssHeight;
         }
     }
 
