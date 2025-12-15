@@ -368,11 +368,14 @@ class Game {
 
     updateCamera() {
         // Smooth camera following
-        const targetCameraX = this.player.x - this.width / 3;
-        this.cameraX = Utils.lerp(this.cameraX, targetCameraX, 0.1);
+        // Use the logical viewport width so horizontal panning works correctly on narrow mobile viewports
+        const horizontalBias = this.isMobile ? 0.28 : (1 / 3);
+        const targetCameraX = this.player.x - (this.viewWidth || this.width) * horizontalBias;
+        const lerpFactorX = this.isMobile ? 0.12 : 0.1;
+        this.cameraX = Utils.lerp(this.cameraX || 0, targetCameraX, lerpFactorX);
         
-        // Clamp camera to level bounds
-        this.cameraX = Utils.clamp(this.cameraX, 0, Math.max(0, this.level.width - this.width));
+        // Clamp camera to level bounds (use viewWidth so camera can move on narrow mobile viewports)
+        this.cameraX = Utils.clamp(this.cameraX, 0, Math.max(0, this.level.width - (this.viewWidth || this.width)));
         // Vertical camera follow to keep player visible on short viewports.
         // Use a slightly smaller bias on mobile so the camera stays lower (more floor visible).
         const verticalBias = this.isMobile ? 0.35 : 0.45;
