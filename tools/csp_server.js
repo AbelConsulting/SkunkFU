@@ -31,7 +31,8 @@ const server = http.createServer((req, res) => {
     fs.readFile(indexPath, 'utf8', (err, data) => {
       if (err) return send404(res);
       const nonce = crypto.randomBytes(16).toString('base64');
-      const csp = `script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com; object-src 'none'; base-uri 'self';`;
+      // Separate rules: allow inline scripts via nonce, allow external script elements from Cloudflare
+      const csp = `script-src 'self' 'nonce-${nonce}'; script-src-elem 'self' https://static.cloudflareinsights.com; object-src 'none'; base-uri 'self';`;
       const body = data.replace(/%CSP_NONCE%/g, nonce);
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': csp });
       res.end(body);

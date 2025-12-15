@@ -24,8 +24,10 @@ class CSPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # If serving index, generate nonce and set CSP header
         if self.path == '/' or self.path == '/index.html':
             nonce = base64.b64encode(os.urandom(16)).decode('ascii')
+            # Separate rules: inline scripts via nonce; external script elements allowed from Cloudflare
             csp = (
-                "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com; "
+                "script-src 'self' 'nonce-" + nonce + "'; "
+                "script-src-elem 'self' https://static.cloudflareinsights.com; "
                 "object-src 'none'; base-uri 'self';"
             )
             self.send_header('Content-Security-Policy', csp)
