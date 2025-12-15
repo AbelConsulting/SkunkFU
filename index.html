@@ -405,7 +405,10 @@ function initTouchControls() {
         } catch (e) {
             if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('TouchControls init failed', e);
         }
-        return;
+        // If TouchControls created the DOM element, we're done. Otherwise fall through
+        // to the static HTML fallback (useful in headless/test environments where
+        // touch detection may report no native touch support).
+        if (document.getElementById('touch-controls')) return;
     }
     // Otherwise bind handlers to existing DOM buttons (static HTML fallback)
 
