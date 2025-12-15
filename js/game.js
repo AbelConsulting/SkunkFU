@@ -113,6 +113,15 @@ class Game {
                     if (down) this.player.handleInput('keyx', true);
                     else this.player.handleInput('keyx', false);
                 }
+                else if (action === 'restart') {
+                    if (down && this.state === 'GAME_OVER') {
+                        // Restart the game
+                        this.startGame();
+                        // Hide any overlays if present
+                        const overlay = document.getElementById('mobile-restart-overlay');
+                        if (overlay) overlay.style.display = 'none';
+                    }
+                }
             });
 
             // Key up handler

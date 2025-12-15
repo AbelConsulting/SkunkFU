@@ -40,6 +40,15 @@ class GameApp {
         if (ctx) ctx.imageSmoothingEnabled = false;
     }
 
+    // Simple debounce helper used for resize/orientation handlers
+    debounce(func, wait = 150) {
+        let timeout = null;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     async init() {
         try {
             // Load all assets
@@ -60,9 +69,10 @@ class GameApp {
             // Create game instance (pass mobile flag)
             this.game = new Game(this.canvas, this.audioManager, this.isMobile);
 
-            // Mobile-friendly adjustments
+            // Mobile-friendly adjustments (debounced resize)
             this.adjustCanvasForMobile();
-            window.addEventListener('resize', () => this.adjustCanvasForMobile());
+            const debouncedAdjust = this.debounce(() => this.adjustCanvasForMobile(), 150);
+            window.addEventListener('resize', debouncedAdjust);
 
             // Create on-screen touch UI if available
             try {
@@ -92,8 +102,9 @@ class GameApp {
                     }
                 }
             });
-            // Mark game as ready for UI layers (mobile start, restart, etc.)
+            // Mark game as ready for UI layers (mobile start, restart, etc.) and notify listeners
             window.gameReady = true;
+            window.dispatchEvent(new Event('gameReady'));
 
             // Start game loop
             this.running = true;
@@ -193,5 +204,5 @@ class GameApp {
 // Start the game when DOM is loaded
 window.addEventListener('DOMContentLoaded', () => {
     const gameApp = new GameApp();
-    window.gameReady = true; // Flag for mobile start button
+    // `gameReady` will be dispatched by GameApp when initialization completes
 });

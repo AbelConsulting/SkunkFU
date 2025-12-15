@@ -169,9 +169,7 @@
             </div>
         </div>
 
-        <div id="mobile-restart-overlay" style="display:none;">
-            <button id="mobile-restart-btn">Tap to Restart</button>
-        </div>
+        <!-- legacy mobile restart overlay removed; on-screen touch controls provide restart -->
     </div>
 
     <script src="js/config.js"></script>
@@ -194,13 +192,47 @@ function isMobile() {
 }
 
 function triggerKeyEvent(key, type) {
-    const event = new KeyboardEvent(type, { key: key, code: key });
+    // Normalize synthetic KeyboardEvent to provide both `key` and standard `code`.
+    // Accept calls like triggerKeyEvent('ArrowLeft','keydown') or triggerKeyEvent('x','keydown').
+    let k = key;
+    let code = undefined;
+
+    if (typeof key === 'string') {
+        const lower = key.toLowerCase();
+        if (lower === ' ' || lower === 'space' || lower === 'spacebar') {
+            k = ' ';
+            code = 'Space';
+        } else if (/^arrow(left|right|up|down)$/i.test(key)) {
+            // Arrow keys passed as 'ArrowLeft' etc.
+            code = key;
+            k = key;
+        } else if (lower === 'enter') {
+            k = 'Enter';
+            code = 'Enter';
+        } else if (lower === 'escape' || lower === 'esc') {
+            k = 'Escape';
+            code = 'Escape';
+        } else if (lower === 'x') {
+            k = 'x';
+            code = 'KeyX';
+        } else if (lower === 'z') {
+            k = 'z';
+            code = 'KeyZ';
+        } else {
+            // Default: use provided string for both fields
+            code = key;
+        }
+    }
+
+    const event = new KeyboardEvent(type, { key: k, code: code, bubbles: true, cancelable: true });
     window.dispatchEvent(event);
 }
 
 // --- CONTROLS LOGIC ---
 function initTouchControls() {
     if (!isMobile()) return;
+    // If new TouchControls module exists, it will create controls and handle wiring.
+    if (window.TouchControls) return;
 
     const setupBtn = (id, key) => {
         const btn = document.getElementById(id);
@@ -256,7 +288,6 @@ function initTouchControls() {
 const mobileStartOverlay = document.getElementById('mobile-start-overlay');
 const mobileStartBtn = document.getElementById('mobile-start-btn');
 const mobileRestartOverlay = document.getElementById('mobile-restart-overlay');
-const mobileRestartBtn = document.getElementById('mobile-restart-btn');
 
 function showMobileStartOverlay() {
     if (mobileStartOverlay) mobileStartOverlay.style.display = 'flex';
@@ -285,21 +316,36 @@ function requestFullscreen() {
 
 if (isMobile() && mobileStartBtn) {
     showMobileStartOverlay();
+    const startHandler = (e) => {
+        try { e && e.preventDefault(); } catch (_) {}
 
-    mobileStartBtn.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        
-        if (!window.gameReady) return; // Wait for game to load
-        
-        // 1. Enter Fullscreen
-        requestFullscreen();
+        const proceed = () => {
+            // Enter Fullscreen and start the game in the same user gesture
+            requestFullscreen();
+            triggerKeyEvent('Enter', 'keydown');
+            setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
+            hideMobileStartOverlay();
+        };
 
-        // 2. Start Game Logic
-        triggerKeyEvent('Enter', 'keydown');
-        setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100); // Small delay ensures game registers input
-        
-        hideMobileStartOverlay();
-    });
+        if (window.gameReady) {
+            proceed();
+        } else {
+            // Indicate loading and wait for the gameReady event
+            mobileStartBtn.disabled = true;
+            const prevText = mobileStartBtn.textContent;
+            mobileStartBtn.textContent = 'Loading...';
+            const onReady = () => {
+                mobileStartBtn.disabled = false;
+                mobileStartBtn.textContent = prevText;
+                window.removeEventListener('gameReady', onReady);
+                proceed();
+            };
+            window.addEventListener('gameReady', onReady);
+        }
+    };
+
+    mobileStartBtn.addEventListener('pointerup', startHandler, { passive: false });
+    mobileStartBtn.addEventListener('click', (e) => startHandler(e));
 
     // Re-show overlay if game goes back to Menu
     window.addEventListener('gameStateChange', function(e) {
@@ -346,29 +392,6 @@ window.addEventListener('orientationchange', updateMobileUI);
 window.addEventListener('resize', updateMobileUI);
 // run once on load
 updateMobileUI();
-
-if (isMobile() && mobileRestartBtn) {
-    mobileRestartBtn.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        
-        if (!window.gameReady) return; // Wait for game to load
-        
-        // Restart Game Logic
-        triggerKeyEvent('Enter', 'keydown');
-        setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
-        
-        hideMobileRestartOverlay();
-    });
-
-    // Show restart overlay on game over
-    window.addEventListener('gameStateChange', function(e) {
-        if (e.detail && e.detail.state === 'GAME_OVER') {
-            showMobileRestartOverlay();
-        } else {
-            hideMobileRestartOverlay();
-        }
-    });
-}
 
 // --- RUNTIME ERROR CAPTURE ---
 (function () {

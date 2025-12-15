@@ -48,6 +48,22 @@
             rightGroup.appendChild(jumpBtn);
             rightGroup.appendChild(attackBtn);
 
+            // Restart button (hidden by default, shown on game over)
+            const restartBtn = this._createButton('Restart', 'restart-btn');
+            restartBtn.style.position = 'absolute';
+            restartBtn.style.left = '50%';
+            restartBtn.style.bottom = '12px';
+            restartBtn.style.transform = 'translateX(-50%)';
+            restartBtn.style.display = 'none';
+            restartBtn.style.width = '160px';
+            restartBtn.style.height = '56px';
+            restartBtn.style.fontSize = '18px';
+            restartBtn.style.borderRadius = '8px';
+            restartBtn.style.background = 'rgba(255,80,80,0.9)';
+            restartBtn.style.pointerEvents = 'auto';
+
+            container.appendChild(restartBtn);
+
             // Small settings control
             const settings = document.createElement('div');
             settings.style.position = 'absolute';
@@ -91,6 +107,18 @@
             this._bindButton(rightBtn, 'right');
             this._bindButton(jumpBtn, 'jump');
             this._bindButton(attackBtn, 'attack');
+            this._bindButton(restartBtn, 'restart');
+
+            // Show/hide restart button on game state changes
+            window.addEventListener('gameStateChange', (e) => {
+                if (!e || !e.detail) return;
+                const st = e.detail.state;
+                if (st === 'GAME_OVER') {
+                    restartBtn.style.display = 'block';
+                } else {
+                    restartBtn.style.display = 'none';
+                }
+            });
         }
 
         _createButton(text, cls){
