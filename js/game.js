@@ -36,15 +36,16 @@ class Game {
         this.level = new Level(this.width, this.height);
         // Keep a flag so Level can reduce visual complexity on mobile
         this.level.useMobileOptimizations = this.isMobile;
-        // Default level data with platforms
+        // Default level data with platforms (make world wider than viewport so horizontal panning is possible)
+        const worldWidth = Math.max(this.width * 2, 1920);
         const levelData = {
-            width: this.width,
+            width: worldWidth,
             height: this.height,
             platforms: [
                 { x: 100, y: 600, width: 400, height: 32, type: 'static' },
                 { x: 600, y: 500, width: 200, height: 32, type: 'static' },
                 { x: 900, y: 400, width: 250, height: 32, type: 'static' },
-                { x: 0, y: 700, width: 1280, height: 40, type: 'static' }
+                { x: 0, y: 700, width: worldWidth, height: 40, type: 'static' }
             ]
         };
         this.level.loadLevel(levelData);
@@ -387,6 +388,11 @@ class Game {
         const nearFloorThreshold = 32;
         if (this.player.y + this.player.height >= this.level.height - nearFloorThreshold) {
             this.cameraY = Math.max(this.cameraY, Math.max(0, this.level.height - this.viewHeight));
+        }
+        // Log first computed cameraX for diagnostics
+        if (!this._loggedCameraX && this.state === 'PLAYING') {
+            this._loggedCameraX = true;
+            console.log('CameraX diagnostic', { cameraX: this.cameraX, targetCameraX, viewWidth: this.viewWidth, levelWidth: this.level.width });
         }
         // Log first computed cameraY for diagnostics
         if (!this._loggedCameraY && this.state === 'PLAYING') {
