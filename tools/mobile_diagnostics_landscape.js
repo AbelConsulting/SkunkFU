@@ -5,7 +5,7 @@ const { chromium, devices } = require('playwright');
   const context = await browser.newContext({ ...device, viewport: { width: 844, height: 390 } });
   const page = await context.newPage();
 
-  await page.goto('http://localhost:8000');
+  await page.goto('http://localhost:8001');
   await page.waitForTimeout(1000);
 
   const info = await page.evaluate(() => {

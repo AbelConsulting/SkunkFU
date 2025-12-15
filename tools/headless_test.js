@@ -14,7 +14,7 @@ const fs = require('fs');
     logs.push({type: 'fps', text: `frames=${frames}`});
   });
 
-  await page.goto('http://localhost:8000');
+  await page.goto('http://localhost:8001');
 
   // Wait for gameReady flag set by main
   await page.waitForFunction('window.gameReady === true', { timeout: 15000 }).catch(() => {});
