@@ -14,7 +14,8 @@ const fs = require('fs');
     logs.push({type: 'fps', text: `frames=${frames}`});
   });
 
-  await page.goto('http://localhost:8001');
+  const SERVER = process.env.TEST_SERVER || 'http://localhost:8001';
+  await page.goto(SERVER);
 
   // Wait for gameReady flag set by main
   await page.waitForFunction('window.gameReady === true', { timeout: 15000 }).catch(() => {});

@@ -10,7 +10,8 @@ const fs = require('fs');
   page.on('console', msg => logs.push({type: msg.type(), text: msg.text()}));
   page.on('pageerror', err => logs.push({type: 'pageerror', text: err.message}));
 
-  await page.goto('http://localhost:8001');
+  const SERVER = process.env.TEST_SERVER || 'http://localhost:8001';
+  await page.goto(SERVER);
 
   // Wait for readiness
   await page.waitForFunction('window.gameReady === true', { timeout: 15000 }).catch(() => {});

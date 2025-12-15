@@ -18,11 +18,11 @@
     },
     {
       "type": "log",
-      "text": "AudioManager: Audio context resumed."
+      "text": "AudioManager: All audio assets loaded."
     },
     {
       "type": "log",
-      "text": "AudioManager: All audio assets loaded."
+      "text": "AudioManager: Audio context resumed."
     }
   ],
   "fps": 60,
