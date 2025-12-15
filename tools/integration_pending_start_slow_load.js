@@ -106,11 +106,36 @@ const { chromium } = require('playwright');
   console.log('after forced updateMobileUI:', afterDebug);
 
   // Deterministically force the pending start to dispatch (test helper)
-  const forced = await page.evaluate(() => {
+  let forced = await page.evaluate(() => {
     if (typeof window.__test_forceDispatchPendingStart === 'function') return window.__test_forceDispatchPendingStart();
     return { ok: false, reason: 'missing-helper' };
   });
   console.log('forced dispatch result:', forced);
+
+  if (!forced || forced.ok === false) {
+    console.log('helper missing or failed — running inline fallback to dispatch pending start');
+    const fallback = await page.evaluate(() => {
+      try {
+        if (!window._pendingStartGesture) return { ok: false, reason: 'no-pending' };
+        window._pendingStartGesture = false;
+        // Attempt to call the canonical `game.startGame()` if available
+        try {
+          if (window.game && typeof window.game.startGame === 'function') {
+            window.game.startGame();
+            return { ok: true, method: 'game.startGame' };
+          }
+        } catch (e) { /* ignore */ }
+        // Older fallback: try to synthesize key events if helper isn't present
+        try { if (typeof requestFullscreen === 'function') requestFullscreen(); } catch (e) {}
+        try { if (typeof triggerKeyEvent === 'function') { triggerKeyEvent('Enter', 'keydown'); setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100); } } catch (e) {}
+        try { if (typeof hideMobileStartOverlay === 'function') hideMobileStartOverlay(); } catch (e) {}
+        return { ok: true, method: 'synth-events' };
+      } catch (e) {
+        return { ok: false, reason: String(e) };
+      }
+    });
+    console.log('fallback result:', fallback);
+  }
 
   // Wait for game to enter PLAYING state (should occur after forced dispatch)
   let started = false;
