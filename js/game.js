@@ -52,30 +52,36 @@ class Game {
 
     
         setupInput() {
+            // Normalize input and use consistent keys (use event.code when available)
+            const normalize = (ev) => {
+                const raw = ev.code || ev.key || '';
+                return String(raw).toLowerCase();
+            };
+
             // Key down handler
             window.addEventListener('keydown', (event) => {
-                const key = event.key;
+                const key = normalize(event);
 
-                // Prevent default for game keys
-                if ([' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) {
+                // Prevent default for primary game keys
+                if (['space', 'arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) {
                     event.preventDefault();
                 }
 
                 // Global controls
-                if (key === 'Escape') {
+                if (key === 'escape') {
                     if (this.state === 'PLAYING') {
                         this.state = 'PAUSED';
-                        this.audioManager.playSound('pause');
-                        this.audioManager.pauseMusic();
+                        this.audioManager.playSound && this.audioManager.playSound('pause');
+                        this.audioManager.pauseMusic && this.audioManager.pauseMusic();
                         this.dispatchGameStateChange();
                     } else if (this.state === 'PAUSED') {
                         this.state = 'PLAYING';
-                        this.audioManager.unpauseMusic();
+                        this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
                         this.dispatchGameStateChange();
                     }
-                } else if (key === 'Enter') {
+                } else if (key === 'enter') {
                     if (this.state === 'MENU' || this.state === 'GAME_OVER') {
-                        this.audioManager.playSound('menu_select');
+                        this.audioManager.playSound && this.audioManager.playSound('menu_select');
                         this.startGame();
                         this.dispatchGameStateChange();
                     }
@@ -87,8 +93,13 @@ class Game {
                 }
             });
 
-                // Key up handler (delegates to existing method)
-                window.addEventListener('keyup', (event) => this.handleKeyUp(event));
+            // Key up handler
+            window.addEventListener('keyup', (event) => {
+                const key = normalize(event);
+                if (this.state === 'PLAYING') {
+                    this.player.handleInput(key, false);
+                }
+            });
             }
 
         // Start or restart the game

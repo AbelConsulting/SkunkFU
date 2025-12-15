@@ -95,14 +95,16 @@ class Player {
     }
 
     handleInput(key, isDown) {
-        this.keys[key] = isDown;
+        // Normalize key (accept both event.code and event.key forms)
+        const k = (key || '').toString().toLowerCase();
+        this.keys[k] = isDown;
 
         if (isDown) {
-            if (key === ' ' || key === 'Spacebar') {
+            if (k === 'space' || k === 'spacebar' || k === ' ') {
                 this.jumpBufferTimer = this.jumpBufferTime;
-            } else if (key === 'x' || key === 'X') {
+            } else if (k === 'keyx' || k === 'x') {
                 this.attack();
-            } else if (key === 'z' || key === 'Z') {
+            } else if (k === 'keyz' || k === 'z') {
                 this.specialAttack();
             }
         }
@@ -227,11 +229,11 @@ class Player {
         // Determine target velocity based on input
         this.targetVelocityX = 0;
         if (this.hitStunTimer <= 0) {
-            if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) {
+            if (this.keys['arrowleft'] || this.keys['a'] || this.keys['keya']) {
                 this.targetVelocityX = -this.speed;
                 if (!this.isAttacking) this.facingRight = false;
             }
-            if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) {
+            if (this.keys['arrowright'] || this.keys['d'] || this.keys['keyd']) {
                 this.targetVelocityX = this.speed;
                 if (!this.isAttacking) this.facingRight = true;
             }

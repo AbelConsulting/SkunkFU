@@ -13,6 +13,7 @@ class GameApp {
         this.audioManager = null;
         this.lastTime = 0;
         this.running = false;
+        this._accumulator = 0;
 
         this.init();
     }
@@ -141,21 +142,20 @@ class GameApp {
         const rawDt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        // Accumulate and step once per frame interval
-        this._accumulator = (this._accumulator || 0) + rawDt;
-        if (this._accumulator < step) {
-            requestAnimationFrame((time) => this.gameLoop(time));
-            return;
+        // Accumulate time and run fixed-step updates. Render once per RAF.
+        this._accumulator += rawDt;
+
+        // Prevent spiral of death by capping steps per frame
+        const maxSteps = 5;
+        let steps = 0;
+        while (this._accumulator >= step && steps < maxSteps) {
+            if (this.game) this.game.update(step);
+            this._accumulator -= step;
+            steps++;
         }
 
-        const dt = Math.min(this._accumulator, 0.1);
-        this._accumulator = 0;
-
-        // Update and render
-        if (this.game) {
-            this.game.update(dt);
-            this.game.render();
-        }
+        // Render once with the current state
+        if (this.game) this.game.render();
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
