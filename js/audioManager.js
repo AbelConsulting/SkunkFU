@@ -127,6 +127,21 @@ class AudioManager {
         }
     }
 
+    pauseMusic() {
+        if (this.currentMusic && !this.currentMusic.paused) {
+            this.currentMusic.pause();
+        }
+    }
+
+    unpauseMusic() {
+        if (this.currentMusic && this.currentMusic.paused) {
+            const playPromise = this.currentMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.warn('Auto-play blocked when unpausing music:', e));
+            }
+        }
+    }
+
     toggleMute() {
         this.soundEnabled = !this.soundEnabled;
         this.musicEnabled = !this.musicEnabled;
