@@ -522,6 +522,45 @@ if (isMobile() && mobileStartBtn) {
         try { e && e.preventDefault(); } catch (_) {}
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStartPressed', {}); } catch (e) {}
 
+        // If device is not in landscape, store a pending start and prompt the user to rotate
+        if (!isLandscape()) {
+            try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStart_pending_rotate', {}); } catch (e) {}
+            window._pendingStartGesture = true;
+            if (mobileStartBtn) {
+                mobileStartBtn._prevText = mobileStartBtn.textContent;
+                mobileStartBtn.textContent = 'Rotate to play';
+                mobileStartBtn.disabled = true;
+            }
+            const rotate = document.getElementById('rotate-message');
+            if (rotate) rotate.style.display = 'flex';
+
+            // If the game isn't ready yet, listen for gameReady and attempt to dispatch
+            // the pending start automatically once ready and we're in a good orientation.
+            if (!window.gameReady) {
+                const onReadyPending = () => {
+                    try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStart_pending_ready', {}); } catch (e) {}
+                    window.removeEventListener('gameReady', onReadyPending);
+                    // Only dispatch now if landscape and still in MENU
+                    if (isLandscape() && window.game && window.game.state === 'MENU') {
+                        try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStart_pending_autoDispatch_onReady', {}); } catch (e) {}
+                        window._pendingStartGesture = false;
+                        if (mobileStartBtn) {
+                            mobileStartBtn.disabled = false;
+                            mobileStartBtn.textContent = mobileStartBtn._prevText || mobileStartBtn.textContent;
+                            delete mobileStartBtn._prevText;
+                        }
+                        requestFullscreen();
+                        triggerKeyEvent('Enter', 'keydown');
+                        setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
+                        hideMobileStartOverlay();
+                    }
+                };
+                window.addEventListener('gameReady', onReadyPending);
+            }
+
+            return;
+        }
+
         const proceed = () => {
             // Enter Fullscreen and start the game in the same user gesture
             requestFullscreen();
@@ -700,6 +739,23 @@ function updateMobileUI() {
         // Only show start overlay when game is in MENU and ready
         if (window.gameReady && window.game && window.game.state === 'MENU') {
             showMobileStartOverlay();
+        }
+
+        // If a start gesture was requested while in portrait, and we are now
+        // landscape + menu + ready, dispatch that pending gesture automatically.
+        if (window._pendingStartGesture && window.gameReady && window.game && window.game.state === 'MENU') {
+            try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStart_pending_dispatch', {}); } catch (e) {}
+            window._pendingStartGesture = false;
+            if (mobileStartBtn) {
+                mobileStartBtn.disabled = false;
+                mobileStartBtn.textContent = mobileStartBtn._prevText || mobileStartBtn.textContent;
+                delete mobileStartBtn._prevText;
+            }
+            // Simulate the proceed flow (important to be done in a user-gesture context ideally)
+            requestFullscreen();
+            triggerKeyEvent('Enter', 'keydown');
+            setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
+            hideMobileStartOverlay();
         }
         const tc = document.getElementById('touch-controls');
         // Ensure controls exist and have listeners. Only hide them if the game is NOT playing.
