@@ -91,6 +91,36 @@ class Game {
                 window.addEventListener('keyup', (event) => this.handleKeyUp(event));
             }
 
+        // Start or restart the game
+        startGame() {
+            console.log('Game.startGame() called');
+            this.state = 'PLAYING';
+            this.score = 0;
+            this.lives = 3;
+            if (this.player && typeof this.player.reset === 'function') this.player.reset();
+            if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
+            this.damageNumbers = [];
+            this.hitSparks = [];
+            if (this.audioManager) this.audioManager.playMusic && this.audioManager.playMusic('gameplay', true);
+            this.dispatchGameStateChange();
+        }
+
+        // Key up handler
+        handleKeyUp(event) {
+            // console debug for input handling
+            // console.log('handleKeyUp', event.key);
+            const key = event.key;
+            if (this.state === 'PLAYING') {
+                this.player.handleInput(key, false);
+            }
+        }
+
+        // Notify UI layers about state change
+        dispatchGameStateChange() {
+            const event = new CustomEvent('gameStateChange', { detail: { state: this.state } });
+            window.dispatchEvent(event);
+        }
+
         update(dt) {
             if (this.state !== "PLAYING") {
                 return;
