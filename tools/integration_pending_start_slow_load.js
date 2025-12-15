@@ -105,6 +105,14 @@ const { chromium } = require('playwright');
   const afterDebug = await page.evaluate(() => ({ landscape: (typeof isLandscape === 'function' ? isLandscape() : null), innerW: window.innerWidth, innerH: window.innerHeight, pending: !!window._pendingStartGesture, gameReady: !!window.gameReady, state: window.game && window.game.state }));
   console.log('after forced updateMobileUI:', afterDebug);
 
+  // Wait for the game to be ready (delayed by test) before attempting to dispatch.
+  try {
+    await page.waitForFunction('window.gameReady === true', { timeout: 8000 });
+    console.log('detected gameReady, now invoking helper');
+  } catch (e) {
+    console.log('gameReady did not become true within timeout, proceeding to attempt dispatch anyway');
+  }
+
   // Deterministically force the pending start to dispatch (test helper)
   let forced = await page.evaluate(() => {
     if (typeof window.__test_forceDispatchPendingStart === 'function') return window.__test_forceDispatchPendingStart();
@@ -113,12 +121,12 @@ const { chromium } = require('playwright');
   console.log('forced dispatch result:', forced);
 
   if (!forced || forced.ok === false) {
-    console.log('helper missing or failed — running inline fallback to dispatch pending start');
+    console.log('helper missing or failed — running inline fallback to dispatch pending start (attempting game.startGame)');
     const fallback = await page.evaluate(() => {
       try {
         if (!window._pendingStartGesture) return { ok: false, reason: 'no-pending' };
         window._pendingStartGesture = false;
-        // Attempt to call the canonical `game.startGame()` if available
+        // Attempt to call the canonical `game.startGame()` if available (should exist once gameReady)
         try {
           if (window.game && typeof window.game.startGame === 'function') {
             window.game.startGame();
