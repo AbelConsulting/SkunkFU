@@ -204,17 +204,21 @@ function initTouchControls() {
 
         btn.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
 
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+        const downHandler = (e) => {
+            try { e && e.preventDefault(); } catch (_) {}
             triggerKeyEvent(key, 'keydown');
             if(key === ' ') triggerKeyEvent('ArrowUp', 'keydown');
-        }, { passive: false });
-
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
+        };
+        const upHandler = (e) => {
+            try { e && e.preventDefault(); } catch (_) {}
             triggerKeyEvent(key, 'keyup');
             if(key === ' ') triggerKeyEvent('ArrowUp', 'keyup');
-        }, { passive: false });
+        };
+
+        btn.addEventListener('touchstart', downHandler, { passive: false });
+        btn.addEventListener('touchend', upHandler, { passive: false });
+        btn.addEventListener('pointerdown', downHandler);
+        btn.addEventListener('pointerup', upHandler);
     };
 
     setupBtn('btn-left', 'ArrowLeft');
@@ -395,7 +399,7 @@ if (isMobile() && mobileRestartBtn) {
 /* Re-insert touch controls as a fixed overlay so transforms on #game-container don't affect layout */
 (function() {
     const html = `
-    <div id="touch-controls" style="position:fixed; bottom:20px; left:0; right:0; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 20px;">
+    <div id="touch-controls" style="position:fixed; bottom:20px; left:0; right:0; transform:none; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:2000; padding:0 20px;">
         <div id="d-pad" class="control-group" style="pointer-events:auto; display:flex; gap:8px;">
             <button class="touch-btn" id="btn-left">&#8592;</button>
             <button class="touch-btn" id="btn-right">&#8594;</button>
