@@ -910,15 +910,26 @@ window.__test_forceDispatchPendingStart = function() {
 
 // Show/hide touch controls based on game state: only visible during PLAYING on mobile landscape
 window.addEventListener('gameStateChange', function(e) {
-    const tc = document.getElementById('touch-controls');
-    if (!tc) return;
-    if (!isMobile()) { tc.style.display = 'none'; tc.style.pointerEvents = 'none'; try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_nonmobile', {}); } catch (e) {} ; return; }
-    if (!isLandscape()) { tc.style.display = 'none'; tc.style.pointerEvents = 'none'; try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_portrait', {}); } catch (e) {} ; return; }
+    // Ensure the controls exist (may be dynamically re-inserted if missing)
+    ensureTouchControlsExists();
+    const tcNow = document.getElementById('touch-controls');
+    if (!tcNow) return;
+
+    // If not mobile / not landscape, ensure controls are hidden
+    if (!isMobile()) {
+        tcNow.style.display = 'none'; tcNow.style.pointerEvents = 'none';
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_nonmobile', {}); } catch (e) {}
+        return;
+    }
+    if (!isLandscape()) {
+        tcNow.style.display = 'none'; tcNow.style.pointerEvents = 'none';
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_portrait', {}); } catch (e) {}
+        return;
+    }
+
     if (e && e.detail && e.detail.state === 'PLAYING') {
-        // Ensure controls exist in DOM and are ready to show
-        ensureTouchControlsExists();
-        const tcNow = document.getElementById('touch-controls');
-        if (tcNow) { tcNow.style.display = 'flex'; tcNow.style.pointerEvents = 'auto'; void tcNow.offsetWidth; tcNow.classList.add('visible'); }
+        // Ensure controls are ready to show
+        tcNow.style.display = 'flex'; tcNow.style.pointerEvents = 'auto'; void tcNow.offsetWidth; tcNow.classList.add('visible');
 
         // show with animation
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_showing', { state: e.detail.state }); } catch (e) {}
