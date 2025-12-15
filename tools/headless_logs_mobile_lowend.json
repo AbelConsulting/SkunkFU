@@ -18,7 +18,7 @@
     },
     {
       "type": "log",
-      "text": "CameraY diagnostic {cameraY: 518, targetCameraY: 537.8407407407408, viewHeight: 202, levelHeight: 720}"
+      "text": "CameraY diagnostic {cameraY: 515.944074074074, targetCameraY: 497.44074074074075, viewHeight: 202, levelHeight: 720}"
     }
   ],
   "fps": 60,
