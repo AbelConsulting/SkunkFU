@@ -92,7 +92,7 @@ class Game {
             }
 
         // Start or restart the game
-        startGame() {
+        async startGame() {
             console.log('Game.startGame() called');
             this.state = 'PLAYING';
             this.score = 0;
@@ -101,7 +101,17 @@ class Game {
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
-            if (this.audioManager) this.audioManager.playMusic && this.audioManager.playMusic('gameplay', true);
+        
+                // Ensure gameplay music is loaded (deferred for mobile performance)
+                if (this.audioManager && !this.audioManager.musicElements['gameplay']) {
+                    try {
+                        await this.audioManager.loadMusic('gameplay', 'assets/audio/music/gameplay.wav');
+                    } catch (e) {
+                        console.warn('Failed to load gameplay music:', e);
+                    }
+                }
+        
+                if (this.audioManager) this.audioManager.playMusic && this.audioManager.playMusic('gameplay', true);
             this.dispatchGameStateChange();
         }
 
