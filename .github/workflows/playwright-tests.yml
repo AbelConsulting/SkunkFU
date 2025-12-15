@@ -36,5 +36,8 @@ jobs:
       - name: Run touch controls concurrent requests test
         run: node tools/touch_controls_concurrent_requests_test.js
 
+      - name: Run touch controls overlapping forced-requests test
+        run: node tools/touch_controls_overlapping_forces_test.js
+
       - name: Run slow-load pending-start test
         run: node tools/integration_pending_start_slow_load.js
