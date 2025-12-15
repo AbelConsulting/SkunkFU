@@ -11,8 +11,13 @@ import pygame
 # Use headless video driver so this can run in CI/without a display
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+# Add repo `src` directory to path (works when running from toolshed or repo root)
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+src_path = os.path.join(repo_root, 'src')
+if not os.path.isdir(src_path):
+    # fallback to parent of repo_root in case this file moved
+    src_path = os.path.join(os.path.dirname(repo_root), 'src')
+sys.path.insert(0, src_path)
 
 from sprite_loader import sprite_loader  # noqa: E402
 

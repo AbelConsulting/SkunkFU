@@ -11,7 +11,7 @@
 			"type": "shell",
 			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe",
 			"args": [
-				"test_sprites.py"
+				"toolshed/test_sprites.py"
 			],
 			"group": {
 				"kind": "test",
