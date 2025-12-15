@@ -42,5 +42,8 @@ jobs:
       - name: Run touch controls presence-on-start test
         run: node tools/touch_controls_present_on_start_test.js
 
+      - name: Run overlay no-overlap test
+        run: node tools/overlay_no_overlap_test.js
+
       - name: Run slow-load pending-start test
         run: node tools/integration_pending_start_slow_load.js
