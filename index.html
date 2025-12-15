@@ -849,6 +849,11 @@ window.addEventListener('gameStateChange', function(e) {
     if (!isMobile()) { tc.style.display = 'none'; tc.style.pointerEvents = 'none'; try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_nonmobile', {}); } catch (e) {} ; return; }
     if (!isLandscape()) { tc.style.display = 'none'; tc.style.pointerEvents = 'none'; try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_portrait', {}); } catch (e) {} ; return; }
     if (e && e.detail && e.detail.state === 'PLAYING') {
+        // Ensure controls exist in DOM and are ready to show
+        ensureTouchControlsExists();
+        const tcNow = document.getElementById('touch-controls');
+        if (tcNow) { tcNow.style.display = 'flex'; tcNow.style.pointerEvents = 'auto'; void tcNow.offsetWidth; tcNow.classList.add('visible'); }
+
         // show with animation
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_showing', { state: e.detail.state }); } catch (e) {}
         showTouchControls(800);
@@ -860,8 +865,10 @@ window.addEventListener('gameStateChange', function(e) {
             const duration = window._forceTouchControls ? 3600000 : (nms || 800);
             const end = Date.now() + duration;
             const tid = setInterval(() => {
-                if (!tc) { clearInterval(tid); return; }
+                const cur = document.getElementById('touch-controls');
+                if (!cur) { clearInterval(tid); return; }
                 try {
+                    cur.style.display = 'flex'; cur.style.pointerEvents = 'auto'; void cur.offsetWidth; cur.classList.add('visible');
                     showTouchControls(window._forceTouchControls ? 3600000 : 800);
                 } catch (e) {}
                 if (Date.now() >= end) clearInterval(tid);
