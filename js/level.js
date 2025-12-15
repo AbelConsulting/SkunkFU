@@ -102,8 +102,9 @@ class Level {
         }
         
         ctx.fillStyle = this.backgroundGradient;
-        // Draw bg relative to camera or fixed? usually fixed or parallax
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
+        // Draw background using logical level dimensions so it matches
+        // the game's coordinate system (avoids mixing device-pixel sizes).
+        ctx.fillRect(0, 0, this.width, this.height);
 
         ctx.save();
         ctx.translate(-cameraX, -cameraY);
