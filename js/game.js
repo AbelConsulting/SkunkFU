@@ -225,7 +225,9 @@ class Game {
             // Place player on the floor on start/restart as well
             if (this.level.platforms && this.level.platforms.length > 0) {
                 const floor = this.level.platforms.reduce((a, b) => (b.y > a.y ? b : a), this.level.platforms[0]);
-                this.player.x = Math.max(floor.x + 20, Math.min(this.player.x, floor.x + floor.width - this.player.width - 20));
+                // Prefer spawning near the horizontal center of the chosen floor platform
+                const spawnX = Math.floor(floor.x + (floor.width - this.player.width) / 2);
+                this.player.x = spawnX;
                 this.player.y = floor.y - this.player.height - 1;
             } else {
                 this.player.x = 100;
