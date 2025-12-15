@@ -465,6 +465,39 @@ function isLandscape() {
     return window.matchMedia && window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
 }
 
+// Helper functions to show/hide touch controls robustly and log attempts.
+window.showTouchControls = function(timeoutMs = 1000) {
+    const tc = document.getElementById('touch-controls');
+    if (!tc) return;
+    try {
+        tc.style.display = 'flex';
+        tc.style.pointerEvents = 'auto';
+        tc.classList.add('visible');
+        tc.style.opacity = '1';
+        window._touchControlsLockUntil = Date.now() + (timeoutMs || 1000);
+        logTouchControlEvent('showTouchControls', { lockUntil: window._touchControlsLockUntil });
+    } catch (e) { console.warn('showTouchControls failed', e); }
+};
+
+window.hideTouchControls = function() {
+    const tc = document.getElementById('touch-controls');
+    if (!tc) return;
+    try {
+        if (window._touchControlsLockUntil && Date.now() < window._touchControlsLockUntil) {
+            // Do not hide while lock is active
+            logTouchControlEvent('hideTouchControls_blockedByLock', { until: window._touchControlsLockUntil });
+            return;
+        }
+        tc.classList.remove('visible');
+        tc.style.pointerEvents = 'none';
+        // Ensure display:none after transition or after a short timeout
+        const onEnd = (ev) => { if (ev && ev.target !== tc) return; tc.style.display = 'none'; tc.removeEventListener('transitionend', onEnd); logTouchControlEvent('touchControls_hidden_final', {}); };
+        tc.addEventListener('transitionend', onEnd);
+        setTimeout(() => { try { if (getComputedStyle(tc).display !== 'none') { tc.style.display = 'none'; logTouchControlEvent('touchControls_hidden_timeout', {}); } } catch (e) {} }, 500);
+        logTouchControlEvent('hideTouchControls', {});
+    } catch (e) { console.warn('hideTouchControls failed', e); }
+};
+
 // Monitor touch-controls for unexpected style/class changes (MutationObserver)
 (function(){
     const tc = () => document.getElementById('touch-controls');
@@ -521,15 +554,11 @@ function updateMobileUI() {
             initTouchControls();
             try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_init', { exists: true, isPlaying }); } catch (e) {}
             if (!isPlaying) {
-                tc.style.display = 'none';
-                tc.style.pointerEvents = 'none';
+                hideTouchControls();
                 try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_init_not_playing', {}); } catch (e) {}
             } else {
                 // Ensure controls remain visible when gameplay is active
-                tc.style.display = 'flex';
-                tc.style.pointerEvents = 'auto';
-                void tc.offsetWidth;
-                tc.classList.add('visible');
+                showTouchControls(800);
                 try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_keep_visible', {}); } catch (e) {}
             }
         }
@@ -564,19 +593,7 @@ window.addEventListener('gameStateChange', function(e) {
     if (e && e.detail && e.detail.state === 'PLAYING') {
         // show with animation
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_showing', { state: e.detail.state }); } catch (e) {}
-        if (tc.style.display === 'none' || getComputedStyle(tc).display === 'none') tc.style.display = 'flex';
-        // enable pointer events so buttons are interactive
-        tc.style.pointerEvents = 'auto';
-        // force reflow then add visible class to trigger transition
-        void tc.offsetWidth;
-        tc.classList.add('visible');
-        // guard against other listeners overriding display by re-applying after animation
-        setTimeout(() => {
-            if (getComputedStyle(tc).display !== 'flex') tc.style.display = 'flex';
-            if (!tc.classList.contains('visible')) tc.classList.add('visible');
-            tc.style.pointerEvents = 'auto';
-            try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_shown_after_delay', {}); } catch (e) {}
-        }, 120);
+        showTouchControls(800);
 
         // Re-assert visibility for a short duration to mitigate racing hides triggered by
         // resize/orientation/fullscreen handlers on some devices (e.g., Galaxy S20)
@@ -585,12 +602,15 @@ window.addEventListener('gameStateChange', function(e) {
             const tid = setInterval(() => {
                 if (!tc) { clearInterval(tid); return; }
                 try {
-                    tc.style.display = 'flex'; tc.style.pointerEvents = 'auto'; if (!tc.classList.contains('visible')) tc.classList.add('visible');
+                    showTouchControls(800);
                 } catch (e) {}
                 if (Date.now() >= end) clearInterval(tid);
-            }, 80);
-        })(700);
+            }, 120);
+        })(800);
     } else {
+        try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hiding', { state: e && e.detail && e.detail.state }); } catch (e) {}
+        hideTouchControls();
+    }
         // hide with animation
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hiding', { state: e && e.detail && e.detail.state }); } catch (e) {}
         tc.classList.remove('visible');
