@@ -19,14 +19,14 @@ class GameApp {
     }
 
     adjustCanvasForMobile() {
-        const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isMobileDevice = this.isMobile || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         const dpr = window.devicePixelRatio || 1;
         // Cap devicePixelRatio on mobile to avoid excessive rendering cost
         const maxDPR = isMobileDevice ? 1 : 1.5;
         const finalDpr = Math.min(dpr, maxDPR);
 
-        // Reduce effective resolution slightly on small devices
-        const scaleReduction = isMobileDevice ? 0.85 : 1.0;
+        // Reduce effective resolution more aggressively on small devices
+        const scaleReduction = isMobileDevice ? 0.7 : 1.0;
         const pixelScale = finalDpr * scaleReduction;
 
         // Set internal canvas pixel size lower for mobile to save GPU/CPU
@@ -48,12 +48,37 @@ class GameApp {
             // Hide loading screen
             this.loadingScreen.classList.add('hidden');
 
-            // Create game instance
-            this.game = new Game(this.canvas, this.audioManager);
+            // Detect mobile early and apply mobile-friendly settings
+            const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            this.isMobile = isMobileDevice;
+
+            // Lower target FPS on mobile to save CPU/battery
+            if (isMobileDevice) {
+                Config.FPS = Math.min(Config.FPS || 60, 45);
+            }
+
+            // Create game instance (pass mobile flag)
+            this.game = new Game(this.canvas, this.audioManager, this.isMobile);
 
             // Mobile-friendly adjustments
             this.adjustCanvasForMobile();
             window.addEventListener('resize', () => this.adjustCanvasForMobile());
+
+            // Create on-screen touch UI if available
+            try {
+                if (this.isMobile && window.TouchControls) {
+                    this.touchControls = new TouchControls({ enabled: true, sensitivity: Config.TOUCH_UI.sensitivity });
+                    // Apply sensitivity changes globally
+                    window.addEventListener('touchSensitivityChanged', (e) => {
+                        const s = e.detail && e.detail.sensitivity ? e.detail.sensitivity : 1.0;
+                        Config.TOUCH_UI.sensitivity = s;
+                        // let player code adapt if needed via event
+                        window.dispatchEvent(new CustomEvent('globalTouchSensitivity', { detail: { sensitivity: s } }));
+                    });
+                }
+            } catch (e) {
+                if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('TouchControls init failed', e);
+            }
 
             // Pause the main loop when page hidden to save battery/CPU
             document.addEventListener('visibilitychange', () => {

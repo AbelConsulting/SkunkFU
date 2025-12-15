@@ -44,4 +44,10 @@ const Config = {
         special_ability: "Shadow Strike",
         color: 'rgb(64, 64, 64)' // Dark gray for ninja
     }
+    ,
+    // Touch controls defaults
+    TOUCH_UI: {
+        enabled: true,
+        sensitivity: 1.0 // multiplier for movement responsiveness (1.0 = default)
+    }
 };

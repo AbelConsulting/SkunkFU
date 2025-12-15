@@ -5,11 +5,14 @@
 console.log('game.js loaded');
 
 class Game {
-    constructor(canvas, audioManager) {
+    constructor(canvas, audioManager, isMobile = false) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.width = Config.SCREEN_WIDTH;
         this.height = Config.SCREEN_HEIGHT;
+
+        // Mobile flag (passed from GameApp)
+        this.isMobile = !!isMobile;
 
         // Initialize audio (use provided AudioManager if available)
         this.audioManager = audioManager || new AudioManager();
@@ -47,6 +50,7 @@ class Game {
         this.cameraX = 0;
 
         // Input handling
+        this._touchKeys = new Set();
         this.setupInput();
     }
 
@@ -93,6 +97,24 @@ class Game {
                 }
             });
 
+            // Listen for on-screen touch UI events
+            window.addEventListener('touchcontrol', (ev) => {
+                if (!ev || !ev.detail) return;
+                const { action, down } = ev.detail;
+                // Map actions to expected keys handled by Player
+                if (action === 'left') {
+                    this.player.handleInput('arrowleft', down);
+                } else if (action === 'right') {
+                    this.player.handleInput('arrowright', down);
+                } else if (action === 'jump') {
+                    if (down) this.player.handleInput('space', true);
+                    else this.player.handleInput('space', false);
+                } else if (action === 'attack') {
+                    if (down) this.player.handleInput('keyx', true);
+                    else this.player.handleInput('keyx', false);
+                }
+            });
+
             // Key up handler
             window.addEventListener('keyup', (event) => {
                 const key = normalize(event);
@@ -100,6 +122,83 @@ class Game {
                     this.player.handleInput(key, false);
                 }
             });
+
+            // Touch controls for mobile: simple split-area controls
+            const setTouchKey = (k, down) => {
+                if (down) {
+                    this._touchKeys.add(k);
+                    this.player.handleInput(k, true);
+                } else {
+                    if (this._touchKeys.has(k)) {
+                        this._touchKeys.delete(k);
+                        this.player.handleInput(k, false);
+                    }
+                }
+            };
+
+            const onTouchStart = (ev) => {
+                if (!ev) return;
+                ev.preventDefault();
+                const rect = this.canvas.getBoundingClientRect();
+                const touches = Array.from(ev.touches || []);
+
+                if (touches.length >= 2) {
+                    // Two-finger = attack
+                    setTouchKey('keyx', true);
+                    return;
+                }
+
+                for (const t of touches) {
+                    const x = t.clientX - rect.left;
+                    const w = rect.width;
+                    if (x < w * 0.33) {
+                        setTouchKey('arrowleft', true);
+                    } else if (x > w * 0.66) {
+                        setTouchKey('arrowright', true);
+                    } else {
+                        setTouchKey('space', true); // jump
+                    }
+                }
+            };
+
+            const onTouchMove = (ev) => {
+                if (!ev) return;
+                ev.preventDefault();
+                const rect = this.canvas.getBoundingClientRect();
+                const touches = Array.from(ev.touches || []);
+                // Clear directional touch keys first
+                setTouchKey('arrowleft', false);
+                setTouchKey('arrowright', false);
+                setTouchKey('space', false);
+
+                if (touches.length >= 2) {
+                    setTouchKey('keyx', true);
+                    return;
+                }
+
+                for (const t of touches) {
+                    const x = t.clientX - rect.left;
+                    const w = rect.width;
+                    if (x < w * 0.33) {
+                        setTouchKey('arrowleft', true);
+                    } else if (x > w * 0.66) {
+                        setTouchKey('arrowright', true);
+                    } else {
+                        setTouchKey('space', true);
+                    }
+                }
+            };
+
+            const clearTouchKeys = () => {
+                for (const k of Array.from(this._touchKeys)) {
+                    setTouchKey(k, false);
+                }
+            };
+
+            this.canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+            this.canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+            this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); clearTouchKeys(); }, { passive: false });
+            this.canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); clearTouchKeys(); }, { passive: false });
             }
 
         // Start or restart the game
@@ -183,19 +282,26 @@ class Game {
         if (attackResult.hit) {
             this.score += attackResult.totalDamage * 10;
             
-            // Create visual feedback
+            // Create visual feedback (limit on mobile)
             for (const enemy of this.enemyManager.getEnemies()) {
                 if (this.player.hitEnemies.has(enemy)) {
-                    this.damageNumbers.push(new DamageNumber(
-                        enemy.x + enemy.width / 2,
-                        enemy.y,
-                        Math.floor(attackResult.totalDamage / attackResult.enemiesHit),
-                        this.player.isShadowStriking
-                    ));
-                    this.hitSparks.push(new HitSpark(
-                        enemy.x + enemy.width / 2,
-                        enemy.y + enemy.height / 2
-                    ));
+                    // On mobile, limit damage numbers to reduce overdraw
+                    if (!this.isMobile || this.damageNumbers.length < 2) {
+                        this.damageNumbers.push(new DamageNumber(
+                            enemy.x + enemy.width / 2,
+                            enemy.y,
+                            Math.floor(attackResult.totalDamage / attackResult.enemiesHit),
+                            this.player.isShadowStriking
+                        ));
+                    }
+
+                    // Skip spark particles on mobile
+                    if (!this.isMobile) {
+                        this.hitSparks.push(new HitSpark(
+                            enemy.x + enemy.width / 2,
+                            enemy.y + enemy.height / 2
+                        ));
+                    }
                 }
             }
 
