@@ -229,6 +229,7 @@ class Game {
                 const spawnX = Math.floor(floor.x + (floor.width - this.player.width) / 2);
                 this.player.x = spawnX;
                 this.player.y = floor.y - this.player.height - 1;
+                    console.log('Initial spawn placed on floor at', this.player.x, this.player.y, 'floor:', floor.x, floor.y, floor.width, floor.height);
             } else {
                 this.player.x = 100;
                 this.player.y = this.height - this.player.height - 1;
