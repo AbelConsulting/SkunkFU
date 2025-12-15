@@ -220,6 +220,18 @@ class Game {
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
+            // Place player on the floor so they don't start on small platforms
+            if (this.level.platforms && this.level.platforms.length > 0) {
+                const floor = this.level.platforms.reduce((a, b) => (b.y > a.y ? b : a), this.level.platforms[0]);
+                const spawnX = Math.floor(floor.x + (floor.width - this.player.width) / 2);
+                const spawnPadding = 8; // px above the platform
+                this.player.x = spawnX;
+                this.player.y = floor.y - this.player.height - spawnPadding;
+                console.log('Spawn placed on floor at', this.player.x, this.player.y, 'floor:', floor.x, floor.y, floor.width, floor.height);
+            } else {
+                this.player.x = 100;
+                this.player.y = this.height - this.player.height - 8;
+            }
         
                 // Ensure gameplay music is loaded (deferred for mobile performance)
                 if (this.audioManager && !this.audioManager.musicElements['gameplay']) {

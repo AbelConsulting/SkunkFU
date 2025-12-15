@@ -10,19 +10,11 @@
     },
     {
       "type": "log",
-      "text": "AudioManager: Loading audio assets..."
+      "text": "Game.startGame() called"
     },
     {
       "type": "log",
-      "text": "AudioManager: Initializing audio context..."
-    },
-    {
-      "type": "log",
-      "text": "AudioManager: Audio context resumed."
-    },
-    {
-      "type": "log",
-      "text": "AudioManager: All audio assets loaded."
+      "text": "Spawn placed on floor at 608 628 floor: 0 700 1280 40"
     }
   ],
   "fps": 60,
