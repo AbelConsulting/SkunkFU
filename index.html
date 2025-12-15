@@ -718,6 +718,7 @@ window.hideTouchControls = function() {
 function updateMobileUI() {
     if (!isMobile()) return;
 
+    try { console.log('updateMobileUI invoked', { landscape: isLandscape(), width: window.innerWidth, height: window.innerHeight, pending: !!window._pendingStartGesture, gameReady: !!window.gameReady, state: window.game && window.game.state }); } catch (e) {}
     try { window && window.logTouchControlEvent && window.logTouchControlEvent('updateMobileUI', { landscape: isLandscape(), width: window.innerWidth, height: window.innerHeight }); } catch (e) {}
 
     if (!isLandscape()) {

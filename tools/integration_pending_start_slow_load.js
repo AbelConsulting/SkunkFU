@@ -5,6 +5,8 @@ const { chromium } = require('playwright');
   // Start in portrait to force "rotate to play" flow
   const context = await browser.newContext({viewport:{width:360,height:640}, userAgent: 'Mozilla/5.0 (Linux; Android 9; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0 Mobile Safari/537.36'});
   const page = await context.newPage();
+  page.on('console', msg => console.log('PAGE_CONSOLE:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE_ERROR:', err.message));
 
   // Inject a small hook before the page scripts run to delay spriteLoader.loadAllSprites
   await page.addInitScript(() => {
@@ -98,7 +100,10 @@ const { chromium } = require('playwright');
   await page.evaluate(() => { window.dispatchEvent(new Event('orientationchange')); window.dispatchEvent(new Event('resize')); });
 
   // Force an immediate mobile UI update (debounced handler may not have fired yet in test environment)
-  await page.evaluate(() => { try { if (typeof updateMobileUI === 'function') updateMobileUI(); } catch (e) {} });
+  const uiRun = await page.evaluate(() => { try { if (typeof updateMobileUI === 'function') { updateMobileUI(); return true; } } catch (e) { return String(e); } });
+  console.log('forced updateMobileUI result:', uiRun);
+  const afterDebug = await page.evaluate(() => ({ landscape: isLandscape(), innerW: window.innerWidth, innerH: window.innerHeight, pending: !!window._pendingStartGesture, gameReady: !!window.gameReady, state: window.game && window.game.state }));
+  console.log('after forced updateMobileUI:', afterDebug);
 
   // Wait for game to enter PLAYING state (should occur after delayed sprite load + dispatch)
   let started = false;
