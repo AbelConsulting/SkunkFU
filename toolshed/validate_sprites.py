@@ -161,10 +161,9 @@ def main():
         print("✅ ALL SPRITES ARE VALID AND COMPATIBLE WITH THE GAME!")
         print()
         print("NEXT STEPS:")
-        print("1. Implement sprite loading system in the game code")
-        print("2. Create animation manager for frame-based animations")
-        print("3. Update player.py and enemy.py to render sprites instead of rectangles")
-        print("4. (Optional) Optimize PNG file sizes for faster loading")
+        print("1. (Optional) Run toolshed/generate_backgrounds.py to create placeholder backgrounds if needed")
+        print("2. (Optional) Use toolshed/optimize_sprites.py to reduce PNG sizes (creates .opt.png files by default)")
+        print("3. Replace placeholder backgrounds with final art when available")
         return_code = 0
     else:
         print("⚠️  SOME SPRITES ARE MISSING OR INVALID")
