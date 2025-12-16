@@ -1,4 +1,4 @@
-side tr/**
+/**
  * Game class - Main game controller
  */
 
@@ -56,6 +56,16 @@ class Game {
         this.cameraX = 0;
         this.cameraY = 0;
 
+        // Expose a minimal pan helper for debugging/manual pan
+        if (typeof window !== 'undefined') {
+            try {
+                window.gamePan = (dx) => { this.panCamera(dx); };
+                window.toggleGamePause = () => { try { this.togglePause(); } catch (e) {} };
+            } catch (e) {
+                // ignore strict contexts
+            }
+        }
+
         // Input handling
         this._touchKeys = new Set();
         this.setupInput();
@@ -79,18 +89,9 @@ class Game {
                 }
 
                 // Global controls
-                if (key === 'escape') {
-                    if (this.state === 'PLAYING') {
-                        this.state = 'PAUSED';
-                        this.audioManager.playSound && this.audioManager.playSound('pause');
-                        this.audioManager.pauseMusic && this.audioManager.pauseMusic();
-                        this.dispatchGameStateChange();
-                    } else if (this.state === 'PAUSED') {
-                        this.state = 'PLAYING';
-                        this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
-                        this.dispatchGameStateChange();
-                    }
-                } else if (key === 'enter') {
+                    if (key === 'escape') {
+                        this.togglePause();
+                    } else if (key === 'enter') {
                     if (this.state === 'MENU' || this.state === 'GAME_OVER') {
                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
                         this.startGame();
@@ -119,6 +120,9 @@ class Game {
                 } else if (action === 'attack') {
                     if (down) this.player.handleInput('keyx', true);
                     else this.player.handleInput('keyx', false);
+                } else if (action === 'pause') {
+                    // Toggle pause on button down (single press)
+                    if (down) this.togglePause();
                 }
                 else if (action === 'restart') {
                     if (down && this.state === 'GAME_OVER') {
@@ -280,6 +284,19 @@ class Game {
             window.dispatchEvent(event);
         }
 
+        togglePause() {
+            if (this.state === 'PLAYING') {
+                this.state = 'PAUSED';
+                this.audioManager.playSound && this.audioManager.playSound('pause');
+                this.audioManager.pauseMusic && this.audioManager.pauseMusic();
+                this.dispatchGameStateChange();
+            } else if (this.state === 'PAUSED') {
+                this.state = 'PLAYING';
+                this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
+                this.dispatchGameStateChange();
+            }
+        }
+
         update(dt) {
             if (this.state !== "PLAYING") {
                 return;
@@ -368,17 +385,20 @@ class Game {
     }
 
     updateCamera() {
-        // Smooth camera following
-        const horizontalBias = this.isMobile ? 0.28 : (1 / 3);
-        const targetCameraX = this.player.x - (this.viewWidth || this.width) * horizontalBias;
-        const lerpFactorX = this.isMobile ? 0.12 : 0.1;
+        // Horizontal follow: center player smoothly, while keeping the camera
+        // clamped to the level bounds. Use a slightly higher lerp on mobile
+        // so camera movement feels responsive without being jumpy.
+        const viewW = this.viewWidth || this.width;
+        const playerCenterX = this.player.x + (this.player.width || 0) * 0.5;
+        const targetCameraX = playerCenterX - viewW * 0.5;
+        const lerpFactorX = this.isMobile ? 0.12 : 0.10;
         this.cameraX = Utils.lerp(this.cameraX || 0, targetCameraX, lerpFactorX);
-        
-        // Clamp camera to level bounds (use viewWidth so camera can move on narrow mobile viewports)
-        const clampMaxX = Math.max(0, this.level.width - (this.viewWidth || this.width));
+
+        // Clamp camera to level bounds and expose clamp for diagnostics
+        const clampMaxX = Math.max(0, this.level.width - viewW);
         this.cameraX = Utils.clamp(this.cameraX, 0, clampMaxX);
 
-        // Diagnostics: emit a short trace for the first few frames while playing to capture values
+        // Diagnostics: emit a short trace for the first few frames while playing
         if (!this._camDiagInitialized) {
             this._camDiagInitialized = true;
             this._camDiagCount = 0;
@@ -387,6 +407,7 @@ class Game {
             console.log('CameraX trace', {
                 frame: this._camDiagCount,
                 playerX: this.player.x,
+                playerCenterX,
                 cameraX: this.cameraX,
                 targetCameraX,
                 clampMaxX,
@@ -416,6 +437,15 @@ class Game {
             this._loggedCameraY = true;
             console.log('CameraY diagnostic', { cameraY: this.cameraY, targetCameraY, viewHeight: this.viewHeight, levelHeight: this.level.height });
         }
+
+    }
+
+    panCamera(deltaX) {
+        // Simple pan helper — moves camera by delta and clamps to level bounds
+        const cur = this.cameraX || 0;
+        const maxX = Math.max(0, this.level.width - (this.viewWidth || this.width));
+        const next = Utils.clamp(cur + (deltaX || 0), 0, maxX);
+        this.cameraX = next;
     }
 
     render() {
