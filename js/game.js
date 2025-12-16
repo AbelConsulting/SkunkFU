@@ -36,16 +36,19 @@ class Game {
         this.level = new Level(this.width, this.height);
         // Keep a flag so Level can reduce visual complexity on mobile
         this.level.useMobileOptimizations = this.isMobile;
+        // Prefer tile-based platform rendering if tile assets are available
+        this.level.tileMode = 'tiles';
+
         // Default level data with platforms (make world wider than viewport so horizontal panning is possible)
         const worldWidth = Math.max(this.width * 2, 1920);
         const levelData = {
             width: worldWidth,
             height: this.height,
             platforms: [
-                { x: 100, y: 600, width: 400, height: 32, type: 'static' },
-                { x: 600, y: 500, width: 200, height: 32, type: 'static' },
-                { x: 900, y: 400, width: 250, height: 32, type: 'static' },
-                { x: 0, y: 700, width: worldWidth, height: 40, type: 'static' }
+                { x: 100, y: 600, width: 400, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 600, y: 500, width: 200, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 900, y: 400, width: 250, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 0, y: 700, width: worldWidth, height: 40, type: 'static', tile: 'ground_tile' }
             ]
         };
         this.level.loadLevel(levelData);
