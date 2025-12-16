@@ -63,11 +63,18 @@ class AudioManager {
     async loadSound(name, path) {
         try {
             const response = await fetch(path);
+            if (!response || !response.ok) {
+                // Provide a clearer message for failures (404, CORS, blocked requests)
+                const msg = `AudioManager: fetch failed for '${path}' (status: ${response ? response.status : 'no response'})`;
+                if (typeof Config !== 'undefined' && Config.DEBUG) console.warn(msg);
+                return null;
+            }
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = this.audioCtx ? await this.audioCtx.decodeAudioData(arrayBuffer) : null;
             this.sfxBuffers[name] = audioBuffer;
             return audioBuffer;
         } catch (e) {
+            // This most commonly indicates a network/CORS error when running under file://
             if (typeof Config !== 'undefined' && Config.DEBUG) console.warn(`Failed to load sound: ${path}`, e);
             return null;
         }

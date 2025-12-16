@@ -47,8 +47,82 @@ class LevelEditor {
                 if (this.container.style.display === 'none') this.show(); else this.hide();
             }
         });
+
+        // Pointer-based selection and hover on the game canvas
+        try {
+            this.canvas = this.game.canvas;
+            if (this.canvas && this.canvas.addEventListener) {
+                this.canvas.addEventListener('pointerdown', (ev) => this._onPointerDown(ev));
+                this.canvas.addEventListener('pointermove', (ev) => this._onPointerMove(ev));
+                this.canvas.addEventListener('pointerleave', (ev) => this._onPointerLeave(ev));
+            }
+        } catch (e) {
+            console.warn('LevelEditor canvas integration failed', e);
+        }
     }
 
+    _getWorldPosFromEvent(ev) {
+        const rect = this.game.canvas.getBoundingClientRect();
+        const px = (ev.clientX - rect.left) / rect.width;
+        const py = (ev.clientY - rect.top) / rect.height;
+        const x = (px * (this.game.viewWidth || this.game.width)) + (this.game.cameraX || 0);
+        const y = (py * (this.game.viewHeight || this.game.height)) + (this.game.cameraY || 0);
+        return { x, y };
+    }
+
+    _onPointerDown(ev) {
+        if (this.container.style.display === 'none') return;
+        ev.preventDefault();
+        const pos = this._getWorldPosFromEvent(ev);
+        const platforms = this.level.platforms || [];
+        for (let i = 0; i < platforms.length; i++) {
+            const p = platforms[i];
+            if (pos.x >= p.x && pos.x <= p.x + p.width && pos.y >= p.y && pos.y <= p.y + p.height) {
+                this.selectPlatform(i);
+                // update overlay
+                this._setOverlay({ selectedIndex: i });
+                // make sure selected is visible
+                const el = document.getElementById(`platform-tile-${i}`);
+                if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+                return;
+            }
+        }
+        // Clicked empty space - deselect
+        this.selectedPlatformIndex = null;
+        this._setOverlay({ selectedIndex: null });
+        this.refreshPlatformList();
+    }
+
+    _onPointerMove(ev) {
+        if (this.container.style.display === 'none') return;
+        const pos = this._getWorldPosFromEvent(ev);
+        const platforms = this.level.platforms || [];
+        let found = null;
+        for (let i = 0; i < platforms.length; i++) {
+            const p = platforms[i];
+            if (pos.x >= p.x && pos.x <= p.x + p.width && pos.y >= p.y && pos.y <= p.y + p.height) {
+                found = i; break;
+            }
+        }
+        if (found !== this._hovered) {
+            this._hovered = found;
+            this._setOverlay({ hoveredIndex: found });
+        }
+    }
+
+    _onPointerLeave(ev) {
+        this._hovered = null;
+        this._setOverlay({ hoveredIndex: null });
+    }
+
+    _setOverlay(obj) {
+        try {
+            if (!this.game) return;
+            this.game._editorOverlay = this.game._editorOverlay || {};
+            Object.assign(this.game._editorOverlay, obj);
+            try { this.game.render(); } catch (e) {}
+        } catch (e) {}
+    }
     show() {
         this.container.style.display = 'block';
         this.toggleBtn.textContent = '🛠️ Editor (Open)';

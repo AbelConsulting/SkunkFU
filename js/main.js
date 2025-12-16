@@ -147,6 +147,18 @@ class GameApp {
 
     async init() {
         try {
+            // Warn if opened via file:// — audio and other networked assets will fail due to browser restrictions
+            if (location && location.protocol === 'file:') {
+                try {
+                    const overlay = document.getElementById('error-overlay');
+                    const content = document.getElementById('error-content');
+                    if (overlay && content) {
+                        overlay.style.display = 'block';
+                        content.textContent = 'Detected file:// protocol. Please serve the project over HTTP (e.g. run `python -m http.server 8000` from the project root and open http://localhost:8000) to avoid CORS and fetch errors.';
+                    }
+                } catch (e) {}
+            }
+
             // Load all assets
             await this.loadAssets();
 

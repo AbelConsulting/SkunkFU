@@ -610,6 +610,31 @@ class Game {
                     }
                 }
 
+                // Editor overlays (selection / hover) — draw in world coordinates
+                if (this._editorOverlay) {
+                    try {
+                        const overlay = this._editorOverlay;
+                        const drawOverlay = (idx, style) => {
+                            const p = (this.level.platforms || [])[idx];
+                            if (!p) return;
+                            ctx.save();
+                            ctx.fillStyle = style.fill || 'rgba(255,255,0,0.12)';
+                            ctx.strokeStyle = style.stroke || 'rgba(255,255,0,0.9)';
+                            ctx.lineWidth = style.lineWidth || 2;
+                            ctx.fillRect(p.x, p.y, p.width, p.height);
+                            ctx.strokeRect(p.x, p.y, p.width, p.height);
+                            ctx.restore();
+                        };
+
+                        if (typeof overlay.hoveredIndex === 'number') {
+                            drawOverlay(overlay.hoveredIndex, { stroke: 'rgba(255,255,0,0.95)', fill: 'rgba(255,255,0,0.08)' });
+                        }
+                        if (typeof overlay.selectedIndex === 'number') {
+                            drawOverlay(overlay.selectedIndex, { stroke: 'rgba(0,255,0,0.95)', fill: 'rgba(0,255,0,0.06)', lineWidth: 3 });
+                        }
+                    } catch (e) {}
+                }
+
                 ctx.restore();
             } catch (e) {}
         }
