@@ -443,6 +443,9 @@ function triggerKeyEvent(key, type) {
         }
     }
 
+    try {
+        if (typeof console !== 'undefined' && console.log) console.log('triggerKeyEvent', { key: k, code, type });
+    } catch (e) {}
     const event = new KeyboardEvent(type, { key: k, code: code, bubbles: true, cancelable: true });
     window.dispatchEvent(event);
 }

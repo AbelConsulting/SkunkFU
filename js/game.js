@@ -130,6 +130,7 @@ class Game {
             // Key down handler
             window.addEventListener('keydown', (event) => {
                 const key = normalize(event);
+                try { if (typeof console !== 'undefined' && console.log) console.log('Game.keydown', { key, state: this.state }); } catch (e) {}
 
                 // Prevent default for primary game keys
                 if (['space', 'arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) {
