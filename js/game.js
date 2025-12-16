@@ -377,25 +377,14 @@ class Game {
     }
 
     updateCamera() {
-        // Horizontal auto-follow using a deadzone so the camera only moves
-        // when the player crosses a left/right threshold. This prevents
-        // small player motion from jiggling the camera while ensuring
-        // horizontal panning works reliably on all viewport sizes.
+        // Centered horizontal follow — keep player centered smoothly
         const viewW = this.viewWidth || this.width;
-        const leftThreshold = viewW * 0.33;
-        const rightThreshold = viewW * 0.66;
-        const curCamX = this.cameraX || 0;
-        let desiredCamX = curCamX;
-        // If player moves left of the left threshold, pan left
-        if (this.player.x < curCamX + leftThreshold) {
-            desiredCamX = this.player.x - leftThreshold;
-        } else if (this.player.x > curCamX + rightThreshold) {
-            // If player moves past the right threshold, pan right
-            desiredCamX = this.player.x - rightThreshold;
-        }
-        const lerpFactorX = this.isMobile ? 0.18 : 0.14;
-        this.cameraX = Utils.lerp(curCamX, desiredCamX, lerpFactorX);
-        // Clamp camera to level bounds (use viewWidth so camera can move on narrow mobile viewports)
+        // Player center X
+        const playerCenterX = this.player.x + (this.player.width || 0) * 0.5;
+        const targetCameraX = playerCenterX - viewW * 0.5;
+        const lerpFactorX = this.isMobile ? 0.12 : 0.10;
+        this.cameraX = Utils.lerp(this.cameraX || 0, targetCameraX, lerpFactorX);
+        // Clamp camera to level bounds
         this.cameraX = Utils.clamp(this.cameraX, 0, Math.max(0, this.level.width - viewW));
         // Vertical camera follow to keep player visible on short viewports.
         // Use a slightly smaller bias on mobile so the camera stays lower (more floor visible).
