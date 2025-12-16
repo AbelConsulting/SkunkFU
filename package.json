@@ -5,9 +5,13 @@
   "scripts": {
     "build": "node scripts/build.js",
     "dev": "node scripts/dev.js",
-    "start": "node tools/csp_server.js"
+    "start": "node tools/csp_server.js",
+    "test:touch-landscape": "node tools/touch_controls_landscape_test.js",
+    "playwright:install": "npx playwright install"
   },
   "devDependencies": {
-    "esbuild": "^0.19.12"
+    "esbuild": "^0.19.12",
+    "playwright": "^1.40.0"
   }
 }
+
