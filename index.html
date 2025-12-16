@@ -138,6 +138,28 @@
             transform: translateY(0);
         }
 
+        /* Pause button (top-right) */
+        #pause-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 500;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        #pause-btn:hover { background: rgba(255,255,255,0.06); }
+
         #mobile-restart-btn {
             padding: 15px 40px;
             font-size: 1.5rem;
@@ -179,6 +201,9 @@
         </div>
 
         <!-- Touch controls moved out of #game-container to avoid transform/layout issues -->
+
+        <!-- Pause Button (desktop & mobile) -->
+        <button id="pause-btn" aria-label="Pause game" title="Pause" style="display:none;">⏸</button>
 
         <div id="mobile-start-overlay" style="display:none;">
             <button id="mobile-start-btn">Tap to Start</button>
@@ -463,6 +488,27 @@ function initTouchControls() {
         }
     });
 }
+
+// Wire pause button: show on non-loading UI, call game's togglePause when clicked
+try {
+    const pauseBtn = document.getElementById('pause-btn');
+    if (pauseBtn) {
+        pauseBtn.style.display = 'flex';
+        pauseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            try {
+                if (window.game && typeof window.game.togglePause === 'function') {
+                    window.game.togglePause();
+                } else if (typeof window.toggleGamePause === 'function') {
+                    window.toggleGamePause();
+                } else {
+                    // Fallback: synthesize Escape key
+                    triggerKeyEvent('Escape', 'keydown');
+                }
+            } catch (err) { console.warn('pause button handler failed', err); }
+        });
+    }
+} catch (e) {}
 
 // --- MOBILE START & FULLSCREEN ---
 const mobileStartOverlay = document.getElementById('mobile-start-overlay');

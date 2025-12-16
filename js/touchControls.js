@@ -48,6 +48,17 @@
             rightGroup.appendChild(jumpBtn);
             rightGroup.appendChild(attackBtn);
 
+            // Pause button for quick mobile pause/resume
+            const pauseBtn = this._createButton('⏸', 'pause-btn');
+            pauseBtn.style.width = '64px';
+            pauseBtn.style.height = '64px';
+            pauseBtn.style.fontSize = '22px';
+            pauseBtn.style.marginLeft = '6px';
+            pauseBtn.setAttribute('aria-label', 'Pause');
+            rightGroup.appendChild(pauseBtn);
+            // keep reference for state updates
+            this._pauseBtn = pauseBtn;
+
             // Restart button (hidden by default, shown on game over)
             const restartBtn = this._createButton('Restart', 'restart-btn');
             restartBtn.style.position = 'absolute';
@@ -108,6 +119,7 @@
             this._bindButton(jumpBtn, 'jump');
             this._bindButton(attackBtn, 'attack');
             this._bindButton(restartBtn, 'restart');
+            this._bindButton(pauseBtn, 'pause');
 
             // Log creation
             try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_created', { touchControls: true }); } catch (e) {}
@@ -117,6 +129,18 @@
                 try { window && window.logTouchControlEvent && window.logTouchControlEvent('gameStateChange', { state: e && e.detail && e.detail.state }); } catch (e) {}
                 if (!e || !e.detail) return;
                 const st = e.detail.state;
+                // Update pause button icon/label when paused or resumed
+                try {
+                    if (this._pauseBtn) {
+                        if (st === 'PAUSED') {
+                            this._pauseBtn.textContent = '▶';
+                            this._pauseBtn.setAttribute('aria-label', 'Resume');
+                        } else {
+                            this._pauseBtn.textContent = '⏸';
+                            this._pauseBtn.setAttribute('aria-label', 'Pause');
+                        }
+                    }
+                } catch (err) {}
                 if (st === 'GAME_OVER') {
                     restartBtn.style.display = 'block';
                 } else {

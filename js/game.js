@@ -60,6 +60,7 @@ class Game {
         if (typeof window !== 'undefined') {
             try {
                 window.gamePan = (dx) => { this.panCamera(dx); };
+                window.toggleGamePause = () => { try { this.togglePause(); } catch (e) {} };
             } catch (e) {
                 // ignore strict contexts
             }
@@ -88,18 +89,9 @@ class Game {
                 }
 
                 // Global controls
-                if (key === 'escape') {
-                    if (this.state === 'PLAYING') {
-                        this.state = 'PAUSED';
-                        this.audioManager.playSound && this.audioManager.playSound('pause');
-                        this.audioManager.pauseMusic && this.audioManager.pauseMusic();
-                        this.dispatchGameStateChange();
-                    } else if (this.state === 'PAUSED') {
-                        this.state = 'PLAYING';
-                        this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
-                        this.dispatchGameStateChange();
-                    }
-                } else if (key === 'enter') {
+                    if (key === 'escape') {
+                        this.togglePause();
+                    } else if (key === 'enter') {
                     if (this.state === 'MENU' || this.state === 'GAME_OVER') {
                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
                         this.startGame();
@@ -128,6 +120,9 @@ class Game {
                 } else if (action === 'attack') {
                     if (down) this.player.handleInput('keyx', true);
                     else this.player.handleInput('keyx', false);
+                } else if (action === 'pause') {
+                    // Toggle pause on button down (single press)
+                    if (down) this.togglePause();
                 }
                 else if (action === 'restart') {
                     if (down && this.state === 'GAME_OVER') {
@@ -287,6 +282,19 @@ class Game {
         dispatchGameStateChange() {
             const event = new CustomEvent('gameStateChange', { detail: { state: this.state } });
             window.dispatchEvent(event);
+        }
+
+        togglePause() {
+            if (this.state === 'PLAYING') {
+                this.state = 'PAUSED';
+                this.audioManager.playSound && this.audioManager.playSound('pause');
+                this.audioManager.pauseMusic && this.audioManager.pauseMusic();
+                this.dispatchGameStateChange();
+            } else if (this.state === 'PAUSED') {
+                this.state = 'PLAYING';
+                this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
+                this.dispatchGameStateChange();
+            }
         }
 
         update(dt) {
