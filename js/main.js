@@ -167,6 +167,13 @@ class GameApp {
             // Expose for diagnostic tests and external tooling
             try { window.game = this.game; window.gameApp = this; } catch (e) { /* ignore in strict contexts */ }
 
+            // Instantiate LevelEditor (if available) so designers can pick tiles per platform
+            try {
+                if (window.LevelEditor) {
+                    this.levelEditor = new LevelEditor(this.game);
+                }
+            } catch (e) { console.warn('LevelEditor init failed', e); }
+
             // Allow overriding mobile parallax via URL or runtime change for quick tuning.
             // URL: ?mobileParallax=0.2  (applies when app initializes)
             const initMobileParallax = (() => {
