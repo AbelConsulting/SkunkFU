@@ -106,7 +106,12 @@ class SpriteLoader {
             // Background / tile sprites
             ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
             ['platform_tile', 'assets/sprites/backgrounds/tiles/platform_tile.png'],
-            ['wall_tile', 'assets/sprites/backgrounds/tiles/wall_tile.png']
+            ['wall_tile', 'assets/sprites/backgrounds/tiles/wall_tile.png'],
+            // Background panoramas
+            ['bg_city', 'assets/sprites/backgrounds/city_bg.png'],
+            ['bg_forest', 'assets/sprites/backgrounds/forest_bg.png'],
+            ['bg_mountains', 'assets/sprites/backgrounds/mountains_bg.png'],
+            ['bg_cave', 'assets/sprites/backgrounds/cave_bg.png']
         ];
 
         this.totalAssets = spritesToLoad.length;

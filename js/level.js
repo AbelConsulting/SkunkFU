@@ -6,6 +6,8 @@ class Level {
     loadLevel(levelData) {
         this.width = levelData.width || this.width;
         this.height = levelData.height || this.height;
+        // Optional background name (matches keys from spriteLoader)
+        this.backgroundName = levelData.background || levelData.backgroundName || this.backgroundName || 'bg_city';
         
         // Initialize platforms (static and moving)
         this.platforms = levelData.platforms.map(p => ({
@@ -75,22 +77,44 @@ class Level {
     }
 
     draw(ctx, cameraX = 0, cameraY = 0, viewWidth = null, viewHeight = null) {
-        // 1. Draw Background (Optimized)
-        if (!this.backgroundGradient) {
-            this.backgroundGradient = ctx.createLinearGradient(0, 0, 0, this.height);
-            this.backgroundGradient.addColorStop(0, this.theme.bgTop);
-            this.backgroundGradient.addColorStop(0.5, this.theme.bgMid);
-            this.backgroundGradient.addColorStop(1, this.theme.bgBot);
-        }
-        
-        ctx.fillStyle = this.backgroundGradient;
-        // Draw the background using logical view dimensions when provided so
-        // it matches the scaled world coordinates and doesn't depend on
-        // the canvas pixel buffer size (avoids intermittent visual jumps
-        // when pixel buffer is resized during asset loads).
+        // 1. Draw Background (panorama if available, otherwise gradient)
         const w = viewWidth || this.width || ctx.canvas.width;
         const h = viewHeight || this.height || ctx.canvas.height;
-        ctx.fillRect(cameraX, cameraY, w, h);
+
+        let bgImg = null;
+        try { bgImg = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(this.backgroundName) : null; } catch (e) { bgImg = null; }
+        if (bgImg) {
+            // Draw a simple parallax: background stretched horizontally to level width
+            // and vertically to cover the view height. Use cameraX to offset for parallax.
+            try {
+                // Compute scale so bg image covers the visible area horizontally
+                const scaleY = h / bgImg.height;
+                const scaledW = Math.ceil(bgImg.width * scaleY);
+                // Determine repeated tiles needed to cover level width
+                const repeatCount = Math.ceil((this.width) / scaledW) + 1;
+                // Draw repeated background with slight parallax (0.5)
+                const parallax = 0.5;
+                const startX = Math.floor(-((cameraX * parallax) % scaledW));
+                for (let i = 0; i < repeatCount; i++) {
+                    const dx = startX + i * scaledW;
+                    ctx.drawImage(bgImg, 0, 0, bgImg.width, bgImg.height, dx, cameraY, scaledW, h);
+                }
+            } catch (e) {
+                // fallback to gradient if draw fails
+                bgImg = null;
+            }
+        }
+
+        if (!bgImg) {
+            if (!this.backgroundGradient) {
+                this.backgroundGradient = ctx.createLinearGradient(0, 0, 0, this.height);
+                this.backgroundGradient.addColorStop(0, this.theme.bgTop);
+                this.backgroundGradient.addColorStop(0.5, this.theme.bgMid);
+                this.backgroundGradient.addColorStop(1, this.theme.bgBot);
+            }
+            ctx.fillStyle = this.backgroundGradient;
+            ctx.fillRect(cameraX, cameraY, w, h);
+        }
 
         ctx.save();
         ctx.translate(-cameraX, -cameraY);
