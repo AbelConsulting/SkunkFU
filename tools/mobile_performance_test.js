@@ -8,16 +8,16 @@ const { chromium } = require('playwright');
   // Wait for gameReady
   await page.waitForFunction('window.gameReady === true', { timeout: 10000 }).catch(() => {});
 
-  // Apply low preset via URL param: reload with ?mobilePerf=low
+  // Reload with the URL param to force application during init
   await page.goto((process.env.TEST_SERVER || 'http://localhost:8000') + '/?mobilePerf=low');
 
-  // Wait for the page to apply and persist pref
-  await page.waitForFunction("localStorage.getItem('mobilePerfMode') === 'low'", { timeout: 5000 }).catch(()=>{});
+  // Wait for the page to apply the pref by checking the Config directly
+  const applied = await page.waitForFunction("typeof Config !== 'undefined' && Config.MOBILE_FPS === 20", { timeout: 5000 }).catch(() => false);
 
   const stored = await page.evaluate(() => localStorage.getItem('mobilePerfMode'));
   const cfg = await page.evaluate(() => typeof Config !== 'undefined' ? Config.MOBILE_FPS : null);
 
-  console.log('mobilePerfMode:', stored, 'Config.MOBILE_FPS:', cfg);
+  console.log('mobilePerfMode:', stored, 'Config.MOBILE_FPS:', cfg, 'appliedCheck:', applied);
 
   if (stored !== 'low' || cfg !== 20) {
     console.error('Mobile perf preset not applied as expected');

@@ -155,6 +155,54 @@ class GameApp {
         };
     }
 
+    // Run a short FPS probe using requestAnimationFrame to determine device capability
+    runMobileFpsProbe(force = false) {
+        return new Promise((resolve) => {
+            try {
+                const duration = (typeof Config !== 'undefined' && typeof Config.MOBILE_FPS_PROBE_DURATION === 'number') ? Config.MOBILE_FPS_PROBE_DURATION : 1000;
+                const t0 = performance.now();
+                let last = t0;
+                let frames = 0;
+                const samples = [];
+                let rafId = null;
+                const onFrame = (ts) => {
+                    const dt = ts - last;
+                    last = ts;
+                    frames++;
+                    samples.push(dt);
+                    if (ts - t0 >= duration) {
+                        if (rafId) cancelAnimationFrame(rafId);
+                        // compute avg fps
+                        const avgDt = samples.reduce((a,b)=>a+b,0)/samples.length;
+                        const fps = 1000 / avgDt;
+                        // Determine mode
+                        const low = (typeof Config !== 'undefined' && typeof Config.MOBILE_FPS_PROBE_LOW === 'number') ? Config.MOBILE_FPS_PROBE_LOW : 22;
+                        const mid = (typeof Config !== 'undefined' && typeof Config.MOBILE_FPS_PROBE_MID === 'number') ? Config.MOBILE_FPS_PROBE_MID : 36;
+                        let mode = 'high';
+                        if (fps < low) mode = 'low';
+                        else if (fps < mid) mode = 'mid';
+
+                        try { console.log('FPS probe result', { fps: Math.round(fps), avgDt, frames, samples: samples.length }); } catch (e) {}
+                        try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileFpsProbe', { fps: Math.round(fps), mode }); } catch (e) {}
+                        // Apply mode only when forced or when no persisted pref set
+                        try {
+                            const pm = localStorage.getItem('mobilePerfMode');
+                            if (force || !pm) {
+                                try { window.setMobilePerformanceMode(mode); } catch (e) {}
+                            }
+                        } catch (e) {}
+                        resolve(mode);
+                        return;
+                    }
+                    rafId = requestAnimationFrame(onFrame);
+                };
+                rafId = requestAnimationFrame(onFrame);
+                // timeout safety
+                setTimeout(() => { try { if (rafId) cancelAnimationFrame(rafId); } catch (e) {}; resolve(null); }, duration + 1200);
+            } catch (e) { resolve(null); }
+        });
+    }
+
     async init() {
         try {
             // Warn if opened via file:// — audio and other networked assets will fail due to browser restrictions
@@ -286,9 +334,21 @@ class GameApp {
                     return false;
                 };
                 const pm = localStorage.getItem('mobilePerfMode');
+                let autoAppliedLow = false;
                 if (this.isMobile && !pm && detectLowEndDevice()) {
-                    try { window.setMobilePerformanceMode('low'); console.log('Auto-applied mobilePerf=low based on device heuristics'); } catch (e) {}
+                    try { window.setMobilePerformanceMode('low'); console.log('Auto-applied mobilePerf=low based on device heuristics'); autoAppliedLow = true; } catch (e) {}
                 }
+                // If on mobile and no preset persisted and heuristics didn't auto-apply, run a short FPS probe
+                try {
+                    const params = new URLSearchParams(location.search);
+                    const forceProbe = params.get('forceProbe') === '1';
+                    if (this.isMobile && !pm && !autoAppliedLow) {
+                        // Delay probe slightly so rendering has stabilized
+                        setTimeout(() => {
+                            try { this.runMobileFpsProbe(forceProbe).then(mode => { if (mode) console.log('Probe selected mode', mode); }).catch(()=>{}); } catch (e) {}
+                        }, 200);
+                    }
+                } catch (e) {}
             } catch (e) {}
 
             // Expose helpers to change mobile parallax at runtime and persist choice

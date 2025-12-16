@@ -71,6 +71,11 @@ const Config = {
     MOBILE_DPR_SCALE_REDUCTION: 0.6, // multiply devicePixelRatio by this on mobile to save pixels
     MOBILE_MAX_PARTICLES: 0, // number of spark particles allowed on mobile (0 = disabled)
     MOBILE_MAX_DAMAGE_NUMBERS: 1, // limit on-screen damage numbers on mobile
+    // FPS probe used to select a default preset on first run (ms)
+    MOBILE_FPS_PROBE_DURATION: 1000,
+    // FPS probe thresholds: <LOW -> low, <MID -> mid, else high
+    MOBILE_FPS_PROBE_LOW: 22,
+    MOBILE_FPS_PROBE_MID: 36,
     // Visual indicators for moving hazards (show path and timing indicators)
     HAZARD_INDICATORS: true,
 

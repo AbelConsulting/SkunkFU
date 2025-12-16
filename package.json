@@ -10,7 +10,7 @@
     "playwright:install": "npx playwright install"
     ,"test:mobile-perf": "node tools/mobile_performance_test.js"
   },
-  "devDependencies": {
+    ,"test:mobile-probe": "node tools/mobile_probe_test.js"
     "esbuild": "^0.19.12",
     "playwright": "^1.40.0"
   }
