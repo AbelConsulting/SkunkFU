@@ -730,9 +730,23 @@ window.requestShowTouchControls = function(durationMs = 1000, options = {}) {
     const id = ++window._touchControlsVisibilityReqId;
     window._touchControlsVisibilityCount = (window._touchControlsVisibilityCount || 0) + 1;
     const tc = ensureTouchControlsExists();
-    if (tc) {
-        tc.style.display = 'flex'; tc.style.pointerEvents = 'auto'; void tc.offsetWidth; tc.classList.add('visible'); tc.style.opacity = '1';
-    }
+
+    // Defensive: avoid re-applying visual state if already visible to prevent repeated layout thrash
+    try {
+        if (tc) {
+            const computed = getComputedStyle(tc);
+            const isVisible = computed.display !== 'none' && tc.classList.contains('visible');
+            if (!isVisible) {
+                tc.style.display = 'flex'; tc.style.pointerEvents = 'auto'; void tc.offsetWidth; tc.classList.add('visible'); tc.style.opacity = '1';
+                try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_shown', {}); } catch (e) {}
+            } else {
+                // Already visible: just ensure pointer events and opacity are set without toggling class/display
+                tc.style.pointerEvents = 'auto';
+                if (tc.style.opacity !== '1') tc.style.opacity = '1';
+            }
+        }
+    } catch (e) {}
+
     // Handle force option
     window._touchControlsReqTimers[id] = { timeoutId: null, force: !!options.force };
     if (options.force) {
@@ -743,7 +757,17 @@ window.requestShowTouchControls = function(durationMs = 1000, options = {}) {
         const tid = setTimeout(() => { try { window.releaseShowTouchControls(id); } catch (e) {} }, durationMs + 50);
         window._touchControlsReqTimers[id].timeoutId = tid;
     }
-    try { window && window.logTouchControlEvent && window.logTouchControlEvent('requestShowTouchControls', { id, force: !!options.force, until: Date.now() + durationMs }); } catch (e) {}
+
+    // Debounce request logging a bit to reduce noise when many callers ping rapidly
+    try {
+        const now = Date.now();
+        window._lastTouchControlsReqLog = window._lastTouchControlsReqLog || 0;
+        if (now - window._lastTouchControlsReqLog > 150) {
+            window._lastTouchControlsReqLog = now;
+            window && window.logTouchControlEvent && window.logTouchControlEvent('requestShowTouchControls', { id, force: !!options.force, until: Date.now() + durationMs });
+        }
+    } catch (e) {}
+
     return id;
 };
 
@@ -834,7 +858,21 @@ window.hideTouchControls = function() {
             const mo = new MutationObserver((mutations) => {
                 for (const m of mutations) {
                     if (m.type === 'attributes' && (m.attributeName === 'style' || m.attributeName === 'class')) {
-                        try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_mutation', { attribute: m.attributeName, style: el.getAttribute('style'), classList: Array.from(el.classList), display: getComputedStyle(el).display, opacity: getComputedStyle(el).opacity }); } catch (e) {}
+                        try {
+                            // Only log when an actual state change (style/class/display/opacity) differs from last logged state
+                            window._lastTouchControlsState = window._lastTouchControlsState || {};
+                            const state = {
+                                style: el.getAttribute('style') || '',
+                                classList: Array.from(el.classList).join(' '),
+                                display: getComputedStyle(el).display,
+                                opacity: getComputedStyle(el).opacity
+                            };
+                            const last = window._lastTouchControlsState;
+                            if (state.style !== last.style || state.classList !== last.classList || state.display !== last.display || state.opacity !== last.opacity) {
+                                window._lastTouchControlsState = state;
+                                try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_mutation', { attribute: m.attributeName, style: state.style, classList: state.classList.split(' '), display: state.display, opacity: state.opacity }); } catch (e) {}
+                            }
+                        } catch (e) {}
                     }
                 }
             });

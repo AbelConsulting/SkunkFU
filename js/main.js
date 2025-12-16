@@ -281,6 +281,56 @@ class GameApp {
             console.error('Failed to initialize game:', error);
             this.loadingText.textContent = 'Error loading game. Please refresh.';
             window.gameReady = false;
+
+            // Show error overlay if available and include a "Start Anyway" button
+            try {
+                const overlay = document.getElementById('error-overlay');
+                const content = document.getElementById('error-content');
+                if (overlay && content) {
+                    overlay.style.display = 'block';
+                    content.textContent = `Failed to initialize game. Error: ${String(error)}\n\nYou can attempt to 'Start Anyway' to bypass asset loading (useful for debugging visuals).`;
+
+                    const startAnyway = document.createElement('button');
+                    startAnyway.textContent = 'Start Anyway';
+                    startAnyway.style.marginLeft = '8px';
+                    startAnyway.style.padding = '8px 12px';
+                    startAnyway.style.borderRadius = '6px';
+                    startAnyway.addEventListener('click', async () => {
+                        try {
+                            // Create a Game instance if not present
+                            if (!this.game) {
+                                this.game = new Game(this.canvas, this.audioManager, this.isMobile);
+                                try { window.game = this.game; window.gameApp = this; } catch (e) {}
+                            }
+
+                            // Hide overlay and loading screen
+                            overlay.style.display = 'none';
+                            this.loadingScreen.classList.add('hidden');
+
+                            // Start the game loop if not running
+                            if (!this.running) {
+                                this.running = true;
+                                this.lastTime = performance.now();
+                                this.gameLoop(this.lastTime);
+                            }
+
+                            // If game has a startGame method, call it
+                            if (this.game && typeof this.game.startGame === 'function') {
+                                await this.game.startGame();
+                            } else {
+                                // Fallback: dispatch playing state event
+                                window.dispatchEvent(new CustomEvent('gameStateChange', { detail: { state: 'PLAYING' } }));
+                            }
+                        } catch (e) {
+                            console.error('Start Anyway failed', e);
+                            alert('Start Anyway failed: ' + e);
+                        }
+                    });
+
+                    const controls = overlay.querySelector('div');
+                    if (controls) controls.appendChild(startAnyway);
+                }
+            } catch (e) { console.warn('Failed to show start-anyway UI', e); }
         }
     }
 
