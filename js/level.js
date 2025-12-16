@@ -1,22 +1,4 @@
 class Level {
-    constructor(width, height) {
-        this.width = width;
-        this.height = height;
-        this.platforms = [];
-        this.backgroundGradient = null;
-        
-        // Cyberpunk style config
-        this.theme = {
-            bgTop: '#0f0026',      // Deep purple/blue night sky
-            bgMid: '#2d0a4b',      // Neon purple
-            bgBot: '#0a0a23',      // Dark blue/black
-            platTop: '#00fff7',    // Neon cyan
-            platBot: '#ff00ea',    // Neon magenta
-            border: '#fffb00',     // Bright yellow border
-            glow: '#00fff7',       // Neon cyan glow
-        };
-    }
-
     /**
      * Load level data from an external configuration
      * This allows you to have Level 1, Level 2, etc. without changing code.
