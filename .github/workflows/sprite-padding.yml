@@ -1,0 +1,34 @@
+name: Sprite Padding Smoke Test
+
+on:
+  push:
+    paths:
+      - 'js/**'
+      - 'tools/**'
+  pull_request:
+    paths:
+      - 'js/**'
+      - 'tools/**'
+
+jobs:
+  sprite-padding:
+    name: Sprite padding detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npm run playwright:install
+
+      - name: Run sprite padding smoke test
+        run: |
+          node tools/check_sprite_padding.js

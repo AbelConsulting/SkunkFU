@@ -9,6 +9,7 @@
     "test:touch-landscape": "node tools/touch_controls_landscape_test.js",
     "test:mobile-perf": "node tools/mobile_performance_test.js",
     "test:mobile-probe": "node tools/mobile_probe_test.js",
+    "test:sprite-padding": "node tools/check_sprite_padding.js",
     "playwright:install": "npx playwright install"
   },
   "devDependencies": {
