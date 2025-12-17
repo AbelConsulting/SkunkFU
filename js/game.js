@@ -398,9 +398,21 @@ class Game {
                 const prect = { x: this.player.x, y: this.player.y, width: this.player.width, height: this.player.height };
                 for (const h of this.level.hazards) {
                     if (h && Utils.rectCollision(prect, { x: h.x, y: h.y, width: h.width, height: h.height })) {
-                        // Temporarily disable spikes: they don't deal damage while debugging
+                        // If spikes are globally disabled, skip spike damage checks
                         if (h.type === 'spike' || h.type === 'moving_spike') {
-                            continue;
+                            if (typeof Config !== 'undefined' && Config.DISABLE_SPIKES) {
+                                // Optional debug log when spikes are skipped
+                                if (typeof console !== 'undefined' && console.log) console.log('Spike collision skipped (disabled) at', h);
+                                continue;
+                            }
+
+                            // Otherwise (spikes enabled), apply damage as before
+                            const died = this.player.takeDamage(20, null);
+                            if (died) {
+                                this.state = 'GAME_OVER';
+                                this.audioManager.stopMusic && this.audioManager.stopMusic();
+                                this.audioManager.playSound && this.audioManager.playSound('game_over', 1.0);
+                            }
                         }
                         // Other hazard types (future) can be handled here
                     }

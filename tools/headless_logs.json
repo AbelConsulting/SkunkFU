@@ -9,20 +9,204 @@
       "text": "Game class defined"
     },
     {
-      "type": "log",
-      "text": "AudioManager: Loading audio assets..."
+      "type": "warning",
+      "text": "Running from file:// — audio and some assets may not load. You can click \"Start Anyway\" to continue in a degraded mode."
     },
     {
       "type": "log",
-      "text": "AudioManager: Initializing audio context..."
+      "text": "SpriteLoader: loaded basic_idle -> 192x48"
     },
     {
       "type": "log",
-      "text": "AudioManager: All audio assets loaded."
+      "text": "SpriteLoader: loaded basic_walk -> 192x48"
     },
     {
       "type": "log",
-      "text": "AudioManager: Audio context resumed."
+      "text": "SpriteLoader: loaded ninja_idle -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_attack -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_hurt -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ground_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded platform_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded wall_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_city -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_walk -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_forest -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_mountains -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_cave -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_jump -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_attack -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_shadow_strike -> 520x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_hurt -> 130x64"
+    },
+    {
+      "type": "warning",
+      "text": "File protocol detected: skipping audio asset loading. Click \"Start Anyway\" to attempt enabling audio."
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: adjustCanvas_mobile_viewClamp {cssHeight: 720, overlayH: 0, cappedOverlayH: 0, finalEffectiveCssHeight: 720}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: gameReady_pending_check {}"
+    },
+    {
+      "type": "log",
+      "text": "Game.keydown {key: enter, state: MENU}"
+    },
+    {
+      "type": "log",
+      "text": "Game.startGame() called"
+    },
+    {
+      "type": "log",
+      "text": "Spawn placed on floor at 1248 628 floor: 0 700 2560 40"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_nonmobile {}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 0, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraY diagnostic {cameraY: 0, targetCameraY: 304.41666666666663, viewHeight: 720, levelHeight: 720}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 1, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 2, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 3, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 4, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 5, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 6, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_nonmobile {}"
+    },
+    {
+      "type": "info",
+      "text": "MediaElementAudioSource outputs zeroes due to CORS access restrictions for file:///C:/Users/Jewel/Documents/GitHub/SkunkFU/assets/audio/music/gameplay.wav"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 7, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 8, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 9, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 10, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 11, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 12, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 13, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 14, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 15, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 16, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 17, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 18, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 19, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
     }
   ],
   "fps": 60
