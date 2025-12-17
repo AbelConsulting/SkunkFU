@@ -85,16 +85,15 @@ class Player {
         // Use spriteLoader.createAnimation when available so frameStride can be
         // inferred from sheet dimensions (handles padding between frames).
         if (spriteLoader && typeof spriteLoader.createAnimation === 'function') {
-            // These ninja sheets include 1px padding between frames; explicitly
-            // provide frameWidth/frameStride to avoid inferred-stride warnings.
-            const defaultFrameOpts = { frameWidth: 64, frameStride: 65 };
+            // Let the SpriteLoader infer frame width/stride (it can detect
+            // per-sheet padding) instead of forcing a hardcoded value.
             this.animations = {
-                idle: spriteLoader.createAnimation('ninja_idle', 4, 0.15, defaultFrameOpts),
-                walk: spriteLoader.createAnimation('ninja_walk', 6, 0.1, defaultFrameOpts),
-                jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12, defaultFrameOpts),
-                attack: spriteLoader.createAnimation('ninja_attack', 6, 0.08, defaultFrameOpts),
-                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 8, 0.05, defaultFrameOpts),
-                hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1, defaultFrameOpts)
+                idle: spriteLoader.createAnimation('ninja_idle', 4, 0.15),
+                walk: spriteLoader.createAnimation('ninja_walk', 6, 0.1),
+                jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12),
+                attack: spriteLoader.createAnimation('ninja_attack', 6, 0.08),
+                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 8, 0.05),
+                hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1)
             };
         } else {
             this.animations = {
