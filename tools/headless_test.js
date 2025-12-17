@@ -38,8 +38,13 @@ const fs = require('fs');
   // Start the game by sending Enter (simulate button press)
   await page.keyboard.press('Enter');
 
-  // Run for 5 seconds while collecting logs
-  await page.waitForTimeout(5000);
+  // Move right for 2 seconds to traverse level (in case spikes are placed ahead)
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(2000);
+  await page.keyboard.up('ArrowRight');
+
+  // Run for 3 more seconds while collecting logs
+  await page.waitForTimeout(3000);
 
   // Compute approximate FPS from frame times
   const frames = await page.evaluate(() => {
