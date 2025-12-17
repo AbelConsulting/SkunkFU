@@ -103,7 +103,16 @@ class Enemy {
         return this.health <= 0;
     }
 
-    update(dt, player, level) {
+    checkGround(x, y, level) {
+        // Check if there's a platform below this position (within a small distance)
+        const checkRect = { x: x, y: y + this.height, width: this.width, height: 10 };
+        for (const platform of level.platforms) {
+            if (Utils.rectCollision(checkRect, platform)) {
+                return true;
+            }
+        }
+        return false;
+    }
         // Update timers
         if (this.hitStunTimer > 0) {
             this.hitStunTimer -= dt;
@@ -190,9 +199,18 @@ class Enemy {
     }
 
     patrol(dt) {
-        // Move back and forth in patrol range
-        this.x += this.velocityX * dt;
+        // Check for ledge before moving
+        const nextX = this.x + this.velocityX * dt;
+        if (!this.checkGround(nextX, this.y, level)) {
+            // Turn around if no ground ahead
+            this.velocityX = -this.velocityX;
+            this.facingRight = !this.facingRight;
+        } else {
+            // Move if safe
+            this.x = nextX;
+        }
 
+        // Check patrol range
         if (this.x < this.startX - this.patrolRange) {
             this.velocityX = this.speed;
             this.facingRight = true;

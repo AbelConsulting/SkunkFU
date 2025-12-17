@@ -58,6 +58,13 @@ class Game {
                 { x: 1200, y: 300, width: 200, height: 24, type: 'moving', tile: 'platform_tile', axis: 'x', range: 160, speed: 1.0 },
                 { x: 1600, y: 360, width: 160, height: 24, type: 'moving', tile: 'platform_tile', axis: 'y', range: 80, speed: 0.9 },
                 { x: 900, y: 400, width: 250, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 1800, y: 520, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 2100, y: 450, width: 200, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 2400, y: 380, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 2600, y: 320, width: 220, height: 24, type: 'moving', tile: 'platform_tile', axis: 'x', range: 100, speed: 0.8 },
+                { x: 2900, y: 480, width: 160, height: 32, type: 'static', tile: 'platform_tile' },
+                { x: 3200, y: 400, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 3500, y: 350, width: 200, height: 32, type: 'static', tile: 'platform_tile' },
                 { x: 0, y: 700, width: worldWidth, height: 40, type: 'static', tile: 'ground_tile' }
             ]
             ,
