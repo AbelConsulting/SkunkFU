@@ -48,16 +48,16 @@
             rightGroup.appendChild(jumpBtn);
             rightGroup.appendChild(attackBtn);
 
-            // Pause button for quick mobile pause/resume
-            const pauseBtn = this._createButton('⏸', 'pause-btn');
-            pauseBtn.style.width = '64px';
-            pauseBtn.style.height = '64px';
-            pauseBtn.style.fontSize = '22px';
-            pauseBtn.style.marginLeft = '6px';
-            pauseBtn.setAttribute('aria-label', 'Pause');
-            rightGroup.appendChild(pauseBtn);
-            // keep reference for state updates
-            this._pauseBtn = pauseBtn;
+            // Pause button for quick mobile pause/resume - DISABLED: using overlay pause instead
+            // const pauseBtn = this._createButton('⏸', 'pause-btn');
+            // pauseBtn.style.width = '64px';
+            // pauseBtn.style.height = '64px';
+            // pauseBtn.style.fontSize = '22px';
+            // pauseBtn.style.marginLeft = '6px';
+            // pauseBtn.setAttribute('aria-label', 'Pause');
+            // rightGroup.appendChild(pauseBtn);
+            // // keep reference for state updates
+            // this._pauseBtn = pauseBtn;
 
             // Restart button (hidden by default, shown on game over)
             const restartBtn = this._createButton('Restart', 'restart-btn');
