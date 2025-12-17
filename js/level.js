@@ -203,42 +203,9 @@ class Level {
                         ctx.restore();
                     }
 
-                    // Draw simple spikes for type === 'spike' and moving_spike
+                    // Spikes disabled temporarily — do not draw spike graphics
                     if (h.type === 'spike' || h.type === 'moving_spike') {
-                        const step = 8;
-                        const spikeH = Math.min(14, Math.max(8, Math.floor(h.height * 0.9)));
-                        const left = h.x;
-                        const top = h.y;
-                        const right = h.x + h.width;
-                        const n = Math.ceil(h.width / step);
-                        ctx.save();
-                        ctx.fillStyle = '#ff4d4d';
-                        for (let i = 0; i < n; i++) {
-                            const sx = left + i * step;
-                            const sw = Math.min(step, right - sx);
-                            ctx.beginPath();
-                            ctx.moveTo(sx, top + h.height);
-                            ctx.lineTo(sx + sw / 2, top + h.height - spikeH);
-                            ctx.lineTo(sx + sw, top + h.height);
-                            ctx.closePath();
-                            ctx.fill();
-                        }
-
-                        // timing indicator: small pulse above spikes for moving spikes
-                        if (h.type === 'moving_spike' && showIndicator) {
-                            try {
-                                const phase = Math.sin(now * (h.speed || 1) + (h.timeOffset || 0));
-                                const intensity = (phase + 1) / 2; // 0..1
-                                const cx = h.x + h.width / 2;
-                                const cy = h.y - 8;
-                                ctx.globalAlpha = 0.6 * intensity + 0.2;
-                                ctx.fillStyle = '#ffef8a';
-                                ctx.beginPath(); ctx.arc(cx, cy, 6 + intensity * 4, 0, Math.PI * 2); ctx.fill();
-                                ctx.globalAlpha = 1.0;
-                            } catch (e) {}
-                        }
-
-                        ctx.restore();
+                        // No visual or damage effect for spikes while disabled.
                     } else {
                         // Generic hazard box
                         ctx.save(); ctx.fillStyle = 'rgba(255,0,0,0.12)'; ctx.fillRect(h.x, h.y, h.width, h.height); ctx.restore();

@@ -398,16 +398,11 @@ class Game {
                 const prect = { x: this.player.x, y: this.player.y, width: this.player.width, height: this.player.height };
                 for (const h of this.level.hazards) {
                     if (h && Utils.rectCollision(prect, { x: h.x, y: h.y, width: h.width, height: h.height })) {
-                        // Treat spike and moving_spike the same: they deal damage on contact
+                        // Temporarily disable spikes: they don't deal damage while debugging
                         if (h.type === 'spike' || h.type === 'moving_spike') {
-                            // Small damage on contact; player's invulnerability timer prevents rapid repeats
-                            const died = this.player.takeDamage(20, null);
-                            if (died) {
-                                this.state = 'GAME_OVER';
-                                this.audioManager.stopMusic && this.audioManager.stopMusic();
-                                this.audioManager.playSound && this.audioManager.playSound('game_over', 1.0);
-                            }
+                            continue;
                         }
+                        // Other hazard types (future) can be handled here
                     }
                 }
             }
