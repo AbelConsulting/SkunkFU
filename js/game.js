@@ -36,6 +36,8 @@ class Game {
         this.level = new Level(this.width, this.height);
         // Keep a flag so Level can reduce visual complexity on mobile
         this.level.useMobileOptimizations = this.isMobile;
+        // Set background parallax based on mobile/desktop
+        this.level.backgroundParallax = this.isMobile ? (Config.BACKGROUND_PARALLAX_MOBILE || 0.25) : (Config.BACKGROUND_PARALLAX || 0.5);
         // Prefer tile-based platform rendering if tile assets are available
         this.level.tileMode = 'tiles';
 
