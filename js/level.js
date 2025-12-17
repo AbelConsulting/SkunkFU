@@ -25,6 +25,14 @@ class Level {
         this._staticNeedsUpdate = true;
         // Hazards (e.g., spikes) - array of rects: { x,y,width,height,type }
         this.hazards = Array.isArray(levelData.hazards) ? levelData.hazards.map(h => ({ ...h })) : [];
+        // If spikes are globally disabled, remove them from the loaded hazards so
+        // they don't exist in level data anymore (permanent removal at load time).
+        if (typeof Config !== 'undefined' && Config.DISABLE_SPIKES) {
+            const before = this.hazards.length;
+            this.hazards = this.hazards.filter(h => !(h && (h.type === 'spike' || h.type === 'moving_spike')));
+            const removed = before - this.hazards.length;
+            if (removed > 0 && typeof console !== 'undefined' && console.log) console.log(`Removed ${removed} spike hazards from level due to Config.DISABLE_SPIKES`);
+        }
     }
 
     update(deltaTime) {
