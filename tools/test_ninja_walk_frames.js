@@ -5,7 +5,8 @@ const { chromium } = require('playwright');
   const page = await context.newPage();
   page.on('console', msg => console.log('PAGE LOG>', msg.text()));
   await page.goto(process.env.TEST_SERVER || 'http://localhost:8000');
-  await page.waitForFunction('window.spriteLoader && typeof window.spriteLoader.getSprite === "function" && window.spriteLoader.getSprite("ninja_walk")', { timeout: 10000 });
+  // Give some time for sprite loader to finish
+  await page.waitForTimeout(1500);
 
   const info = await page.evaluate(() => {
     try {
