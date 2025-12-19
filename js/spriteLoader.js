@@ -147,11 +147,11 @@ class SpriteLoader {
                 const img = this.sprites[name];
                 if (!img) continue;
 
-                if ((img.width % count) !== 0) {
-                    // Try to detect a uniform padding between frames (common when
-                    // sheets have 1px gaps between frames). If detected, annotate
+                // Try to detect a uniform padding between frames (common when
+                    // sheets have 1px-8px gaps between frames). If detected, annotate
                     // the image with the discovered frameWidth/frameStride so
-                    // createAnimation can use them without producing a warning.
+                    // createAnimation can use them even when the sheet width happens
+                    // to be divisible by frameCount (padding can still be present).
                     let detectedPad = 0;
                     let detectedFrameWidth = null;
                     for (let pad = 1; pad <= 8; pad++) {
@@ -168,14 +168,13 @@ class SpriteLoader {
                         img._detectedFrameWidth = detectedFrameWidth;
                         img._detectedFrameStride = detectedFrameWidth + detectedPad;
                         try {
-                            console.info(`SpriteLoader: sprite ${name} width ${img.width} not divisible by ${count}; detected uniform ${detectedPad}px padding (frameWidth=${detectedFrameWidth}, stride=${img._detectedFrameStride})`);
+                            console.info(`SpriteLoader: sprite ${name} width ${img.width}; detected uniform ${detectedPad}px padding (frameWidth=${detectedFrameWidth}, stride=${img._detectedFrameStride})`);
                         } catch (e) {}
-                    } else {
+                    } else if ((img.width % count) !== 0) {
                         try {
                             console.warn(`SpriteLoader: sprite ${name} width ${img.width} is not divisible by frameCount ${count} (frame width=${(img.width/count).toFixed(2)})`);
                         } catch (e) {}
                     }
-                }
             }
             // Ensure tile sprites are upscaled to 64x64 for consistent tiling
             const tileNames = ['ground_tile', 'platform_tile', 'wall_tile'];
@@ -229,14 +228,14 @@ class SpriteLoader {
 
         let frameStride = opts.frameStride;
         if (!frameStride) {
-            if ((sheet.width % frameCount) === 0) {
-                frameStride = inferredFrameWidth;
-            } else if (sheet._detectedFrameStride) {
-                // Use previously-detected padding (quiet/info-level message already emitted)
+            // Prefer any detected stride (handles sheets with uniform padding)
+            if (sheet._detectedFrameStride) {
                 frameStride = sheet._detectedFrameStride;
+            } else if ((sheet.width % frameCount) === 0) {
+                frameStride = inferredFrameWidth;
             } else {
                 // Choose the nearest integer stride and warn — this handles
-                // sheets that include padding between frames.
+                // sheets that include padding or fractional frames.
                 frameStride = Math.round(sheet.width / frameCount);
                 try { console.warn(`SpriteLoader: ${name} width ${sheet.width} not divisible by ${frameCount}; using inferred stride ${frameStride}`); } catch (e) {}
             }
