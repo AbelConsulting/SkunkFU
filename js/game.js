@@ -70,17 +70,14 @@ class Game {
             hazards: []
         };
         this.level.loadLevel(levelData);
-        // Enforce global spike disable at runtime in case levels or remote data
-        // introduce hazards after initial load (defensive patch for production)
-        if (typeof Config !== 'undefined' && Config.DISABLE_SPIKES) {
-            try {
-                const before = (this.level.hazards && this.level.hazards.length) || 0;
-                if (before > 0) {
-                    console.log('Removed', before, 'spike hazards at runtime due to Config.DISABLE_SPIKES');
-                }
-                this.level.hazards = [];
-            } catch (e) { /* ignore */ }
-        }
+        // Remove all hazards at runtime to ensure none spawn unexpectedly
+        try {
+            const before = (this.level.hazards && this.level.hazards.length) || 0;
+            if (before > 0) {
+                console.log('Removed', before, 'hazards at runtime (global hazard removal)');
+            }
+            this.level.hazards = [];
+        } catch (e) { /* ignore */ }
 
         this.enemyManager = new EnemyManager(this.audioManager);
         this.ui = new UI(this.width, this.height);
