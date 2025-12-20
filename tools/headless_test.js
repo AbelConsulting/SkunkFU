@@ -38,7 +38,7 @@ const fs = require('fs');
   // Start the game by sending Enter (simulate button press)
   await page.keyboard.press('Enter');
 
-  // Move right for 2 seconds to traverse level (in case spikes are placed ahead)
+  // Move right for 2 seconds to traverse level (in case hazards are placed ahead)
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(2000);
   await page.keyboard.up('ArrowRight');

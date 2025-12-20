@@ -55,7 +55,8 @@ class Level {
         // Update moving hazards (if any)
         if (this.hazards && this.hazards.length > 0) {
             this.hazards.forEach(h => {
-                if (h.axis && h.range && (h.type === 'moving_spike' || h.moving)) {
+                // Generic moving hazard support: if axis and range are present, animate position
+                if (h.axis && h.range) {
                     const speed = h.speed || 1.0;
                     if (!('initialX' in h)) h.initialX = h.x;
                     if (!('initialY' in h)) h.initialY = h.y;

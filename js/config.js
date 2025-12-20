@@ -79,9 +79,6 @@ const Config = {
     // Visual indicators for moving hazards (show path and timing indicators)
     HAZARD_INDICATORS: true,
 
-    // Temporarily disable spikes when true. Useful for testing/debugging.
-    DISABLE_SPIKES: false,
-
     // Enable tile-based platform graphics when assets are present
     USE_TILE_GRAPHICS: true
 };
