@@ -188,13 +188,21 @@
             font-weight: bold;
         }
 
-        /* --- ORIENTATION CHECK --- */
+        /* --- ORIENTATION CHECK / forced landscape --- */
         #rotate-message { display: none; }
+        #rotate-message .rotate-actions { margin-top: 12px; }
+        #rotate-message #rotate-play-btn { padding: 12px 20px; font-size:16px; border-radius:8px; border:none; background:#ff6b6b; color:#fff; cursor:pointer; }
         
         @media screen and (orientation: portrait) {
             #rotate-message { display: flex; }
             #game-container { display: none; }
         }
+
+        /* Allow a 'force portrait->landscape' mode: when body has .force-landscape, treat as landscape */
+        body.force-landscape #rotate-message { display: none !important; }
+        body.force-landscape #game-container { display: flex !important; }
+        body.force-landscape #canvas-rotator { transform: rotate(90deg); transform-origin: center center; width: calc(100vh); height: calc(100vw); display:flex; align-items:center; justify-content:center; }
+        body.force-landscape canvas { max-width: calc(100vh - var(--safe-top) - var(--safe-bottom)); max-height: calc(100vw - var(--safe-left) - var(--safe-right)); }
     </style>
 </head>
 <body>
@@ -202,10 +210,15 @@
     <div id="rotate-message">
         <h1>Please Rotate Your Device</h1>
         <p>Landscape mode required</p>
+        <div class="rotate-actions">
+            <button id="rotate-play-btn">Play Anyway (Rotate Canvas)</button>
+        </div>
     </div>
 
     <div id="game-container">
-        <canvas id="game-canvas" width="1280" height="720"></canvas>
+        <div id="canvas-rotator" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <canvas id="game-canvas" width="1280" height="720"></canvas>
+        </div>
         
         <div id="loading-screen">
             <div class="loading-content">
@@ -677,8 +690,8 @@ if (isMobile() && mobileStartBtn) {
         try { e && e.preventDefault(); } catch (_) {}
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStartPressed', {}); } catch (e) {}
 
-        // If device is not in landscape, store a pending start and prompt the user to rotate
-        if (!isLandscape()) {
+        // If device is not in landscape and not forcing rotated-landscape, store a pending start and prompt the user to rotate
+        if (!isLandscape() && !window._forcedLandscapeMode) {
             try { window && window.logTouchControlEvent && window.logTouchControlEvent('mobileStart_pending_rotate', {}); } catch (e) {}
             window._pendingStartGesture = true;
             if (mobileStartBtn) {
@@ -1055,6 +1068,35 @@ document.addEventListener('fullscreenchange', () => {
 });
 // run once on load (use non-debounced immediate call so layout is correct)
 updateMobileUI();
+
+// Allow forcing a rotated 'landscape' mode when device is held portrait. A button is provided on the rotate overlay.
+// Clicking it will rotate the canvas and allow gameplay without physically rotating the device.
+(function(){
+    const rp = document.getElementById('rotate-play-btn');
+    if (!rp) return;
+    rp.addEventListener('click', (e) => {
+        try { e && e.preventDefault(); } catch (e) {}
+        document.body.classList.add('force-landscape');
+        window._forcedLandscapeMode = true;
+        const rotate = document.getElementById('rotate-message');
+        if (rotate) rotate.style.display = 'none';
+        updateMobileUI();
+        // Ensure layout/resizing handlers run so the game's canvas recalculates size immediately
+        try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+        if (window.gameReady && window.game && window.game.state === 'MENU') {
+            showMobileStartOverlay();
+        }
+    });
+    // Clear forced mode if device becomes actual landscape
+    window.addEventListener('orientationchange', () => {
+        if (isLandscape() && window._forcedLandscapeMode) {
+            document.body.classList.remove('force-landscape');
+            window._forcedLandscapeMode = false;
+            updateMobileUI();
+            try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+        }
+    });
+})();
 
 // If gameReady fires while a pending start exists, and device is landscape + in MENU,
 // ensure we auto-dispatch the pending gesture (covers cases where startHandler did not
