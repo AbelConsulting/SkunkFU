@@ -54,8 +54,9 @@ class Game {
                 { name: 'bg_mountains', parallax: 0.1 },
                 { name: 'bg_clouds', parallax: 0.3 }
             ],
-            // Two spawn points: right (default behavior) and left (new)
-            spawnPoints: [ { x: 'right', y: 300 }, { x: 'left', y: 300 } ],
+            // Three spawn points: right, center, and left
+            // center uses the numeric world center so enemies can spawn in the middle
+            spawnPoints: [ { x: 'right', y: 300 }, { x: Math.floor(worldWidth / 2), y: 300 }, { x: 'left', y: 300 } ],
             platforms: [
                 // Simple evenly-spaced static platforms for easier gameplay and testing
                 { x: 0, y: 700, width: worldWidth, height: 40, type: 'static', tile: 'ground_tile' },
