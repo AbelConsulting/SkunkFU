@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   // Start in portrait viewport to mimic common mobile orientation when loading
   const context = await browser.newContext({viewport:{width:360,height:640}, userAgent: 'Mozilla/5.0 (Linux; Android 9; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0 Mobile Safari/537.36'});
   const page = await context.newPage();
-  const SERVER = process.env.TEST_SERVER || 'http://localhost:8001';
+  const SERVER = process.env.TEST_SERVER || 'http://localhost:8000';
   await page.goto(SERVER);
   // Ensure the canvas is present in the DOM (may be hidden until PLAYING)
   await page.waitForSelector('#game-canvas', { state: 'attached' });
