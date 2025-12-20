@@ -36,7 +36,7 @@ class Game:
         self.damage_font = pygame.font.Font(None, 24)
         
         # Initialize game components
-        self.player = Player(100, 500, audio_manager=self.audio_manager)
+        self.player = Player(198, 468, audio_manager=self.audio_manager)  # Spawn on left platform to avoid ground hazards
         self.level = Level(width, height)
         self.enemy_manager = EnemyManager(audio_manager=self.audio_manager)
         self.ui = UI(width, height)
