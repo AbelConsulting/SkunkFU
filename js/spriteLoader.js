@@ -23,7 +23,7 @@ class SpriteLoader {
             'ninja_idle': 4,
             'ninja_walk': 4,
             'ninja_jump': 4,
-            'ninja_attack': 6,
+            'ninja_attack': 4,
             'ninja_shadow_strike': 8,
             'ninja_hurt': 2
         };
