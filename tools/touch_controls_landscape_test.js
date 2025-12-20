@@ -30,13 +30,16 @@ const { chromium } = require('playwright');
     const tc = document.getElementById('touch-controls');
     if (!tc) return { present: false };
     const cs = getComputedStyle(tc);
-    return { present: true, display: cs.display, pointerEvents: tc.style.pointerEvents || cs.pointerEvents, classList: Array.from(tc.classList) };
+    // Sample a child control to ensure pointer-targets are interactive even if container is inert
+    const child = tc.querySelector('.control-group, .touch-btn, #d-pad, #actions, #btn-left');
+    const childCs = child ? getComputedStyle(child) : null;
+    return { present: true, display: cs.display, containerPointerEvents: tc.style.pointerEvents || cs.pointerEvents, classList: Array.from(tc.classList), childPointerEvents: child ? (child.style.pointerEvents || childCs.pointerEvents) : null };
   });
   console.log('touch-controls visibility:', vis);
 
-  // Assert
-  if (!vis.present || vis.display === 'none' || vis.pointerEvents === 'none' || !vis.classList.includes('visible')) {
-    console.error('Touch controls are not visible when they should be');
+  // Assert: we accept the container being inert as long as at least one child accepts pointer events
+  if (!vis.present || vis.display === 'none' || !vis.classList.includes('visible') || (vis.containerPointerEvents === 'none' && (!vis.childPointerEvents || vis.childPointerEvents === 'none'))) {
+    console.error('Touch controls are not visible or interactive when they should be', vis);
     process.exitCode = 2;
   }
 
