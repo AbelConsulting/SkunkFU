@@ -62,10 +62,10 @@ class Game {
                 { x: 120, y: 540, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
                 { x: 420, y: 520, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
                 { x: 720, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1020, y: 480, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 1020, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
                 { x: 1320, y: 520, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
                 { x: 1620, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1920, y: 480, width: 220, height: 24, type: 'static', tile: 'platform_tile' }
+                { x: 1920, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' }
             ],
             hazards: []
         };
