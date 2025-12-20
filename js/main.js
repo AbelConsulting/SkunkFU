@@ -247,8 +247,7 @@ class GameApp {
             const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             this.isMobile = isMobileDevice;
 
-            // Hazards are globally disabled in the game; code for spike toggles removed.
-            // (Previously there was a URL override for spikes; this behavior has been removed.)
+            // Hazards are globally disabled in the game; URL-based hazard toggles have been removed.
 
             // Lower target FPS on mobile to save CPU/battery (configurable)
             if (isMobileDevice) {

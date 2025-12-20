@@ -415,7 +415,7 @@ class Game {
         // Update player
         this.player.update(dt, this.level);
 
-        // Hazard collision checks disabled: hazards and spike damage are removed.
+        // Hazard collision checks disabled: hazards and related damage are removed.
         try {
             if (this.level && this.level.hazards && this.level.hazards.length > 0) {
                 if (typeof console !== 'undefined' && console.log) console.log('Clearing hazards at runtime before collision checks (hazards disabled).');

@@ -218,7 +218,7 @@ class Level {
             if (platform.type === 'moving') this.drawPlatform(ctx, platform);
         }
 
-        // 3. Hazard visuals removed: spike and hazard drawings are intentionally disabled.
+        // 3. Hazard visuals removed: hazard drawings are intentionally disabled.
         // If any hazards exist for backwards compatibility, clear them silently so
         // they cannot render or affect gameplay.
         if (this.hazards && this.hazards.length > 0) {
