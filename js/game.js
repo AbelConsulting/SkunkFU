@@ -298,31 +298,26 @@ class Game {
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
-            // Place player at spawn point (mobile: left, desktop: right)
-            if (this.level.spawnPoints && this.level.spawnPoints.length > 0) {
-                const spawnSide = this.isMobile ? 'left' : 'right';
-                let sp = this.level.spawnPoints.find(s => s.x === spawnSide);
-                if (!sp) sp = this.level.spawnPoints[0];
-                let spawnX = (typeof sp.x === 'number') ? sp.x : (sp.x === 'left' ? 16 : this.level.width - 16);
-                let spawnY = (typeof sp.y === 'number') ? sp.y : 300;
-                // Ensure spawn is on a platform
-                const platform = this.level.platforms.find(p => spawnX >= p.x && spawnX <= p.x + p.width && spawnY + this.player.height >= p.y);
-                if (platform) {
-                    spawnY = platform.y - this.player.height - 8;
+            // Place player at spawn point (mobile: left platform, desktop: right platform)
+            if (this.level.platforms && this.level.platforms.length > 0) {
+                let spawnPlatform;
+                if (this.isMobile) {
+                    // For mobile, use the leftmost non-ground platform
+                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
+                    spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x < a.x ? b : a), nonGroundPlatforms[0]);
+                } else {
+                    // For desktop, use the rightmost non-ground platform
+                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
+                    spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x > a.x ? b : a), nonGroundPlatforms[0]);
                 }
+                const spawnX = Math.floor(spawnPlatform.x + (spawnPlatform.width - this.player.width) / 2);
+                const spawnY = spawnPlatform.y - this.player.height - 8;
                 this.player.x = spawnX;
                 this.player.y = spawnY;
-                console.log('Spawn placed at spawn point', this.player.x, this.player.y, 'spawn:', sp.x, sp.y);
+                console.log('Spawn placed on platform at', this.player.x, this.player.y, 'platform:', spawnPlatform.x, spawnPlatform.y, spawnPlatform.width, spawnPlatform.height);
             } else {
-                // Fallback to platform spawn
-                const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
-                const platforms = nonGroundPlatforms.length > 0 ? nonGroundPlatforms : this.level.platforms;
-                const floor = platforms.reduce((a, b) => (b.y > a.y ? b : a), platforms[0]);
-                const spawnX = Math.floor(floor.x + (floor.width - this.player.width) / 2);
-                const spawnPadding = 8; // px above the platform
-                this.player.x = spawnX;
-                this.player.y = floor.y - this.player.height - spawnPadding;
-                console.log('Spawn placed on platform at', this.player.x, this.player.y, 'platform:', floor.x, floor.y, floor.width, floor.height);
+                this.player.x = 100;
+                this.player.y = this.height - this.player.height - 8;
             }
         
                 // Ensure gameplay music is loaded (deferred for mobile performance)
