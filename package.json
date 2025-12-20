@@ -28,7 +28,8 @@
 
     "test:sprite-padding": "node tools/check_sprite_padding.js",
 
-    "playwright:install": "npx playwright install"
+    "playwright:install": "npx playwright install",
+    "deploy:wrangler": "npm run build && npx wrangler deploy --assets=./dist"
   },
   "devDependencies": {
     "esbuild": "^0.19.12",
