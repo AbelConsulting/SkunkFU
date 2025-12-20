@@ -10,19 +10,287 @@
     },
     {
       "type": "log",
-      "text": "AudioManager: Loading audio assets..."
+      "text": "touchDebug: mobileStartShown {}"
     },
     {
       "type": "log",
-      "text": "AudioManager: Initializing audio context..."
+      "text": "touchDebug: updateMobileUI {landscape: false, width: 390, height: 664}"
     },
     {
       "type": "log",
-      "text": "AudioManager: All audio assets loaded."
+      "text": "touchDebug: mobileStartHidden {}"
     },
     {
       "type": "log",
-      "text": "AudioManager: Audio context resumed."
+      "text": "SpriteLoader: loaded ninja_idle -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_walk -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_jump -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_attack -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_shadow_strike -> 520x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_hurt -> 130x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_idle -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_walk -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_attack -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_hurt -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ground_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded platform_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded wall_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_city -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_forest -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_mountains -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_cave -> 1920x1080"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_idle width 260; detected uniform 4px padding (frameWidth=62, stride=66)"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_walk width 390; detected uniform 6px padding (frameWidth=60, stride=66)"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_jump width 260; detected uniform 4px padding (frameWidth=62, stride=66)"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_attack width 390; detected uniform 6px padding (frameWidth=60, stride=66)"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_shadow_strike width 520; detected uniform 8px padding (frameWidth=58, stride=66)"
+    },
+    {
+      "type": "info",
+      "text": "SpriteLoader: sprite ninja_hurt width 130; detected uniform 2px padding (frameWidth=64, stride=66)"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: adjustCanvas_mobile_viewClamp {cssHeight: 219, overlayH: 0, cappedOverlayH: 0, finalEffectiveCssHeight: 219}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: gameReady_pending_check {}"
+    },
+    {
+      "type": "log",
+      "text": "Game.keydown {key: enter, state: MENU}"
+    },
+    {
+      "type": "log",
+      "text": "Game.startGame() called"
+    },
+    {
+      "type": "log",
+      "text": "Spawn placed on platform at 198 468 platform: 120 540 220 24"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: gameStateChange_menu {state: PLAYING}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: mobileStartHidden {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_portrait {}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 0, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraY diagnostic {cameraY: 390.75166666666667, targetCameraY: 393.0166666666667, viewHeight: 219, levelHeight: 720}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: gameStateChange_menu {state: PLAYING}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: mobileStartHidden {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_portrait {}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 1, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 2, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 3, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 4, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 5, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 6, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 7, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 8, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 9, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 10, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 11, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 12, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 13, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 14, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 15, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 16, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 17, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 18, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 19, playerX: 198, playerCenterX: 230, cameraX: 0, targetCameraX: -4}"
+    },
+    {
+      "type": "log",
+      "text": "FPS probe result {fps: 60, avgDt: 16.580327868657033, frames: 61, samples: 61}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: mobileFpsProbe {fps: 60, mode: high}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: adjustCanvas_mobile_viewClamp {cssHeight: 219, overlayH: 0, cappedOverlayH: 0, finalEffectiveCssHeight: 219}"
+    },
+    {
+      "type": "log",
+      "text": "Mobile performance mode set to high {MOBILE_FPS: 40, MOBILE_DPR_SCALE_REDUCTION: 0.7}"
+    },
+    {
+      "type": "log",
+      "text": "Probe selected mode high"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
+    },
+    {
+      "type": "error",
+      "text": "Captured error: Uncaught ReferenceError: level is not defined at http://localhost:8000/js/enemy.js:206:46\nReferenceError: level is not defined\n    at Enemy.patrol (http://localhost:8000/js/enemy.js:206:46)\n    at Enemy.update (http://localhost:8000/js/enemy.js:156:26)\n    at EnemyManager.update (http://localhost:8000/js/enemyManager.js:64:19)\n    at Game.update (http://localhost:8000/js/game.js?v=6:419:27)\n    at GameApp.gameLoop (http://localhost:8000/js/main.js:598:38)\n    at http://localhost:8000/js/main.js:621:46\n    at eval (eval at evaluate (:290:30), <anonymous>:9:11)"
+    },
+    {
+      "type": "pageerror",
+      "text": "level is not defined"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: adjustCanvas_mobile_viewClamp {cssHeight: 219, overlayH: 0, cappedOverlayH: 0, finalEffectiveCssHeight: 219}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: updateMobileUI {landscape: false, width: 390, height: 664}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: mobileStartHidden {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_portrait {}"
     }
   ],
   "fps": 60,
