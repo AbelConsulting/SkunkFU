@@ -415,31 +415,11 @@ class Game {
         // Update player
         this.player.update(dt, this.level);
 
-        // Check hazards (spikes etc.) that can damage the player
+        // Hazard collision checks disabled: hazards and spike damage are removed.
         try {
             if (this.level && this.level.hazards && this.level.hazards.length > 0) {
-                const prect = { x: this.player.x, y: this.player.y, width: this.player.width, height: this.player.height };
-                for (const h of this.level.hazards) {
-                    if (h && Utils.rectCollision(prect, { x: h.x, y: h.y, width: h.width, height: h.height })) {
-                        // If spikes are globally disabled, skip spike damage checks
-                        if (h.type === 'spike' || h.type === 'moving_spike') {
-                            if (typeof Config !== 'undefined' && Config.DISABLE_SPIKES) {
-                                // Optional debug log when spikes are skipped
-                                if (typeof console !== 'undefined' && console.log) console.log('Spike collision skipped (disabled) at', h);
-                                continue;
-                            }
-
-                            // Otherwise (spikes enabled), apply damage as before
-                            const died = this.player.takeDamage(20, null);
-                            if (died) {
-                                this.state = 'GAME_OVER';
-                                this.audioManager.stopMusic && this.audioManager.stopMusic();
-                                this.audioManager.playSound && this.audioManager.playSound('game_over', 1.0);
-                            }
-                        }
-                        // Other hazard types (future) can be handled here
-                    }
-                }
+                if (typeof console !== 'undefined' && console.log) console.log('Clearing hazards at runtime before collision checks (hazards disabled).');
+                this.level.hazards = [];
             }
         } catch (e) { /* ignore hazard check errors */ }
 
