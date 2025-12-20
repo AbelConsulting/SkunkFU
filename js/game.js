@@ -59,13 +59,13 @@ class Game {
             platforms: [
                 // Simple evenly-spaced static platforms for easier gameplay and testing
                 { x: 0, y: 700, width: worldWidth, height: 40, type: 'static', tile: 'ground_tile' },
-                { x: 120, y: 540, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 420, y: 520, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 720, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1020, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1320, y: 520, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1620, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-                { x: 1920, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' }
+                { x: 120, y: 544, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 420, y: 524, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 720, y: 504, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 1020, y: 504, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 1320, y: 524, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 1620, y: 504, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+                { x: 1920, y: 504, width: 220, height: 24, type: 'static', tile: 'platform_tile' }
             ],
             hazards: []
         };
