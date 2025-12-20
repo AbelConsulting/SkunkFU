@@ -1,0 +1,77 @@
+name: CI & Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Playwright tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run enemy missing-level telemetry test
+        run: node tools/run_enemy_missing_level_sim.js
+
+      - name: Upload telemetry test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: enemy-telemetry-results
+          path: tools/run_enemy_missing_level_sim.json
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Prepare dist for publish
+        run: |
+          # ensure dist exists and contains static files
+          ls -la dist || true
+          echo "Dist contents:" && ls -la dist || true
+
+      - name: Publish to Cloudflare Pages
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          if ! command -v wrangler >/dev/null 2>&1; then
+            npm install -g wrangler@2
+          fi
+          # Publish dist directory; CF_PAGES_PROJECT should contain the Pages project name
+          wrangler pages publish ./dist --project-name "${{ secrets.CF_PAGES_PROJECT }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: dist

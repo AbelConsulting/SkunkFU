@@ -50,6 +50,42 @@ async function build({ minify = true, sourcemap = false } = {}) {
     target: ['es2017']
   });
   console.log('Built', path.join(DIST, 'bundle.js'));
+
+  // Copy static site files into dist so Wrangler/Pages can publish the folder
+  try {
+    const staticFiles = ['index.html', 'styles.css', 'package.json'];
+    for (const f of staticFiles) {
+      const src = path.join(ROOT, f);
+      const dest = path.join(DIST, f);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+      }
+    }
+    // Copy assets/ and js/ folders to dist (shallow copy)
+    const cp = (srcDir, destDir) => {
+      if (!fs.existsSync(srcDir)) return;
+      if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+      for (const item of fs.readdirSync(srcDir)) {
+        const s = path.join(srcDir, item);
+        const d = path.join(destDir, item);
+        const stat = fs.statSync(s);
+        if (stat.isDirectory()) {
+          fs.mkdirSync(d, { recursive: true });
+          // copy files inside
+          for (const sub of fs.readdirSync(s)) {
+            const ss = path.join(s, sub);
+            const dd = path.join(d, sub);
+            fs.copyFileSync(ss, dd);
+          }
+        } else {
+          fs.copyFileSync(s, d);
+        }
+      }
+    };
+    cp(path.join(ROOT, 'assets'), path.join(DIST, 'assets'));
+    cp(path.join(ROOT, 'js'), path.join(DIST, 'js'));
+    console.log('Copied static files into dist');
+  } catch (e) { console.warn('Static copy to dist failed', e); }
 }
 
 if (require.main === module) {
