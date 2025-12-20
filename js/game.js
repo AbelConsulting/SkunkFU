@@ -304,11 +304,11 @@ class Game {
                 let spawnPlatform;
                 if (this.isMobile) {
                     // For mobile, use the leftmost non-ground platform
-                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
+                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
                     spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x < a.x ? b : a), nonGroundPlatforms[0]);
                 } else {
                     // For desktop, use the rightmost non-ground platform
-                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
+                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
                     spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x > a.x ? b : a), nonGroundPlatforms[0]);
                 }
                 const spawnX = Math.floor(spawnPlatform.x + (spawnPlatform.width - this.player.width) / 2);
