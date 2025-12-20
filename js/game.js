@@ -301,7 +301,7 @@ class Game {
             // Place player on a platform (not the ground floor for mobile)
             if (this.level.platforms && this.level.platforms.length > 0) {
                 // Filter out the ground platform (assume it's the one with largest y or full width)
-                const nonGroundPlatforms = this.level.platforms.filter(p => p.y < this.level.height - 50 || p.width < this.level.width * 0.8);
+                const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 50 && p.width >= this.level.width * 0.8));
                 const platforms = nonGroundPlatforms.length > 0 ? nonGroundPlatforms : this.level.platforms;
                 const floor = platforms.reduce((a, b) => (b.y > a.y ? b : a), platforms[0]);
                 const spawnX = Math.floor(floor.x + (floor.width - this.player.width) / 2);
