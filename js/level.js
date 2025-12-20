@@ -1,9 +1,10 @@
 class Level {
     /**
-     * Load level data from an external configuration
-     * This allows you to have Level 1, Level 2, etc. without changing code.
+     * Load level data from an external configuration object.
+     * Accepts partial data; missing fields will keep previous values.
+     * @param {Object} levelData
      */
-    loadLevel(levelData) {
+    loadLevel(levelData = {}) {
         this.width = levelData.width || this.width;
         this.height = levelData.height || this.height;
         // Optional background name (matches keys from spriteLoader)
@@ -31,6 +32,10 @@ class Level {
         if (hadHazards && typeof console !== 'undefined' && console.log) console.log(`Removed ${levelData.hazards.length} hazards from level load (global hazard removal).`);
     }
 
+    /**
+     * Update animated level elements (moving platforms, hazards).
+     * @param {number} deltaTime - Time (seconds) since last update
+     */
     update(deltaTime) {
         // Update moving platforms
         const time = Date.now() / 1000;
@@ -72,8 +77,11 @@ class Level {
     }
 
     /**
-     * ROBUST Collision Detection
-     * Uses "previous frame" position to prevent tunneling.
+     * Check collision against platforms using previous-frame position to avoid tunneling.
+     * Returns { collided: boolean, platform?: Object, landingY?: number }
+     * @param {Object} rect - Current object bounding rect { x,y,width,height }
+     * @param {Object} prevRect - Previous frame bounding rect
+     * @param {number} velocityY - Current vertical velocity (used to skip upward movement)
      */
     checkPlatformCollision(rect, prevRect, velocityY) {
         // Optimization: Don't check if moving up
@@ -106,6 +114,14 @@ class Level {
         return { collided: false };
     }
 
+    /**
+     * Render the level: background layers, static layer, moving platforms.
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} [cameraX=0]
+     * @param {number} [cameraY=0]
+     * @param {number|null} [viewWidth=null]
+     * @param {number|null} [viewHeight=null]
+     */
     draw(ctx, cameraX = 0, cameraY = 0, viewWidth = null, viewHeight = null) {
         // 1. Draw Background (panorama if available, otherwise gradient)
         const w = viewWidth || this.width || ctx.canvas.width;
@@ -218,26 +234,36 @@ class Level {
             if (platform.type === 'moving') this.drawPlatform(ctx, platform);
         }
 
-        // 3. Hazard visuals removed: hazard drawings are intentionally disabled.
-        // If any hazards exist for backwards compatibility, clear them silently so
-        // they cannot render or affect gameplay.
-        if (this.hazards && this.hazards.length > 0) {
-            if (typeof console !== 'undefined' && console.log) console.log(`Clearing ${this.hazards.length} hazards: visuals disabled.`);
-            this.hazards = [];
-        }
+        // 3. Hazards are not supported in this build; legacy hazard data is ignored.
 
         ctx.restore();
     }
 
-    constructor(width, height) {
+    constructor(width = 800, height = 600) {
         this.width = width;
         this.height = height;
         this.platforms = [];
+
+        // Level visuals & content
+        this.backgroundName = 'bg_city';
+        this.backgroundLayers = [];
+        this.backgroundParallax = (typeof Config !== 'undefined' ? Config.BACKGROUND_PARALLAX : 0.5);
+        this.spawnPoints = null;
+        this.hazards = [];
+
         this.backgroundGradient = null;
         this.tileMode = 'tiles'; // 'tiles' or 'neon' - controls platform rendering
-        this._tilePatterns = {}; // cache for canvas patterns
+        this._tilePatterns = {}; // reserved for future per-canvas pattern caching
         this.cachedSprites = {}; // cache for sprite images
-        
+
+        // Static layer caching for pre-rendered non-moving platforms
+        this._staticNeedsUpdate = true;
+        this._staticLayerCanvas = null;
+        this._staticLayerScale = 1;
+
+        // Performance flags
+        this.useMobileOptimizations = false;
+
         // Cyberpunk style config
         this.theme = {
             bgTop: '#0f0026',      // Deep purple/blue night sky
@@ -250,43 +276,66 @@ class Level {
         };
     }
 
+    /**
+     * Load and cache a sprite by name using the global spriteLoader.
+     * Returns null if the sprite isn't available.
+     * @param {string} name
+     * @returns {HTMLImageElement|null}
+     */
+    _getSprite(name) {
+        if (!name) return null;
+        if (!this.cachedSprites[name]) {
+            try {
+                this.cachedSprites[name] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(name) : null;
+            } catch (e) {
+                this.cachedSprites[name] = null;
+                if (typeof console !== 'undefined' && console.warn) console.warn(`Failed to load sprite ${name}`, e);
+            }
+        }
+        return this.cachedSprites[name];
+    }
+
+    /**
+     * Create a repeating CanvasPattern for the given tile on the provided context.
+     * Returns null on failure.
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {string} tileName
+     * @returns {CanvasPattern|null}
+     */
+    _createPattern(ctx, tileName) {
+        if (!ctx || !tileName) return null;
+        const tileImg = this._getSprite(tileName);
+        if (!tileImg) return null;
+        try {
+            return ctx.createPattern(tileImg, 'repeat');
+        } catch (e) {
+            if (typeof console !== 'undefined' && console.warn) console.warn(`Failed to create pattern for ${tileName}`, e);
+            return null;
+        }
+    }
+
     drawPlatform(ctx, p) {
         // If tile mode is enabled and sprite exists, draw a tiled fill
         if (this.tileMode === 'tiles') {
             const tileName = p.tile || 'platform_tile';
-            let tileImg = this.cachedSprites[tileName];
-            if (!tileImg) {
-                tileImg = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(tileName) : null;
-                if (tileImg) this.cachedSprites[tileName] = tileImg;
-            }
-            if (tileImg) {
-                if (!this._tilePatterns) this._tilePatterns = {};
-                if (!this._tilePatterns[tileName]) {
-                    try {
-                        this._tilePatterns[tileName] = ctx.createPattern(tileImg, 'repeat');
-                    } catch (e) {
-                        this._tilePatterns[tileName] = null;
-                    }
-                }
-                const pattern = this._tilePatterns[tileName];
-                if (pattern) {
-                    ctx.save();
-                    ctx.fillStyle = pattern;
-                    ctx.fillRect(p.x, p.y, p.width, p.height);
-                    ctx.restore();
+            const pattern = this._createPattern(ctx, tileName);
+            if (pattern) {
+                ctx.save();
+                ctx.fillStyle = pattern;
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                ctx.restore();
 
-                    // Subtle border and highlight for readability
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(p.x, p.y, p.width, p.height);
-                    ctx.globalAlpha = 0.25;
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(p.x, p.y, p.width, 4);
-                    ctx.restore();
+                // Subtle border and highlight for readability
+                ctx.save();
+                ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x, p.y, p.width, p.height);
+                ctx.globalAlpha = 0.25;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(p.x, p.y, p.width, 4);
+                ctx.restore();
 
-                    return; // done
-                }
+                return; // done
             }
         }
 
@@ -355,24 +404,15 @@ class Level {
                 // If tile mode with a pattern, create pattern on the static ctx
                 if (this.tileMode === 'tiles') {
                     const tileName = p.tile || 'platform_tile';
-                    let tileImg = this.cachedSprites[tileName];
-                    if (!tileImg) {
-                        tileImg = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(tileName) : null;
-                        if (tileImg) this.cachedSprites[tileName] = tileImg;
-                    }
-                    if (tileImg) {
-                        try {
-                            const pattern = c.createPattern(tileImg, 'repeat');
-                            if (pattern) {
-                                c.save();
-                                c.fillStyle = pattern;
-                                c.fillRect(sx, sy, sw, sh);
-                                c.restore();
-                                // subtle border
-                                c.save(); c.strokeStyle = 'rgba(0,0,0,0.6)'; c.lineWidth = 2; c.strokeRect(sx, sy, sw, sh); c.restore();
-                                continue;
-                            }
-                        } catch (e) {}
+                    const pattern = this._createPattern(c, tileName);
+                    if (pattern) {
+                        c.save();
+                        c.fillStyle = pattern;
+                        c.fillRect(sx, sy, sw, sh);
+                        c.restore();
+                        // subtle border
+                        c.save(); c.strokeStyle = 'rgba(0,0,0,0.6)'; c.lineWidth = 2; c.strokeRect(sx, sy, sw, sh); c.restore();
+                        continue;
                     }
                 }
 
