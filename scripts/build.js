@@ -64,23 +64,18 @@ async function build({ minify = true, sourcemap = false } = {}) {
     // Copy assets/ and js/ folders to dist (shallow copy)
     const cp = (srcDir, destDir) => {
       if (!fs.existsSync(srcDir)) return;
-      if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-      for (const item of fs.readdirSync(srcDir)) {
-        const s = path.join(srcDir, item);
-        const d = path.join(destDir, item);
+      const copyRecursive = (s, d) => {
         const stat = fs.statSync(s);
         if (stat.isDirectory()) {
-          fs.mkdirSync(d, { recursive: true });
-          // copy files inside
-          for (const sub of fs.readdirSync(s)) {
-            const ss = path.join(s, sub);
-            const dd = path.join(d, sub);
-            fs.copyFileSync(ss, dd);
+          if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+          for (const name of fs.readdirSync(s)) {
+            copyRecursive(path.join(s, name), path.join(d, name));
           }
         } else {
           fs.copyFileSync(s, d);
         }
-      }
+      };
+      copyRecursive(srcDir, destDir);
     };
     cp(path.join(ROOT, 'assets'), path.join(DIST, 'assets'));
     cp(path.join(ROOT, 'js'), path.join(DIST, 'js'));
