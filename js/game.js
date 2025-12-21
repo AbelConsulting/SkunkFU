@@ -674,6 +674,12 @@ class Game {
         // Restore scale transform
         this.ctx.restore();
         // Render UI (always on top, no camera offset)
+        // Ensure UI knows the current logical view size (important for mobile centering)
+        try {
+            this.ui.width = this.viewWidth || this.width;
+            this.ui.height = this.viewHeight || this.height;
+        } catch (e) {}
+
         if (this.state === "PLAYING") {
             this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount);
         } else if (this.state === "MENU") {
