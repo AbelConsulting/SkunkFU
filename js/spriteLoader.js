@@ -30,6 +30,75 @@ class SpriteLoader {
     }
 
     /**
+     * Load an image by trying a list of candidate paths (useful for backgrounds)
+     * Tries combinations of suffixes (@1x,@2x) and extensions (.webp,.png).
+     * Stores the first successfully decoded image into `this.sprites[name]`.
+     * Returns the stored image (ImageBitmap or HTMLImageElement or canvas placeholder).
+     */
+    async loadSpriteBest(name, basePathNoExt) {
+        const cacheBuster = this._cacheBuster ? ('?cb=' + this._cacheBuster) : '';
+        const suffixes = ['', '@1x', '@2x'];
+        const exts = ['.webp', '.png'];
+
+        const tryLoad = async (path) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                try { img.decoding = 'async'; } catch (e) {}
+                try { img.crossOrigin = 'anonymous'; } catch (e) {}
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('failed to load ' + path));
+                try { img.src = path; } catch (e) { reject(e); }
+            });
+        };
+
+        for (const s of suffixes) {
+            for (const e of exts) {
+                const path = `${basePathNoExt}${s}${e}${cacheBuster}`;
+                try {
+                    const img = await tryLoad(path);
+                    // Prefer ImageBitmap when available
+                    if (typeof createImageBitmap === 'function') {
+                        try {
+                            const bitmap = await createImageBitmap(img);
+                            this.sprites[name] = bitmap;
+                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${bitmap.width}x${bitmap.height}`); } catch (e) {}
+                            return bitmap;
+                        } catch (e) {
+                            // fallback to image element if bitmap creation fails
+                            this.sprites[name] = img;
+                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${img.width}x${img.height}`); } catch (e) {}
+                            return img;
+                        }
+                    } else {
+                        this.sprites[name] = img;
+                        try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${img.width}x${img.height}`); } catch (e) {}
+                        return img;
+                    }
+                } catch (e) {
+                    // try next candidate
+                }
+            }
+        }
+
+        // All candidates failed — fall back to placeholder behavior similar to loadSprite onerror
+        if (!this._missing) this._missing = [];
+        this._missing.push({ name, path: basePathNoExt });
+
+        // Provide a simple fallback canvas (single-tile placeholder)
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(name || 'missing', 4, 12);
+        this.sprites[name] = canvas;
+        return canvas;
+    }
+
+    /**
      * Load a sprite image
      */
     loadSprite(name, path) {

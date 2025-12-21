@@ -19,23 +19,13 @@ class Level {
                 const ensureLoaded = (name) => {
                     if (!name) return;
                     if (spriteLoader.getSprite(name)) return; // already present
-                    // map bg_xxx -> assets/sprites/backgrounds/xxx_bg[{@1x,@2x}].webp|.png
+                    // map bg_xxx -> assets/sprites/backgrounds/xxx_bg
                     const base = name.replace(/^bg_/, '');
-                    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
-                    // Prefer smaller mobile variants when mobile optimizations enabled
-                    const suffix = (this.useMobileOptimizations) ? '@1x' : (dpr >= 2 ? '@2x' : '');
-                    // Prefer modern compressed WebP when available
-                    const preferredPath = `assets/sprites/backgrounds/${base}_bg${suffix}.webp`;
-                    const fallbackPath = `assets/sprites/backgrounds/${base}_bg${suffix}.png`;
-                    // Fire-and-forget; when loaded, cache into level.cachedSprites
-                    spriteLoader.loadSprite(name, preferredPath).then(img => {
-                        try { this.cachedSprites[name] = img; } catch (e) {}
-                    }).catch(() => {
-                        // Try fallback extension once
-                        spriteLoader.loadSprite(name, fallbackPath).then(img => {
-                            try { this.cachedSprites[name] = img; } catch (e) {}
-                        }).catch(() => {});
-                    });
+                    const basePath = `assets/sprites/backgrounds/${base}_bg`;
+                    // Use the robust variant loader which tries webp/png and suffixes
+                    try {
+                        spriteLoader.loadSpriteBest(name, basePath).then(img => { try { this.cachedSprites[name] = img; } catch (e) {} }).catch(() => {});
+                    } catch (e) {}
                 };
 
                 ensureLoaded(this.backgroundName);
