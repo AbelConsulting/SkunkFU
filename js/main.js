@@ -318,31 +318,34 @@ class GameApp {
                     if (!badge) {
                         badge = document.createElement('div');
                         badge.id = 'mobile-score-badge';
-                        // Inline styles keep layout local and avoid touching CSS files
-                        Object.assign(badge.style, {
-                            position: 'absolute',
-                            top: '12px',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            zIndex: 1200,
-                            padding: '6px 12px',
-                            background: 'rgba(0,0,0,0.55)',
-                            color: '#fff',
-                            borderRadius: '10px',
-                            fontSize: '16px',
-                            fontFamily: 'sans-serif',
-                            display: 'none',
-                            pointerEvents: 'none'
-                        });
                         container.appendChild(badge);
+
+                        // Inject compact neon styles for the badge and pulse animation
+                        try {
+                            const css = `
+                                #mobile-score-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index:1200; display:none; pointer-events:none; font-family: sans-serif; }
+                                #mobile-score-badge .badge-inner { background: rgba(0,0,0,0.45); padding:6px 12px; border-radius:12px; display:inline-block; box-shadow: 0 0 16px rgba(57,255,20,0.08); }
+                                #mobile-score-badge .label { color:#cfe; font-size:12px; display:block; text-align:center; opacity:0.85; }
+                                #mobile-score-badge .value { color: #39FF14; font-weight:700; font-size:18px; text-align:center; display:block; text-shadow: 0 0 6px rgba(57,255,20,0.85), 0 0 12px rgba(0,255,255,0.18); }
+                                @keyframes score-pop { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(57,255,20,0)); } 50% { transform: scale(1.15); filter: drop-shadow(0 0 18px rgba(57,255,20,0.85)); } 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(57,255,20,0.35)); } }
+                                #mobile-score-badge.pop .badge-inner { animation: score-pop 360ms ease-out; }
+                            `;
+                            const s = document.createElement('style'); s.setAttribute('data-generated','mobile-score-badge'); s.appendChild(document.createTextNode(css)); document.head.appendChild(s);
+                        } catch (e) {}
                     }
 
                     const updateBadge = (score) => {
-                        try { badge.textContent = 'Score: ' + (typeof score === 'number' ? score : (this.game && this.game.score || 0)); } catch (e) {}
+                        try {
+                            const val = (typeof score === 'number') ? score : (this.game && this.game.score || 0);
+                            badge.innerHTML = `<div class="badge-inner"><span class="label">SCORE</span><span class="value">${val}</span></div>`;
+                            badge.style.display = 'block';
+                            // Pulse animation
+                            try { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); setTimeout(()=> badge.classList.remove('pop'), 520); } catch (e) {}
+                        } catch (e) {}
                     };
 
                     window.addEventListener('scoreChange', (ev) => {
-                        try { updateBadge(ev && ev.detail && typeof ev.detail.score !== 'undefined' ? ev.detail.score : (this.game && this.game.score)); badge.style.display = 'block'; } catch (e) {}
+                        try { updateBadge(ev && ev.detail && typeof ev.detail.score !== 'undefined' ? ev.detail.score : (this.game && this.game.score)); } catch (e) {}
                     });
 
                     window.addEventListener('gameStateChange', (ev) => {

@@ -87,7 +87,7 @@ class UI {
         ctx.fillText('Press ENTER to Restart', this.width / 2, this.height / 2 + 120);
     }
 
-    drawHUD(ctx, player, score, combo) {
+    drawHUD(ctx, player, score, combo, pulse) {
         const padding = 20;
 
         // Health bar
@@ -121,10 +121,40 @@ class UI {
         ctx.fillText(`HP: ${Math.max(0, Math.floor(player.health))} / ${player.maxHealth}`, 
                      healthBarX + 10, healthBarY + 6);
 
-        // Score
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(`Score: ${score}`, this.width - padding, padding);
+        // Score (neon number with pulse animation)
+        try {
+            const s = typeof score === 'number' ? String(score) : String(score || 0);
+            const scoreX = this.width - padding;
+            const scoreY = padding;
+            const p = Math.max(0, Math.min(1, pulse || 0));
+            const scale = 1 + p * 0.28;
+
+            ctx.save();
+            ctx.translate(scoreX, scoreY);
+            ctx.scale(scale, scale);
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+
+            // Small label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#cfe';
+            ctx.fillText('SCORE', 0, 0);
+
+            // Neon number with glow
+            const numY = 16;
+            ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#39FF14';
+            ctx.shadowColor = '#39FF14';
+            ctx.shadowBlur = 10 + p * 18;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+            ctx.strokeText(s, 0, numY);
+            ctx.fillText(s, 0, numY);
+
+            // reset
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        } catch (e) {}
 
         // Combo counter
         if (combo > 1) {

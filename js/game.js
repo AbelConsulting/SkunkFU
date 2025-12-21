@@ -58,6 +58,7 @@ class Game {
         this.hitPauseTimer = 0;
         this.damageNumbers = [];
         this.hitSparks = [];
+        this._scorePulse = 0;
 
         // Initialize game components
         this.player = new Player(100, 500, this.audioManager);
@@ -453,6 +454,8 @@ class Game {
         if (attackResult.hit) {
             this.score += attackResult.totalDamage * 10;
             try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
+            // trigger score pulse animation
+            try { this._scorePulse = 1.0; } catch (e) {}
             
             // Create visual feedback (limit on mobile)
             for (const enemy of this.enemyManager.getEnemies()) {
@@ -507,6 +510,8 @@ class Game {
 
         // Update camera to follow player
         this.updateCamera();
+        // decay score pulse over time
+        try { this._scorePulse = Math.max(0, (this._scorePulse || 0) - dt * 2.5); } catch (e) {}
     }
 
     centerCameraOnPlayer() {
@@ -676,12 +681,12 @@ class Game {
         // Render UI (always on top, no camera offset)
         // Ensure UI knows the current logical view size (important for mobile centering)
         try {
-            this.ui.width = this.viewWidth || this.width;
-            this.ui.height = this.viewHeight || this.height;
+                this.ui.width = this.viewWidth || this.width;
+                this.ui.height = this.viewHeight || this.height;
         } catch (e) {}
 
         if (this.state === "PLAYING") {
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount);
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0);
         } else if (this.state === "MENU") {
             this.ui.drawMenu(this.ctx);
         } else if (this.state === "PAUSED" && !this.isMobile) {
