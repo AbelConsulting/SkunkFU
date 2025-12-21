@@ -79,10 +79,7 @@ class Game {
             // panorama instead of the fallback gradient.
             background: 'bg_forest',
             // Additional background layers for depth (drawn behind main background)
-            backgroundLayers: [
-                { name: 'bg_mountains', parallax: 0.1 },
-                { name: 'bg_mountains', parallax: 0.3 }
-            ],
+            backgroundLayers: [],
             // Three spawn points: right, center, and left
             // center uses the numeric world center so enemies can spawn in the middle
             spawnPoints: [ { x: 'right', y: 300 }, { x: Math.floor(worldWidth / 2), y: 300 }, { x: 'left', y: 300 } ],
