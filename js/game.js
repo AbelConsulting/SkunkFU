@@ -17,6 +17,34 @@ class Game {
         // Mobile flag (passed from GameApp)
         this.isMobile = !!isMobile;
 
+        // Detect iPad Safari (touch-capable iPadOS often reports Macintosh)
+        // Treat as mobile to enable existing mobile optimizations and reduce
+        // rendering/devicePixelRatio to avoid GPU/memory pressure on Safari.
+        try {
+            const ua = (navigator && navigator.userAgent) || '';
+            const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|Edg|Chrome/.test(ua);
+            const isTouch = (typeof document !== 'undefined' && ('ontouchend' in document)) || (navigator && navigator.maxTouchPoints > 0);
+            const isiPadLike = /iPad|Macintosh/.test(ua) && isTouch;
+            const isiPadSafari = isiPadLike && isSafari;
+            if (isiPadSafari) {
+                this.isMobile = true;
+                // Reduce DPR slightly to lower memory/texture pressure (keep >=1)
+                const baseDpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+                // Use a conservative scale factor to avoid blurry UI while reducing load
+                const reduced = Math.max(1, Math.round(baseDpr * 0.7 * 100) / 100);
+                this._forcedDpr = reduced;
+                try {
+                    if (this.canvas) {
+                        // Keep CSS size as logical view size, but lower backing store resolution
+                        this.canvas.style.width = (this.viewWidth || this.width) + 'px';
+                        this.canvas.style.height = (this.viewHeight || this.height) + 'px';
+                        this.canvas.width = Math.max(1, Math.floor((this.viewWidth || this.width) * reduced));
+                        this.canvas.height = Math.max(1, Math.floor((this.viewHeight || this.height) * reduced));
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {}
+
         // Initialize audio (use provided AudioManager if available)
         this.audioManager = audioManager || new AudioManager();
 

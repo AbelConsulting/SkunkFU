@@ -35,13 +35,32 @@ class SpriteLoader {
     loadSprite(name, path) {
         return new Promise((resolve, reject) => {
             const img = new Image();
+            // Hint to the browser to decode off-main-thread where supported
+            try { img.decoding = 'async'; } catch (e) {}
+            // Allow cross-origin decoding if assets are served from CDN
+            try { img.crossOrigin = 'anonymous'; } catch (e) {}
+
             img.onload = () => {
-                this.sprites[name] = img;
-                try {
-                    if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${img.width}x${img.height}`);
-                } catch (e) {}
-                this.loadedCount++;
-                resolve(img);
+                // Prefer creating an ImageBitmap when available to avoid
+                // main-thread decode stalls. Fall back to the HTMLImageElement.
+                const finishWith = (stored) => {
+                    this.sprites[name] = stored;
+                    try {
+                        if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${stored.width}x${stored.height}`);
+                    } catch (e) {}
+                    this.loadedCount++;
+                    resolve(stored);
+                };
+
+                if (typeof createImageBitmap === 'function') {
+                    try {
+                        createImageBitmap(img).then(bitmap => finishWith(bitmap)).catch(() => finishWith(img));
+                    } catch (e) {
+                        finishWith(img);
+                    }
+                } else {
+                    finishWith(img);
+                }
             };
             img.onerror = () => {
                 // Record missing asset
@@ -89,7 +108,13 @@ class SpriteLoader {
                 this.loadedCount++;
                 resolve(canvas);
             };
-            img.src = path;
+            // Start loading
+            try {
+                img.src = path;
+            } catch (e) {
+                // In some environments setting src may throw; handle as error
+                img.onerror && img.onerror();
+            }
         });
     }
 
