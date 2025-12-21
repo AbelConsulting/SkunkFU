@@ -81,7 +81,7 @@ class Game {
             // Additional background layers for depth (drawn behind main background)
             backgroundLayers: [
                 { name: 'bg_mountains', parallax: 0.1 },
-                { name: 'bg_clouds', parallax: 0.3 }
+                { name: 'bg_mountains', parallax: 0.3 }
             ],
             // Three spawn points: right, center, and left
             // center uses the numeric world center so enemies can spawn in the middle
