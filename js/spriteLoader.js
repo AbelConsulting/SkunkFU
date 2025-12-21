@@ -52,8 +52,9 @@ class SpriteLoader {
             });
         };
 
-        for (const s of suffixes) {
-            for (const e of exts) {
+        // Loop ext first (png variants for all suffixes), then webp variants
+        for (const e of exts) {
+            for (const s of suffixes) {
                 const path = `${basePathNoExt}${s}${e}${cacheBuster}`;
                 try {
                     const img = await tryLoad(path);
@@ -62,17 +63,20 @@ class SpriteLoader {
                         try {
                             const bitmap = await createImageBitmap(img);
                             this.sprites[name] = bitmap;
-                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${bitmap.width}x${bitmap.height}`); } catch (e) {}
+                            this.loadedCount++;
+                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${bitmap.width}x${bitmap.height}`); } catch (e) {}
                             return bitmap;
                         } catch (e) {
                             // fallback to image element if bitmap creation fails
                             this.sprites[name] = img;
-                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${img.width}x${img.height}`); } catch (e) {}
+                            this.loadedCount++;
+                            try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${img.width}x${img.height}`); } catch (e) {}
                             return img;
                         }
                     } else {
                         this.sprites[name] = img;
-                        try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${img.width}x${img.height}`); } catch (e) {}
+                        this.loadedCount++;
+                        try { if (typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${img.width}x${img.height}`); } catch (e) {}
                         return img;
                     }
                 } catch (e) {
