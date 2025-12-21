@@ -38,7 +38,8 @@ class SpriteLoader {
     async loadSpriteBest(name, basePathNoExt) {
         const cacheBuster = this._cacheBuster ? ('?cb=' + this._cacheBuster) : '';
         const suffixes = ['', '@1x', '@2x'];
-        const exts = ['.webp', '.png'];
+        // Try PNG first to avoid noisy .webp 404s on hosts without WebP variants
+        const exts = ['.png', '.webp'];
 
         const tryLoad = async (path) => {
             return new Promise((resolve, reject) => {
