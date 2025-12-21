@@ -103,17 +103,6 @@ class Enemy {
         return this.health <= 0;
     }
 
-    checkGround(x, y, level) {
-        // Check if there's a platform below this position (within a small distance)
-        const checkRect = { x: x, y: y + this.height, width: this.width, height: 10 };
-        for (const platform of level.platforms) {
-            if (Utils.rectCollision(checkRect, platform)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     update(dt, player, level) {
         // Update timers
         if (this.hitStunTimer > 0) {
