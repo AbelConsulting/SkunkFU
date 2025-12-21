@@ -24,7 +24,13 @@ class GameApp {
         const dpr = window.devicePixelRatio || 1;
         // Cap devicePixelRatio on mobile to avoid excessive rendering cost
         const maxDPR = isMobileDevice ? 1 : 1.5;
-        const finalDpr = Math.min(dpr, maxDPR);
+        let finalDpr = Math.min(dpr, maxDPR);
+        // Respect any forced DPR from the Game instance (e.g., iPad Safari heuristic)
+        try {
+            if (this.game && this.game._forcedDpr) {
+                finalDpr = Math.max(1, Math.min(finalDpr, this.game._forcedDpr));
+            }
+        } catch (e) {}
 
         // Reduce effective resolution more aggressively on small devices
         const scaleReduction = isMobileDevice ? (Config.MOBILE_DPR_SCALE_REDUCTION || 0.7) : 1.0;
@@ -303,6 +309,24 @@ class GameApp {
             this.game = new Game(this.canvas, this.audioManager, this.isMobile);
             // Expose for diagnostic tests and external tooling
             try { window.game = this.game; window.gameApp = this; } catch (e) { /* ignore in strict contexts */ }
+
+            // If the Game instance indicated a forced DPR (iPad Safari), apply
+            // conservative mobile performance defaults to reduce FPS and DPR
+            // pressure. This avoids visible jank on iPad Safari caused by large
+            // texture uploads and decoding.
+            try {
+                if (this.game && this.game._forcedDpr) {
+                    // Lower DPR scale reduction so backing store matches forced DPR
+                    Config.MOBILE_DPR_SCALE_REDUCTION = Math.min(Config.MOBILE_DPR_SCALE_REDUCTION || 1, (this.game._forcedDpr / (window.devicePixelRatio || 1)) || 0.7);
+                    // Prefer a moderate FPS target on iPad Safari
+                    Config.MOBILE_FPS = Math.min(Config.MOBILE_FPS || 40, 30);
+                    // Apply now if mobile mode already active
+                    if (this.isMobile && typeof window.setMobilePerformanceMode === 'function') {
+                        try { window.setMobilePerformanceMode('mid'); } catch (e) {}
+                    }
+                    try { console.log('Applied iPad-Safari conservative DPR/FPS settings', { forcedDpr: this.game._forcedDpr, MOBILE_DPR_SCALE_REDUCTION: Config.MOBILE_DPR_SCALE_REDUCTION, MOBILE_FPS: Config.MOBILE_FPS }); } catch (e) {}
+                }
+            } catch (e) {}
 
             // Instantiate LevelEditor (if available) so designers can pick tiles per platform
             try {

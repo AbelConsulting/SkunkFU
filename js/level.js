@@ -400,7 +400,10 @@ class Level {
     // Call when level content or viewport size changes
     renderStaticLayer(viewWidth = null, viewHeight = null) {
         try {
-            const MAX_STATIC_WIDTH = 4096; // cap to avoid excessive memory use
+            // Cap pre-rendered static layer width to avoid excessive memory
+            // and GPU texture usage. Use a smaller cap on mobile to reduce
+            // pressure on devices like iPad/Safari.
+            const MAX_STATIC_WIDTH = this.useMobileOptimizations ? 2048 : 4096;
             const targetW = Math.min(this.width, MAX_STATIC_WIDTH);
             // We'll render at the level height so vertical content is preserved
             const targetH = Math.max(1, Math.floor(this.height));
