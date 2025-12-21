@@ -154,6 +154,7 @@ class Game {
                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
                         this.startGame();
                         this.dispatchGameStateChange();
+                            try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
                     }
                 }
 
@@ -354,6 +355,14 @@ class Game {
             window.dispatchEvent(event);
         }
 
+        // Notify UI layers about score updates
+        dispatchScoreChange() {
+            try {
+                const ev = new CustomEvent('scoreChange', { detail: { score: this.score } });
+                window.dispatchEvent(ev);
+            } catch (e) { /* ignore */ }
+        }
+
         togglePause() {
             if (this.state === 'PLAYING') {
                 this.state = 'PAUSED';
@@ -423,6 +432,7 @@ class Game {
         const attackResult = this.enemyManager.checkPlayerAttack(this.player);
         if (attackResult.hit) {
             this.score += attackResult.totalDamage * 10;
+            try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
             
             // Create visual feedback (limit on mobile)
             for (const enemy of this.enemyManager.getEnemies()) {
@@ -471,6 +481,8 @@ class Game {
             this.state = "GAME_OVER";
             this.audioManager.stopMusic();
             this.audioManager.playSound('game_over', 1.0);
+            // Notify UI layers (mobile touch controls) about state change
+            try { this.dispatchGameStateChange && this.dispatchGameStateChange(); } catch(e) {}
         }
 
         // Update camera to follow player
