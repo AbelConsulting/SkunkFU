@@ -1098,6 +1098,40 @@ updateMobileUI();
     });
 })();
 
+// Integration: listen for messages from a parent/wrapper app so it can force landscape
+(function(){
+    function safePost(msg) {
+        try { window.parent && window.parent.postMessage && window.parent.postMessage(msg, '*'); } catch (e) {}
+    }
+
+    window.addEventListener('message', (ev) => {
+        const msg = ev && ev.data ? ev.data : null;
+        if (!msg || typeof msg !== 'object') return;
+        try {
+            if (msg.type === 'FORCE_LANDSCAPE') {
+                document.body.classList.add('force-landscape');
+                window._forcedLandscapeMode = true;
+                updateMobileUI();
+                try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+                safePost({ source: 'SkunkFU', type: 'FORCED_LANDSCAPE_SET', value: true });
+            } else if (msg.type === 'CLEAR_FORCED_LANDSCAPE') {
+                document.body.classList.remove('force-landscape');
+                window._forcedLandscapeMode = false;
+                updateMobileUI();
+                try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+                safePost({ source: 'SkunkFU', type: 'FORCED_LANDSCAPE_CLEARED', value: true });
+            } else if (msg.type === 'REQUEST_STATUS') {
+                const status = { forced: !!window._forcedLandscapeMode, ready: !!window.gameReady, state: window.game && window.game.state };
+                safePost({ source: 'SkunkFU', type: 'STATUS', status });
+            }
+        } catch (e) {}
+    });
+
+    // Notify parent when important events happen
+    window.addEventListener('gameReady', () => { safePost({ source: 'SkunkFU', type: 'GAME_READY' }); });
+    window.addEventListener('gameStateChange', (e) => { safePost({ source: 'SkunkFU', type: 'GAME_STATE', state: e && e.detail && e.detail.state }); });
+})();
+
 // If gameReady fires while a pending start exists, and device is landscape + in MENU,
 // ensure we auto-dispatch the pending gesture (covers cases where startHandler did not
 // register an onReady listener because the pending flag was set externally by tests).
