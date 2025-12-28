@@ -413,7 +413,9 @@ class Game {
                 this.state = 'PAUSED';
                 this.audioManager.playSound && this.audioManager.playSound('pause');
                 this.audioManager.pauseMusic && this.audioManager.pauseMusic();
-                if (this.isMobile) {
+                // Show pause overlay on mobile or when touch controls are present
+                const hasTouchControls = document.getElementById('touch-controls') || document.getElementById('btn-pause');
+                if (this.isMobile || hasTouchControls) {
                     const overlay = document.getElementById('pause-overlay');
                     if (overlay) overlay.style.display = 'flex';
                 }
@@ -421,10 +423,9 @@ class Game {
             } else if (this.state === 'PAUSED') {
                 this.state = 'PLAYING';
                 this.audioManager.unpauseMusic && this.audioManager.unpauseMusic();
-                if (this.isMobile) {
-                    const overlay = document.getElementById('pause-overlay');
-                    if (overlay) overlay.style.display = 'none';
-                }
+                // Hide pause overlay
+                const overlay = document.getElementById('pause-overlay');
+                if (overlay) overlay.style.display = 'none';
                 this.dispatchGameStateChange();
             }
         }
@@ -776,7 +777,11 @@ class Game {
         } else if (this.state === "MENU") {
             this.ui.drawMenu(this.ctx);
         } else if (this.state === "PAUSED" && !this.isMobile) {
-            this.ui.drawPauseMenu(this.ctx);
+            // Only show drawn pause menu on desktop when no touch controls
+            const hasTouchControls = document.getElementById('touch-controls') || document.getElementById('btn-pause');
+            if (!hasTouchControls) {
+                this.ui.drawPauseMenu(this.ctx);
+            }
         } else if (this.state === "GAME_OVER") {
             this.ui.drawGameOver(this.ctx, this.score, this.enemyManager.enemiesDefeated);
         }

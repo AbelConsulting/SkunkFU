@@ -645,14 +645,31 @@ function initTouchControls() {
 
         const downHandler = (e) => {
             try { e && e.preventDefault(); } catch (_) {}
-            triggerKeyEvent(key, 'keydown');
-            if(key === ' ') triggerKeyEvent('ArrowUp', 'keydown');
+            // Special handling for pause button - call togglePause directly instead of triggering key events
+            if (id === 'btn-pause') {
+                try {
+                    if (window.game && typeof window.game.togglePause === 'function') {
+                        window.game.togglePause();
+                    } else if (typeof window.toggleGamePause === 'function') {
+                        window.toggleGamePause();
+                    } else {
+                        // Fallback: synthesize Escape key
+                        triggerKeyEvent(key, 'keydown');
+                    }
+                } catch (err) { console.warn('pause button handler failed', err); }
+            } else {
+                triggerKeyEvent(key, 'keydown');
+                if(key === ' ') triggerKeyEvent('ArrowUp', 'keydown');
+            }
             logTouchControlEvent('touch_down', { button: id, key });
         };
         const upHandler = (e) => {
             try { e && e.preventDefault(); } catch (_) {}
-            triggerKeyEvent(key, 'keyup');
-            if(key === ' ') triggerKeyEvent('ArrowUp', 'keyup');
+            // Don't send keyup for pause button since it's a toggle
+            if (id !== 'btn-pause') {
+                triggerKeyEvent(key, 'keyup');
+                if(key === ' ') triggerKeyEvent('ArrowUp', 'keyup');
+            }
             logTouchControlEvent('touch_up', { button: id, key });
         };
 

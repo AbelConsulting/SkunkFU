@@ -2,14 +2,33 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Run SkunkFU Game",
+			"label": "Run SkunkFU Game (JS)",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe src/main.py"
+			"command": "python",
+			"args": ["-m", "http.server", "8000"],
+			"isBackground": true,
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Open JS Game in Browser",
+			"type": "shell",
+			"command": "start",
+			"args": ["http://localhost:8000"],
+			"windows": {
+				"command": "cmd",
+				"args": ["/c", "start", "http://localhost:8000"]
+			}
 		},
 		{
 			"label": "Sprite Smoke Test",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe",
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe",
 			"args": [
 				"toolshed/test_sprites.py"
 			],
@@ -21,42 +40,38 @@
 		{
 			"label": "Convert Quadrants to Horizontal",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe convert_quadrants_to_horizontal.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe convert_quadrants_to_horizontal.py"
 		},
 		{
 			"label": "Remove Sprite Backgrounds",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe remove_sprite_backgrounds.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe remove_sprite_backgrounds.py"
 		},
 		{
 			"label": "Cleanup Sprites",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe cleanup_sprites.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe cleanup_sprites.py"
 		},
 		{
 			"label": "Generate Metal Sound",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe generate_metal_sound.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe generate_metal_sound.py"
 		},
 		{
 			"label": "Generate Metal Guitar",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe generate_metal_sound.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe generate_metal_sound.py"
 		},
 		{
 			"label": "Analyze Music Mix",
 			"type": "shell",
-			"command": "C:/Users/marcf/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe analyze_music_mix.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe analyze_music_mix.py"
 		},
 		{
 			"label": "Generate Background Music",
 			"type": "shell",
-			"command": "python generate_music.py"
-		},
-		{
-			"label": "Generate Background Music",
-			"type": "shell",
-			"command": ".venv\\Scripts\\python.exe generate_music.py"
+			"command": "C:/Users/Jewel/Documents/GitHub/SkunkFU/.venv/Scripts/python.exe",
+			"args": ["generate_music.py"]
 		}
 	]
 }

@@ -25,7 +25,15 @@ class SpriteLoader {
             'ninja_jump': 4,
             'ninja_attack': 4,
             'ninja_shadow_strike': 8,
-            'ninja_hurt': 2
+            'ninja_hurt': 2,
+            'basic_idle': 4,
+            'basic_walk': 4,
+            'basic_attack': 4,
+            'basic_hurt': 2,
+            'second_idle': 4,
+            'second_walk': 4,
+            'second_attack': 4,
+            'second_hurt': 2
         };
     }
 
@@ -210,6 +218,10 @@ class SpriteLoader {
             ['basic_walk', 'assets/sprites/enemies/basic_walk.png'],
             ['basic_attack', 'assets/sprites/enemies/basic_attack.png'],
             ['basic_hurt', 'assets/sprites/enemies/basic_hurt.png'],
+            ['second_idle', 'assets/sprites/enemies/second_idle.png'],
+            ['second_walk', 'assets/sprites/enemies/second_walk.png'],
+            ['second_attack', 'assets/sprites/enemies/second_attack.png'],
+            ['second_hurt', 'assets/sprites/enemies/second_hurt.png'],
 
             // Background / tile sprites
             ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
