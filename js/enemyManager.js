@@ -51,6 +51,9 @@ class EnemyManager {
         const enemyType = rand < 0.45 ? "BASIC" : rand < 0.65 ? "FAST_BASIC" : "SECOND_BASIC";
         const enemy = new Enemy(sx, sy, enemyType, this.audioManager);
         this.enemies.push(enemy);
+        try {
+            console.log('EnemyManager.spawnEnemy', { type: enemyType, x: enemy.x, y: enemy.y, levelWidth: level && level.width, total: this.enemies.length });
+        } catch (e) {}
     }
 
     update(dt, player, level) {
