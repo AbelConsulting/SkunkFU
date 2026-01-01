@@ -10,13 +10,16 @@ const JS_DIR = path.join(ROOT, 'js');
 const filesInOrder = [
   'config.js',
   'utils.js',
+  'highscores.js',
   'spriteLoader.js',
   'audioManager.js',
   'visualEffects.js',
   'level.js',
+  'levelEditor.js',
   'player.js',
   'enemy.js',
   'enemyManager.js',
+  'touchControls.js',
   'ui.js',
   'game.js',
   'main.js'
