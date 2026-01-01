@@ -82,10 +82,6 @@ jobs:
             echo "Error: CLOUDFLARE_API_TOKEN is not set. Create a repository secret named CLOUDFLARE_API_TOKEN with a token that has 'Pages:write' and 'Account:read' permissions." >&2
             exit 1
           fi
-          if [ -z "$CLOUDFLARE_PAGES_PROJECT" ]; then
-            echo "Error: CLOUDFLARE_PAGES_PROJECT is not set. Create a repository secret named CLOUDFLARE_PAGES_PROJECT with your Pages project name." >&2
-            exit 1
-          fi
 
           # Ensure wrangler is available (install if missing)
           if ! command -v wrangler >/dev/null 2>&1; then
