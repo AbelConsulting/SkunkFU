@@ -1,9 +1,72 @@
 // js/highscores.js
-// Simple top-5 local high-score manager with 3-character initials input
+// Enhanced local high-score manager with sharing and validation
 (function(window){
   const STORAGE_KEY = 'skunkfu_highscores_v1';
   const ACHIEVEMENTS_KEY = 'skunkfu_achievements_v1';
-  const MAX_SCORES = 5;
+  const MAX_SCORES = 10; // Increased from 5 to 10
+
+  // Score validation: prevent obviously tampered scores
+  function validateScore(score, gameStats) {
+    if (typeof score !== 'number' || score < 0 || !isFinite(score)) return false;
+    if (score > 1000000) return false; // Reasonable max
+    
+    // Basic sanity checks on game stats
+    if (gameStats) {
+      if (gameStats.timeSurvived && score > gameStats.timeSurvived * 1000) return false; // Max ~1000 pts/sec
+      if (gameStats.enemiesDefeated && score < gameStats.enemiesDefeated * 50) return false; // Min 50 pts/enemy
+    }
+    return true;
+  }
+
+  // Generate shareable score code (base64 encoded)
+  function encodeScore(score, initials, gameStats = {}) {
+    const data = {
+      s: Math.floor(score),
+      i: String(initials || '???').toUpperCase().slice(0, 3),
+      t: gameStats.timeSurvived || 0,
+      e: gameStats.enemiesDefeated || 0,
+      c: gameStats.maxCombo || 0,
+      d: Date.now()
+    };
+    try {
+      const json = JSON.stringify(data);
+      return btoa(json).replace(/=/g, '');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Decode shareable score code
+  function decodeScore(code) {
+    try {
+      const padding = (4 - (code.length % 4)) % 4;
+      const base64 = code + '='.repeat(padding);
+      const json = atob(base64);
+      const data = JSON.parse(json);
+      return {
+        score: data.s,
+        initials: data.i,
+        timeSurvived: data.t,
+        enemiesDefeated: data.e,
+        maxCombo: data.c,
+        date: data.d
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Cross-tab synchronization
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY && e.newValue) {
+      try {
+        // Dispatch event to update UI when scores change in another tab
+        window.dispatchEvent(new CustomEvent('highscoresUpdated', {
+          detail: { scores: JSON.parse(e.newValue) }
+        }));
+      } catch (err) {}
+    }
+  });
 
   function loadAchievements(){
     try {
@@ -136,9 +199,15 @@
   }
 
   function addScore(score, initials, gameStats = {}) {
+    // Validate before adding
+    if (!validateScore(score, gameStats)) {
+      console.warn('Invalid score rejected', score);
+      return loadScores();
+    }
+
     const entry = {
       score: Math.floor(score),
-      initials: String(initials || '').toUpperCase().slice(0,3),
+      initials: String(initials || '???').toUpperCase().slice(0,3),
       date: Date.now(),
       // Enhanced stats
       timeSurvived: gameStats.timeSurvived || 0,
@@ -146,14 +215,51 @@
       maxCombo: gameStats.maxCombo || 0,
       totalDamage: gameStats.totalDamage || 0,
       accuracy: gameStats.accuracy || 0,
-      gameVersion: gameStats.gameVersion || '1.0'
+      gameVersion: gameStats.gameVersion || '1.0',
+      // Add shareable code
+      shareCode: encodeScore(score, initials, gameStats)
     };
     const scores = loadScores();
     scores.push(entry);
     scores.sort((a,b)=>b.score - a.score || a.date - b.date);
     const top = scores.slice(0, MAX_SCORES);
     saveScores(top);
+    
+    // Notify other tabs
+    window.dispatchEvent(new CustomEvent('highscoresUpdated', {
+      detail: { scores: top }
+    }));
+    
     return top;
+  }
+
+  // Import score from shareable code
+  function importScoreCode(code) {
+    const decoded = decodeScore(code);
+    if (!decoded) return { success: false, error: 'Invalid code' };
+    
+    if (!validateScore(decoded.score, decoded)) {
+      return { success: false, error: 'Invalid score data' };
+    }
+
+    const scores = loadScores();
+    // Check if this exact score already exists
+    const exists = scores.some(s => 
+      s.score === decoded.score && 
+      s.initials === decoded.initials && 
+      Math.abs(s.date - decoded.date) < 1000
+    );
+    
+    if (exists) {
+      return { success: false, error: 'Score already imported' };
+    }
+
+    scores.push(decoded);
+    scores.sort((a,b)=>b.score - a.score || a.date - b.date);
+    const top = scores.slice(0, MAX_SCORES);
+    saveScores(top);
+    
+    return { success: true, scores: top };
   }
 
   function promptForInitials(score, gameStats, onDone){
@@ -244,22 +350,44 @@
       ok.style.cursor = 'pointer';
       ok.style.transition = 'all 0.2s';
       ok.onclick = async () => {
-        const initials = (input.value || '---').slice(0,3);
+        const initials = (input.value || '???').slice(0,3);
         const updated = addScore(score, initials, gameStats);
-        // Show quick submitting feedback
+        
+        // Show share code
+        const shareCode = encodeScore(score, initials, gameStats);
         const status = document.createElement('div'); 
         status.style.marginTop = '12px'; 
-        status.style.fontSize = '14px'; 
+        status.style.fontSize = '12px'; 
         status.style.color = '#4CAF50'; 
-        status.textContent = '✓ Score saved!';
+        status.innerHTML = '✓ Score saved!<br><br><b>Share Code:</b>';
+        
+        const codeBox = document.createElement('div');
+        codeBox.style.background = '#2d2d2d';
+        codeBox.style.padding = '8px';
+        codeBox.style.borderRadius = '4px';
+        codeBox.style.marginTop = '8px';
+        codeBox.style.fontSize = '11px';
+        codeBox.style.wordBreak = 'break-all';
+        codeBox.style.color = '#0f0';
+        codeBox.style.fontFamily = 'monospace';
+        codeBox.style.cursor = 'pointer';
+        codeBox.textContent = shareCode;
+        codeBox.title = 'Click to copy';
+        codeBox.onclick = () => {
+          try {
+            navigator.clipboard.writeText(shareCode);
+            codeBox.style.background = '#1a5928';
+            setTimeout(() => codeBox.style.background = '#2d2d2d', 300);
+          } catch(e) {}
+        };
+        
+        status.appendChild(codeBox);
         box.appendChild(status);
-        try { 
-          document.body.removeChild(overlay); 
-          // Trigger a brief celebration effect
-          setTimeout(() => {
-            try { status.remove(); } catch(e){}
-          }, 1500);
-        } catch (e) {}
+        
+        setTimeout(() => {
+          try { document.body.removeChild(overlay); } catch(e){}
+        }, 3500);
+        
         if (onDone) onDone(updated);
       };
 
@@ -466,8 +594,95 @@
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            try {
+    const shareCodeBtn = document.createElement('button');
+    shareCodeBtn.textContent = '🔗 Share Code';
+    shareCodeBtn.style.padding = '6px 12px';
+    shareCodeBtn.style.borderRadius = '4px';
+    shareCodeBtn.style.border = 'none';
+    shareCodeBtn.style.background = '#9C27B0';
+    shareCodeBtn.style.color = 'white';
+    shareCodeBtn.style.cursor = 'pointer';
+    shareCodeBtn.onclick = () => {
+      const promptDiv = document.createElement('div');
+      promptDiv.style.position = 'fixed';
+      promptDiv.style.left = '50%';
+      promptDiv.style.top = '50%';
+      promptDiv.style.transform = 'translate(-50%, -50%)';
+      promptDiv.style.background = 'rgba(0,0,0,0.95)';
+      promptDiv.style.padding = '20px';
+      promptDiv.style.borderRadius = '8px';
+      promptDiv.style.z
+    validateScore,
+    encodeScore,
+    decodeScore,
+    importScoreCode,Index = '10000';
+      promptDiv.style.minWidth = '300px';
+      
+      const title = document.createElement('div');
+      title.textContent = 'Import Score Code';
+      title.style.fontSize = '18px';
+      title.style.fontWeight = 'bold';
+      title.style.marginBottom = '12px';
+      title.style.color = '#fff';
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Paste share code here...';
+      input.style.width = '100%';
+      input.style.padding = '8px';
+      input.style.marginBottom = '12px';
+      input.style.borderRadius = '4px';
+      input.style.border = '1px solid #666';
+      input.style.background = '#222';
+      input.style.color = '#fff';
+      
+      const btnRow = document.createElement('div');
+      btnRow.style.display = 'flex';
+      btnRow.style.gap = '8px';
+      
+      const importCodeBtn = document.createElement('button');
+      importCodeBtn.textContent = 'Import';
+      importCodeBtn.style.flex = '1';
+      importCodeBtn.style.padding = '8px';
+      importCodeBtn.style.borderRadius = '4px';
+      importCodeBtn.style.border = 'none';
+      importCodeBtn.style.background = '#4CAF50';
+      importCodeBtn.style.color = 'white';
+      importCodeBtn.style.cursor = 'pointer';
+      importCodeBtn.onclick = () => {
+        const result = importScoreCode(input.value.trim());
+        if (result.success) {
+          alert('Score imported successfully!');
+          renderScoreboard(container, showDetails);
+          document.body.removeChild(promptDiv);
+        } else {
+          alert(result.error || 'Failed to import score');
+        }
+      };
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.flex = '1';
+      cancelBtn.style.padding = '8px';
+      cancelBtn.style.borderRadius = '4px';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.background = '#666';
+      cancelBtn.style.color = 'white';
+      cancelBtn.style.cursor = 'pointer';
+      cancelBtn.onclick = () => document.body.removeChild(promptDiv);
+      
+      btnRow.appendChild(importCodeBtn);
+      btnRow.appendChild(cancelBtn);
+      promptDiv.appendChild(title);
+      promptDiv.appendChild(input);
+      promptDiv.appendChild(btnRow);
+      document.body.appendChild(promptDiv);
+      input.focus();
+    };
+
+    buttonRow.appendChild(exportBtn);
+    buttonRow.appendChild(importBtn);
+    buttonRow.appendChild(shareCode
               const importedScores = JSON.parse(e.target.result);
               if (Array.isArray(importedScores)) {
                 // Validate and merge scores
