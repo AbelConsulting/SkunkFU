@@ -31,7 +31,7 @@
 
     "playwright:install": "npx playwright install",
     "deploy:wrangler": "npm run build && npx wrangler deploy",
-    "deploy:pages": "npm run build && npx wrangler pages deploy ./dist --project-name \"$CF_PAGES_PROJECT\""
+    "deploy:pages": "npm run build && npx wrangler pages deploy ./dist"
   },
   "devDependencies": {
     "esbuild": "^0.19.12",
