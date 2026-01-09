@@ -30,7 +30,7 @@
     "test:sprite-padding": "node tools/check_sprite_padding.js",
 
     "playwright:install": "npx playwright install",
-    "deploy:wrangler": "npm run build && npx wrangler deploy",
+    "deploy:wrangler": "node -e \"console.error('Error: This is a Cloudflare Pages project. Use: npm run deploy:pages'); process.exit(1)\"",
     "deploy:pages": "npm run build && npx wrangler pages deploy ./dist"
   },
   "devDependencies": {
