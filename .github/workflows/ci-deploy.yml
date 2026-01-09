@@ -49,13 +49,7 @@ jobs:
     name: Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
     needs: test
-    # If you're hosting on GitHub Pages (or otherwise not using Cloudflare Pages),
-    # leave these secrets unset and this job will be skipped.
-    if: >-
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      secrets.CLOUDFLARE_API_TOKEN != '' &&
-      secrets.CLOUDFLARE_ACCOUNT_ID != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -81,16 +75,16 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_PAGES_PROJECT: ${{ secrets.CLOUDFLARE_PAGES_PROJECT }}
         run: |
-          # Fail early with helpful message when required secrets are missing
+          # If you're hosting on GitHub Pages, leave the Cloudflare secrets unset.
+          # In that case, this step will print a notice and exit successfully.
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "Error: CLOUDFLARE_API_TOKEN is not set. Create a repository secret named CLOUDFLARE_API_TOKEN with a token that has 'Pages:write' and 'Account:read' permissions." >&2
-            exit 1
+            echo "::notice::Cloudflare Pages deploy skipped (CLOUDFLARE_API_TOKEN not set)." >&2
+            exit 0
           fi
           if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "Error: CLOUDFLARE_ACCOUNT_ID is not set. Create a repository secret named CLOUDFLARE_ACCOUNT_ID." >&2
-            exit 1
+            echo "::notice::Cloudflare Pages deploy skipped (CLOUDFLARE_ACCOUNT_ID not set)." >&2
+            exit 0
           fi
 
           # Normalize (common issue: accidental whitespace/newlines in GitHub secrets)
@@ -135,14 +129,10 @@ jobs:
             echo "Note: 'wrangler deploy' may attempt to deploy a Worker by default. This workflow publishes to Pages using 'wrangler pages publish' via the npm script 'deploy:pages'.";
           fi
 
-          # Determine Pages project name
-          PROJECT_NAME="$CLOUDFLARE_PAGES_PROJECT"
+          # Determine Pages project name from wrangler.jsonc (source of truth)
+          PROJECT_NAME=$(node -e "const fs=require('fs'); const t=fs.readFileSync('wrangler.jsonc','utf8'); const noComments=t.replace(/\/\/.*$/mg,'').replace(/\/\*[\s\S]*?\*\//g,''); const j=JSON.parse(noComments); process.stdout.write(String(j.name||''));")
           if [ -z "$PROJECT_NAME" ]; then
-            # Parse wrangler.jsonc (JSON-with-comments) to extract the configured name
-            PROJECT_NAME=$(node -e "const fs=require('fs'); const t=fs.readFileSync('wrangler.jsonc','utf8'); const noComments=t.replace(/\/\/.*$/mg,'').replace(/\/\*[\s\S]*?\*\//g,''); const j=JSON.parse(noComments); process.stdout.write(String(j.name||''));")
-          fi
-          if [ -z "$PROJECT_NAME" ]; then
-            echo "Error: Cloudflare Pages project name is not set. Set repo secret CLOUDFLARE_PAGES_PROJECT or set 'name' in wrangler.jsonc." >&2
+            echo "Error: Cloudflare Pages project name is not set. Set 'name' in wrangler.jsonc." >&2
             exit 1
           fi
 
