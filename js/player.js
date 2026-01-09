@@ -63,8 +63,8 @@ class Player {
 
         // Shadow strike tuning: active damage window and hitbox size
         // Default: active on all frames except the first/last (windup/recovery)
-        this.shadowStrikeHitboxWidth = 100;
-        this.shadowStrikeHitboxHeight = 60;
+        this.shadowStrikeHitboxWidth = 120;
+        this.shadowStrikeHitboxHeight = 70;
 
         // Combo system
         this.comboCount = 0;
