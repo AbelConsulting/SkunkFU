@@ -104,7 +104,7 @@ class Player {
                 jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12),
                         attack: spriteLoader.createAnimation('ninja_attack', 4, 0.08),
                 // Shadow Strike is a 4-frame sheet.
-                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.1),
+                    shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.04),
                 hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1)
             };
         } else {
@@ -113,7 +113,7 @@ class Player {
                         walk: new Animation(ninja_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 jump: new Animation(ninja_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                         attack: new Animation(ninja_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                shadow_strike: new Animation(ninja_shadow_strike, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                    shadow_strike: new Animation(ninja_shadow_strike, 4, 0.04, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 hurt: new Animation(ninja_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
             };
         }
