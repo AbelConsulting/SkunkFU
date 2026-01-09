@@ -544,8 +544,8 @@ class Game {
 
             // Screen shake and hit pause for impactful hits
             if (this.player.isShadowStriking) {
-                // Shadow Strike already has strong hit pause/sparks; keep shake subtle.
-                this.screenShake = new ScreenShake(0.06, 2);
+                // Shadow Strike: no screen shake (mobile-friendly)
+                this.screenShake = null;
                 this.hitPauseTimer = 0.07;
             } else if (this.player.comboCount >= 3) {
                 this.screenShake = new ScreenShake(0.08, 5);
