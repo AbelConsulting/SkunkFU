@@ -432,14 +432,7 @@ class Game {
          * @param {number} index 
          */
         loadLevel(index) {
-            if Check Level Completion (Player reached right edge)
-            // Use width - 100 as the goal line
-            if (this.player.x > this.level.width - 100) {
-                this.completeLevel();
-                return;
-            }
-
-            // (typeof LEVEL_CONFIGS === 'undefined' || !LEVEL_CONFIGS[index]) {
+            if (typeof LEVEL_CONFIGS === 'undefined' || !LEVEL_CONFIGS[index]) {
                 console.error('Level not found:', index);
                 return;
             }
@@ -503,16 +496,22 @@ class Game {
                 return;
             }
 
+            // Check Level Completion (Player reached right edge)
+            if (this.player.x > this.level.width - 100) {
+                this.completeLevel();
+                return;
+            }
+
             // Update game statistics
             this.gameStats.timeSurvived += dt;
 
             // Update screen shake
-        if (this.screenShake) {
-            this.screenShake.update(dt);
-            if (!this.screenShake.isActive()) {
-                this.screenShake = null;
+            if (this.screenShake) {
+                this.screenShake.update(dt);
+                if (!this.screenShake.isActive()) {
+                    this.screenShake = null;
+                }
             }
-        }
 
         // Update hit pause
         if (this.hitPauseTimer > 0) {
@@ -849,7 +848,17 @@ class Game {
         } catch (e) {}
 
         if (this.state === "PLAYING") {
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0);
+            // Pass current level info to HUD
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1);
+        } else if (this.state === "LEVEL_COMPLETE") {
+            // Draw Level Complete screen
+            if (this.ui && typeof this.ui.drawLevelComplete === 'function') {
+                this.ui.drawLevelComplete(this.ctx, this.currentLevelIndex + 1);
+            }
+        } else if (this.state === "VICTORY") {
+             if (this.ui && typeof this.ui.drawVictory === 'function') {
+                this.ui.drawVictory(this.ctx, this.score);
+             }
         } else if (this.state === "MENU") {
             this.ui.drawMenu(this.ctx);
         } else if (this.state === "PAUSED" && !this.isMobile) {

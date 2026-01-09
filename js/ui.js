@@ -87,7 +87,44 @@ class UI {
         ctx.fillText('Press ENTER to Restart', this.width / 2, this.height / 2 + 120);
     }
 
-    drawHUD(ctx, player, score, combo, pulse) {
+    drawLevelComplete(ctx, levelNum) {
+        // Background overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.font = 'bold 64px Arial';
+        ctx.fillStyle = '#44FF44'; // Green for success
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('STAGE CLEAR!', this.width / 2, this.height / 2 - 40);
+
+        ctx.font = '32px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`Proceeding to Stage ${levelNum + 1}...`, this.width / 2, this.height / 2 + 30);
+    }
+
+    drawVictory(ctx, score) {
+        // Background overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.font = 'bold 72px Arial';
+        ctx.fillStyle = '#FFD700'; // Gold
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('MISSION ACCOMPLISHED!', this.width / 2, this.height / 2 - 60);
+
+        ctx.font = '36px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`Final Score: ${score}`, this.width / 2, this.height / 2 + 20);
+        
+        ctx.font = '24px Arial';
+        ctx.fillStyle = '#AAAAAA';
+        ctx.fillText('The Skunk Squad is safe... for now.', this.width / 2, this.height / 2 + 80);
+        ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
+    }
+
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1) {
         const padding = 20;
 
         // Health bar
@@ -120,6 +157,16 @@ class UI {
         ctx.textBaseline = 'top';
         ctx.fillText(`HP: ${Math.max(0, Math.floor(player.health))} / ${player.maxHealth}`, 
                      healthBarX + 10, healthBarY + 6);
+
+        // Stage Indicator
+        try {
+            ctx.save();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText(`STAGE ${levelNumber}`, this.width / 2, padding + 10);
+            ctx.restore();
+        } catch (e) {}
 
         // Score (neon number with pulse animation)
         try {
