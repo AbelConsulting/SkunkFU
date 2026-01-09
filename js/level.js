@@ -151,16 +151,23 @@ class Level {
         const w = viewWidth || this.width || ctx.canvas.width;
         const h = viewHeight || this.height || ctx.canvas.height;
 
+        // Mobile performance tuning: allow the same draw path, but optionally
+        // disable heavy background images on very low-end devices.
+        let mobilePerfMode = null;
+        try { mobilePerfMode = (typeof localStorage !== 'undefined') ? localStorage.getItem('mobilePerfMode') : null; } catch (e) {}
+        const allowBackgroundImage = !(this.useMobileOptimizations && mobilePerfMode === 'low');
+
         let bgImg = null;
-        // Always attempt to draw the main background image when available.
-        // Mobile optimizations should reduce extra layers/draw calls, not force
-        // a different rendering path.
-        try {
-            if (!this.cachedSprites[this.backgroundName]) {
-                this.cachedSprites[this.backgroundName] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(this.backgroundName) : null;
-            }
-            bgImg = this.cachedSprites[this.backgroundName];
-        } catch (e) { bgImg = null; }
+        // Always attempt to draw the main background image when available
+        // unless explicitly disabled by low-end mobile perf mode.
+        if (allowBackgroundImage) {
+            try {
+                if (!this.cachedSprites[this.backgroundName]) {
+                    this.cachedSprites[this.backgroundName] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(this.backgroundName) : null;
+                }
+                bgImg = this.cachedSprites[this.backgroundName];
+            } catch (e) { bgImg = null; }
+        }
 
         // Main background first (farthest layer)
         if (bgImg) {
