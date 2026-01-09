@@ -146,88 +146,78 @@ class Level {
      * @param {number|null} [viewHeight=null]
      */
     draw(ctx, cameraX = 0, cameraY = 0, viewWidth = null, viewHeight = null) {
-        // 1. Draw Background (panorama if available, otherwise gradient)
+        // 1. Draw Background (screen-space): panorama if available, otherwise gradient.
+        // Important: background should fill the viewport (0..w,0..h) regardless of camera.
         const w = viewWidth || this.width || ctx.canvas.width;
         const h = viewHeight || this.height || ctx.canvas.height;
 
-        // Draw background layers (distant elements) - skip on mobile for performance
-        if (!this.useMobileOptimizations) {
-            for (const layer of this.backgroundLayers) {
-                let layerImg = null;
-                try {
-                    if (!this.cachedSprites[layer.name]) {
-                        this.cachedSprites[layer.name] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(layer.name) : null;
-                    }
-                    layerImg = this.cachedSprites[layer.name];
-                } catch (e) { layerImg = null; }
-                if (layerImg) {
-                    try {
-                        const scaleY = h / layerImg.height;
-                        const scaledW = Math.ceil(layerImg.width * scaleY);
-                        const parallax = layer.parallax || 0.5;
-                        let repeatCount = Math.ceil((this.width) / scaledW) + 1;
-                        let drawScaledW = scaledW;
-                        if (this.useMobileOptimizations) {
-                            drawScaledW = Math.max(1, Math.ceil(this.width));
-                            repeatCount = 1;
-                        }
-                        const startX = Math.floor(-((cameraX * parallax) % drawScaledW));
-                        for (let i = 0; i < repeatCount; i++) {
-                            const dx = startX + i * drawScaledW;
-                            ctx.drawImage(layerImg, 0, 0, layerImg.width, layerImg.height, dx, cameraY, drawScaledW, h);
-                        }
-                    } catch (e) {}
-                }
-            }
-        }
-
         let bgImg = null;
-        // Skip loading background sprites on mobile for performance - use gradient instead
-        if (!this.useMobileOptimizations) {
-            try {
-                if (!this.cachedSprites[this.backgroundName]) {
-                    this.cachedSprites[this.backgroundName] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(this.backgroundName) : null;
-                }
-                bgImg = this.cachedSprites[this.backgroundName];
-            } catch (e) { bgImg = null; }
-        }
+        // Always attempt to draw the main background image when available.
+        // Mobile optimizations should reduce extra layers/draw calls, not force
+        // a different rendering path.
+        try {
+            if (!this.cachedSprites[this.backgroundName]) {
+                this.cachedSprites[this.backgroundName] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(this.backgroundName) : null;
+            }
+            bgImg = this.cachedSprites[this.backgroundName];
+        } catch (e) { bgImg = null; }
+
+        // Main background first (farthest layer)
         if (bgImg) {
-            // Draw a simple parallax: background stretched horizontally to level width
-            // and vertically to cover the view height. Use cameraX to offset for parallax.
             try {
-                // Compute scale so bg image covers the visible area vertically
                 const scaleY = h / bgImg.height;
-                const scaledW = Math.ceil(bgImg.width * scaleY);
-                // Determine repeated tiles needed to cover level width. On mobile
-                // use a single stretched background to reduce draw calls.
+                const tileW = Math.max(1, Math.ceil(bgImg.width * scaleY));
                 const parallax = (typeof this.backgroundParallax !== 'undefined') ? this.backgroundParallax : (typeof Config !== 'undefined' ? Config.BACKGROUND_PARALLAX : 0.5);
-                let repeatCount = Math.ceil((this.width) / scaledW) + 1;
-                let drawScaledW = scaledW;
-                if (this.useMobileOptimizations) {
-                    // Stretch the background to the level width and draw it once.
-                    drawScaledW = Math.max(1, Math.ceil(this.width));
-                    repeatCount = 1;
-                }
-                const startX = Math.floor(-((cameraX * parallax) % drawScaledW));
+                const repeatCount = Math.ceil(w / tileW) + 2;
+                const startX = Math.floor(-((cameraX * parallax) % tileW));
                 for (let i = 0; i < repeatCount; i++) {
-                    const dx = startX + i * drawScaledW;
-                    ctx.drawImage(bgImg, 0, 0, bgImg.width, bgImg.height, dx, cameraY, drawScaledW, h);
+                    const dx = startX + i * tileW;
+                    ctx.drawImage(bgImg, 0, 0, bgImg.width, bgImg.height, dx, 0, tileW, h);
                 }
             } catch (e) {
-                // fallback to gradient if draw fails
                 bgImg = null;
             }
         }
 
+        // Fallback gradient if background image isn't available
         if (!bgImg) {
-            if (!this.backgroundGradient) {
-                this.backgroundGradient = ctx.createLinearGradient(0, 0, 0, this.height);
+            // Recreate gradient if viewport height changes
+            if (!this.backgroundGradient || this._backgroundGradientH !== h) {
+                this._backgroundGradientH = h;
+                this.backgroundGradient = ctx.createLinearGradient(0, 0, 0, h);
                 this.backgroundGradient.addColorStop(0, this.theme.bgTop);
                 this.backgroundGradient.addColorStop(0.5, this.theme.bgMid);
                 this.backgroundGradient.addColorStop(1, this.theme.bgBot);
             }
             ctx.fillStyle = this.backgroundGradient;
-            ctx.fillRect(cameraX, cameraY, w, h);
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // Background layers (drawn on top of main background for depth)
+        if (!this.useMobileOptimizations) {
+            for (const layer of this.backgroundLayers) {
+                let layerImg = null;
+                try {
+                    if (!layer || !layer.name) continue;
+                    if (!this.cachedSprites[layer.name]) {
+                        this.cachedSprites[layer.name] = (typeof spriteLoader !== 'undefined') ? spriteLoader.getSprite(layer.name) : null;
+                    }
+                    layerImg = this.cachedSprites[layer.name];
+                } catch (e) { layerImg = null; }
+                if (!layerImg) continue;
+
+                try {
+                    const scaleY = h / layerImg.height;
+                    const tileW = Math.max(1, Math.ceil(layerImg.width * scaleY));
+                    const parallax = (typeof layer.parallax === 'number') ? layer.parallax : 0.5;
+                    const repeatCount = Math.ceil(w / tileW) + 2;
+                    const startX = Math.floor(-((cameraX * parallax) % tileW));
+                    for (let i = 0; i < repeatCount; i++) {
+                        const dx = startX + i * tileW;
+                        ctx.drawImage(layerImg, 0, 0, layerImg.width, layerImg.height, dx, 0, tileW, h);
+                    }
+                } catch (e) {}
+            }
         }
 
         ctx.save();

@@ -696,18 +696,6 @@ class GameApp {
         }
 
         requestAnimationFrame((time) => this.gameLoop(time));
-            // Apply mobile-friendly background/parallax defaults
-            try {
-                if (this.game.level) {
-                    this.game.level.useMobileOptimizations = true;
-                    if (typeof Config !== 'undefined' && typeof Config.BACKGROUND_PARALLAX_MOBILE !== 'undefined') {
-                        this.game.level.backgroundParallax = Config.BACKGROUND_PARALLAX_MOBILE;
-                    }
-                }
-            } catch (e) {}
-
-            // Ensure camera recenters immediately for mobile UX changes
-            try { if (typeof this.game.centerCameraOnPlayer === 'function') this.game.centerCameraOnPlayer(); } catch (e) {}
     }
 }
 
