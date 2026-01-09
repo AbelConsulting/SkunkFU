@@ -86,6 +86,23 @@ class EnemyManager {
             return { hit: false, enemiesHit: 0, totalDamage: 0 };
         }
 
+        // If the player exposes an active-frame window for attacks, respect it.
+        // This prevents damage during windup/recovery on special moves.
+        try {
+            if (typeof player.isAttackDamageActive === 'function' && !player.isAttackDamageActive()) {
+                return { hit: false, enemiesHit: 0, totalDamage: 0 };
+            }
+        } catch (e) { /* ignore */ }
+
+        // Prefer a swept/expanded hitbox for fast dash attacks.
+        let attackBox = player.attackHitbox;
+        try {
+            if (typeof player.getAttackHitboxForCollision === 'function') {
+                const hb = player.getAttackHitboxForCollision();
+                if (hb) attackBox = hb;
+            }
+        } catch (e) { /* ignore */ }
+
         let enemiesHit = 0;
         let totalDamage = 0;
 
@@ -93,7 +110,7 @@ class EnemyManager {
             // Check if enemy hasn't been hit yet in this attack
             if (!player.hitEnemies.has(enemy)) {
                 // Check collision between attack hitbox and enemy
-                if (Utils.rectCollision(player.attackHitbox, enemy.getRect())) {
+                if (Utils.rectCollision(attackBox, enemy.getRect())) {
                     const knockbackDir = player.facingRight ? 1 : -1;
                     const damage = player.isShadowStriking ? 
                         player.attackDamage * 1.5 : player.attackDamage;
