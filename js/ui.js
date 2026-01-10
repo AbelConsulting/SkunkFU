@@ -8,7 +8,7 @@ class UI {
         this.height = height;
     }
 
-    drawMenu(ctx) {
+    drawMenu(ctx, savedLevelIndex = 0) {
         // Background overlay
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, this.width, this.height);
@@ -29,22 +29,32 @@ class UI {
         // Instructions
         ctx.font = '24px Arial';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Press ENTER to Start', this.width / 2, this.height / 2 + 50);
+        
+        let startY = this.height / 2 + 50;
+        ctx.fillText('Press ENTER to Start New Game', this.width / 2, startY);
+        
+        // Show Continue option if available
+        if (savedLevelIndex > 0) {
+            startY += 40;
+            ctx.fillStyle = '#FFFF00';
+            ctx.fillText(`Press C to Continue (Stage ${savedLevelIndex + 1})`, this.width / 2, startY);
+            ctx.fillStyle = '#FFFFFF'; // Reset
+        }
 
         // Controls
         ctx.font = '18px Arial';
         ctx.fillStyle = '#AAAAAA';
         ctx.textAlign = 'left';
-        const startX = this.width / 2 - 200;
-        const startY = this.height / 2 + 120;
+        const ctrlX = this.width / 2 - 200;
+        const ctrlY = startY + 70;
         const lineHeight = 25;
 
-        ctx.fillText('Controls:', startX, startY);
-        ctx.fillText('Arrow Keys / A,D - Move', startX, startY + lineHeight);
-        ctx.fillText('Spacebar - Jump', startX, startY + lineHeight * 2);
-        ctx.fillText('X - Attack', startX, startY + lineHeight * 3);
-        ctx.fillText('Z - Shadow Strike', startX, startY + lineHeight * 4);
-        ctx.fillText('ESC - Pause', startX, startY + lineHeight * 5);
+        ctx.fillText('Controls:', ctrlX, ctrlY);
+        ctx.fillText('Arrow Keys / A,D - Move', ctrlX, ctrlY + lineHeight);
+        ctx.fillText('Spacebar - Jump', ctrlX, ctrlY + lineHeight * 2);
+        ctx.fillText('X - Attack', ctrlX, ctrlY + lineHeight * 3);
+        ctx.fillText('Z - Shadow Strike', ctrlX, ctrlY + lineHeight * 4);
+        ctx.fillText('ESC - Pause', ctrlX, ctrlY + lineHeight * 5);
     }
 
     drawPauseMenu(ctx) {

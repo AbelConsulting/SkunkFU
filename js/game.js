@@ -85,6 +85,13 @@ class Game {
 
         // Initialize Level logic
         this.currentLevelIndex = 0;
+        this.savedLevelIndex = 0;
+        try {
+            const saved = localStorage.getItem('skunkfu_level_progress');
+            if (saved) {
+                this.savedLevelIndex = parseInt(saved, 10) || 0;
+            }
+        } catch(e) {}
         
         // Load the first level
         // (LEVEL_CONFIGS is defined in levelData.js)
@@ -180,9 +187,21 @@ class Game {
                     } else if (key === 'enter') {
                     if (this.state === 'MENU' || this.state === 'GAME_OVER') {
                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
-                        this.startGame();
+                        this.startGame(0); // Restart from level 1
                         this.dispatchGameStateChange();
                             try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
+                    }
+                } else if (key === 'c') {
+                    // Continue from saved level
+                    if (this.state === 'MENU' && this.savedLevelIndex > 0) {
+                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
+                         // Ensure we don't go out of bounds if config changed
+                         if (typeof LEVEL_CONFIGS !== 'undefined' && this.savedLevelIndex < LEVEL_CONFIGS.length) {
+                             this.startGame(this.savedLevelIndex);
+                         } else {
+                             this.startGame(0);
+                         }
+                         this.dispatchGameStateChange();
                     }
                 }
 
@@ -318,9 +337,14 @@ class Game {
             this.canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); clearTouchKeys(); }, { passive: false });
             }
 
-        // Start or restart the game
-        async startGame() {
-            console.log('Game.startGame() called');
+        // Start or restart the game (New Game)
+        async startGame(levelIndex = 0) {
+            console.log('Game.startGame() called, level:', levelIndex);
+            
+            // If starting a new game (level 0), reset progress unless this logic is handled elsewhere
+            // But we want to allow replaying unlocked levels? For now, standard arcade: unlocked levels are checkpoints.
+            
+            this.loadLevel(levelIndex);
             this.state = 'PLAYING';
             this.score = 0;
             this.lives = 3;
@@ -474,9 +498,17 @@ class Game {
             console.log('Level Complete!');
             this.audioManager.playSound && this.audioManager.playSound('powerup'); // Use a positive sound
             
+            // Save progress
+            const nextIndex = this.currentLevelIndex + 1;
+            if (nextIndex > this.savedLevelIndex) {
+                this.savedLevelIndex = nextIndex;
+                try {
+                    localStorage.setItem('skunkfu_level_progress', nextIndex.toString());
+                } catch(e) {}
+            }
+
             // Wait then transition
             setTimeout(() => {
-                const nextIndex = this.currentLevelIndex + 1;
                 if (typeof LEVEL_CONFIGS !== 'undefined' && nextIndex < LEVEL_CONFIGS.length) {
                     this.loadLevel(nextIndex);
                     this.state = 'PLAYING';
@@ -862,7 +894,7 @@ class Game {
                 this.ui.drawVictory(this.ctx, this.score);
              }
         } else if (this.state === "MENU") {
-            this.ui.drawMenu(this.ctx);
+            this.ui.drawMenu(this.ctx, this.savedLevelIndex);
         } else if (this.state === "PAUSED" && !this.isMobile) {
             // Only show drawn pause menu on desktop when no touch controls
             const hasTouchControls = document.getElementById('touch-controls') || document.getElementById('btn-pause');
