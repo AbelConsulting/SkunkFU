@@ -85,13 +85,8 @@ class Game {
 
         // Initialize Level logic
         this.currentLevelIndex = 0;
+        // Arcade is short (3 levels): no continue/progress system.
         this.savedLevelIndex = 0;
-        try {
-            const saved = localStorage.getItem('skunkfu_level_progress');
-            if (saved) {
-                this.savedLevelIndex = parseInt(saved, 10) || 0;
-            }
-        } catch(e) {}
         
         // Load the first level
         // (LEVEL_CONFIGS is defined in levelData.js)
@@ -190,18 +185,6 @@ class Game {
                         this.startGame(0); // Restart from level 1
                         this.dispatchGameStateChange();
                             try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
-                    }
-                } else if (key === 'c') {
-                    // Continue from saved level
-                    if (this.state === 'MENU' && this.savedLevelIndex > 0) {
-                         this.audioManager.playSound && this.audioManager.playSound('menu_select');
-                         // Ensure we don't go out of bounds if config changed
-                         if (typeof LEVEL_CONFIGS !== 'undefined' && this.savedLevelIndex < LEVEL_CONFIGS.length) {
-                             this.startGame(this.savedLevelIndex);
-                         } else {
-                             this.startGame(0);
-                         }
-                         this.dispatchGameStateChange();
                     }
                 }
 
@@ -519,14 +502,7 @@ class Game {
             if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Level Complete!');
             this.audioManager.playSound && this.audioManager.playSound('level_complete', 0.8);
             
-            // Save progress
-            const nextIndex = this.currentLevelIndex + 1;
-            if (nextIndex > this.savedLevelIndex) {
-                this.savedLevelIndex = nextIndex;
-                try {
-                    localStorage.setItem('skunkfu_level_progress', nextIndex.toString());
-                } catch(e) {}
-            }
+            // No progress/continue system: always play straight through.
 
             // Wait then transition
             setTimeout(() => {
@@ -1069,7 +1045,7 @@ class Game {
                 this.ui.drawVictory(this.ctx, this.score);
              }
         } else if (this.state === "MENU") {
-            this.ui.drawMenu(this.ctx, this.savedLevelIndex);
+            this.ui.drawMenu(this.ctx);
         } else if (this.state === "PAUSED" && !this.isMobile) {
             // Only show drawn pause menu on desktop when no touch controls
             const hasTouchControls = document.getElementById('touch-controls') || document.getElementById('btn-pause');

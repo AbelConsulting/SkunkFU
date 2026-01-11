@@ -9,7 +9,7 @@ class UI {
         this.bossWarningTime = 0;
     }
 
-    drawMenu(ctx, savedLevelIndex = 0) {
+    drawMenu(ctx) {
         // Background overlay
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, this.width, this.height);
@@ -33,14 +33,6 @@ class UI {
         
         let startY = this.height / 2 + 50;
         ctx.fillText('Press ENTER to Start New Game', this.width / 2, startY);
-        
-        // Show Continue option if available
-        if (savedLevelIndex > 0) {
-            startY += 40;
-            ctx.fillStyle = '#FFFF00';
-            ctx.fillText(`Press C to Continue (Stage ${savedLevelIndex + 1})`, this.width / 2, startY);
-            ctx.fillStyle = '#FFFFFF'; // Reset
-        }
 
         // Controls
         ctx.font = '18px Arial';
