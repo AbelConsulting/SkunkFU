@@ -204,6 +204,10 @@ class SpriteLoader {
      * Load all game sprites
      */
     async loadAllSprites() {
+        // Reset counters for a fresh progress run
+        this.loadedCount = 0;
+        this.totalAssets = 0;
+
         const baseList = [
             // Player sprites
             ['ninja_idle', 'assets/sprites/characters/ninja_idle.png'],

@@ -115,10 +115,31 @@ class AudioManager {
     /**
      * Load all assets (Accepts lists as arguments for reusability)
      */
-    async loadAssets(soundList, musicList) {
+    async loadAssets(soundList, musicList, onProgress = null) {
         if (typeof Config !== 'undefined' && Config.DEBUG) console.log('AudioManager: Loading audio assets...');
-        const soundPromises = soundList.map(([name, path]) => this.loadSound(name, path));
-        const musicPromises = musicList.map(([name, path]) => this.loadMusic(name, path));
+
+        const total = (soundList ? soundList.length : 0) + (musicList ? musicList.length : 0);
+        let loaded = 0;
+        const report = () => {
+            try {
+                if (typeof onProgress === 'function') onProgress(loaded, total);
+            } catch (e) {}
+        };
+        report();
+
+        const wrap = (p) => Promise.resolve(p).then((v) => {
+            loaded++;
+            report();
+            return v;
+        }).catch((e) => {
+            // Still advance progress on failure so the loading UI doesn't hang.
+            loaded++;
+            report();
+            return null;
+        });
+
+        const soundPromises = (soundList || []).map(([name, path]) => wrap(this.loadSound(name, path)));
+        const musicPromises = (musicList || []).map(([name, path]) => wrap(this.loadMusic(name, path)));
         await Promise.all([...soundPromises, ...musicPromises]);
         if (typeof Config !== 'undefined' && Config.DEBUG) console.log('AudioManager: All audio assets loaded.');
     }
