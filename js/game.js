@@ -481,6 +481,10 @@ class Game {
             this.bossEncountered = false;
             this.bossDefeated = false;
             if (this.enemyManager) this.enemyManager.bossInstance = null;
+            // Reset music playback rate when loading new level
+            if (this.audioManager && this.audioManager.resetMusicPlaybackRate) {
+                this.audioManager.resetMusicPlaybackRate();
+            }
 
             // Update Enemy settings
             if (this.enemyManager && config.enemyConfig) {
@@ -595,7 +599,11 @@ class Game {
                     // Visual/Audio cue
                     try {
                         if (this.ui.showBossWarning) this.ui.showBossWarning();
-                        // this.audioManager.playSound('boss_spawn'); 
+                        // this.audioManager.playSound('boss_spawn');
+                        // Double music BPM for boss encounter
+                        if (this.audioManager && this.audioManager.setMusicPlaybackRate) {
+                            this.audioManager.setMusicPlaybackRate(2.0);
+                        }
                     } catch(e) {}
                 }
             }
@@ -610,6 +618,10 @@ class Game {
                                 this.enemyManager.spawningEnabled = true;
                                 this.enemyManager.bossInstance = null;
                                 this.enemyManager.spawnTimer = 0;
+                            // Reset music BPM to normal after boss defeat
+                            if (this.audioManager && this.audioManager.resetMusicPlaybackRate) {
+                                this.audioManager.resetMusicPlaybackRate();
+                            }
                             }
                 }
                 

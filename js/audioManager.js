@@ -226,4 +226,25 @@ class AudioManager {
             this.currentMusic.volume = volume;
         }
     }
+
+    /**
+     * Set music playback rate (speed)
+     * @param {number} rate - Playback rate (1.0 = normal, 2.0 = double speed/BPM)
+     */
+    setMusicPlaybackRate(rate) {
+        const clampedRate = Math.max(0.25, Math.min(4.0, rate)); // Clamp between 0.25x and 4x
+        if (this.currentMusic) {
+            this.currentMusic.playbackRate = clampedRate;
+            if (typeof Config !== 'undefined' && Config.DEBUG) {
+                console.log(`AudioManager: Music playback rate set to ${clampedRate}x`);
+            }
+        }
+    }
+
+    /**
+     * Reset music playback rate to normal
+     */
+    resetMusicPlaybackRate() {
+        this.setMusicPlaybackRate(1.0);
+    }
 }
