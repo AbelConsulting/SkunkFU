@@ -603,7 +603,16 @@ class GameApp {
             ['pause', 'assets/audio/sfx/pause.wav'],
             ['combo', 'assets/audio/sfx/combo.wav'],
             ['game_over', 'assets/audio/sfx/game_over.wav'],
-            ['metal_pad', 'assets/audio/sfx/metal_pad.wav']
+            ['metal_pad', 'assets/audio/sfx/metal_pad.wav'],
+            // New sound effects
+            ['boss_spawn', 'assets/audio/sfx/boss_spawn.wav'],
+            ['boss_defeat', 'assets/audio/sfx/boss_defeat.wav'],
+            ['boss_attack', 'assets/audio/sfx/boss_attack.wav'],
+            ['boss_hurt', 'assets/audio/sfx/boss_hurt.wav'],
+            ['level_complete', 'assets/audio/sfx/level_complete.wav'],
+            ['powerup', 'assets/audio/sfx/powerup.wav'],
+            ['coin_collect', 'assets/audio/sfx/coin_collect.wav'],
+            ['footstep', 'assets/audio/sfx/footstep.wav']
         ];
         // Defer music loading until game start to reduce initial bandwidth and decoding on mobile
         const musicList = [];

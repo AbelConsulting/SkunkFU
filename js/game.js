@@ -516,7 +516,7 @@ class Game {
             
             this.state = 'LEVEL_COMPLETE';
             console.log('Level Complete!');
-            this.audioManager.playSound && this.audioManager.playSound('powerup'); // Use a positive sound
+            this.audioManager.playSound && this.audioManager.playSound('level_complete', 0.8);
             
             // Save progress
             const nextIndex = this.currentLevelIndex + 1;
@@ -599,7 +599,10 @@ class Game {
                     // Visual/Audio cue
                     try {
                         if (this.ui.showBossWarning) this.ui.showBossWarning();
-                        // this.audioManager.playSound('boss_spawn');
+                        // Boss spawn sound
+                        if (this.audioManager && this.audioManager.playSound) {
+                            this.audioManager.playSound('boss_spawn', 0.8);
+                        }
                         // Double music BPM for boss encounter
                         if (this.audioManager && this.audioManager.setMusicPlaybackRate) {
                             this.audioManager.setMusicPlaybackRate(2.0);
@@ -614,6 +617,10 @@ class Game {
                 if (this.enemyManager.bossInstance && (this.enemyManager.bossInstance.health <= 0 || this.enemyManager.enemies.indexOf(this.enemyManager.bossInstance) === -1)) {
                      this.bossDefeated = true;
                      console.log('Boss Defeated! Exit Unlocked.');
+                     // Boss defeat sound
+                     if (this.audioManager && this.audioManager.playSound) {
+                         this.audioManager.playSound('boss_defeat', 0.9);
+                     }
                             if (this.enemyManager) {
                                 this.enemyManager.spawningEnabled = true;
                                 this.enemyManager.bossInstance = null;

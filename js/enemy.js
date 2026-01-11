@@ -128,9 +128,19 @@ class Enemy {
 
         if (this.audioManager) {
             if (this.health <= 0) {
-                this.audioManager.playSound('enemy_death', 0.7);
+                // Boss-specific death sound
+                if (this.enemyType === 'BOSS') {
+                    this.audioManager.playSound('boss_hurt', 0.8);
+                } else {
+                    this.audioManager.playSound('enemy_death', 0.7);
+                }
             } else {
-                this.audioManager.playSound('enemy_hit', 0.5);
+                // Boss-specific hurt sound
+                if (this.enemyType === 'BOSS') {
+                    this.audioManager.playSound('boss_hurt', 0.6);
+                } else {
+                    this.audioManager.playSound('enemy_hit', 0.5);
+                }
             }
         }
 
@@ -317,6 +327,13 @@ class Enemy {
             this.isAttacking = true;
             this.attackTimer = this.attackDuration;
             this.attackCooldownTimer = this.attackCooldown;
+
+            // Play attack sound
+            if (this.audioManager) {
+                if (this.enemyType === 'BOSS') {
+                    this.audioManager.playSound('boss_attack', 0.7);
+                }
+            }
 
             // Reset attack animation
             if (this.animations.attack) {

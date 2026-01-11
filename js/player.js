@@ -77,6 +77,10 @@ class Player {
         this.invulnerableTimer = 0;
         this.invulnerableDuration = 0.5;
 
+        // Footstep sounds
+        this.footstepTimer = 0;
+        this.footstepInterval = 0.25; // Footstep every 0.25 seconds when walking
+
         // Animation state
         this.animationState = "IDLE";
         this.currentAnimation = null;
@@ -277,6 +281,9 @@ class Player {
         if (this.hitStunTimer > 0) this.hitStunTimer -= dt;
         if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
 
+        // Update footstep timer
+        if (this.footstepTimer > 0) this.footstepTimer -= dt;
+
         // Determine target velocity based on input
         this.targetVelocityX = 0;
         if (this.hitStunTimer <= 0) {
@@ -342,6 +349,13 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            
+            // Play landing sound if falling from significant height
+            if (!wasOnGround && this.velocityY < -200) { // Falling faster than 200 units/sec
+                if (this.audioManager) {
+                    this.audioManager.playSound('land', 0.6);
+                }
+            }
         } else {
             this.onGround = false;
         }
@@ -351,6 +365,14 @@ class Player {
             this.coyoteTimer = this.coyoteTime;
         } else if (this.onGround) {
             this.coyoteTimer = 0;
+        }
+
+        // Play footstep sounds when walking on ground
+        if (this.onGround && Math.abs(this.velocityX) > 50 && this.footstepTimer <= 0 && !this.isAttacking && !this.isShadowStriking) {
+            if (this.audioManager) {
+                this.audioManager.playSound('footstep', 0.3);
+            }
+            this.footstepTimer = this.footstepInterval;
         }
 
         // Handle jump buffering
