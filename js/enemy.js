@@ -91,11 +91,17 @@ class Enemy {
         
         const hurt_sprite = spriteLoader.getSprite(`${prefix}_hurt`);
 
+        // Some enemy sets (boss) don't have a dedicated hurt sheet.
+        // Fall back to the idle sheet to avoid missing animations.
+        const hurtAnim = hurt_sprite
+            ? new Animation(hurt_sprite, 2, 0.1)
+            : new Animation(idle_sprite, 4, 0.12);
+
         this.animations = {
             idle: new Animation(idle_sprite, 4, 0.2),
             walk: new Animation(walk_sprite, 4, 0.15),
             attack: new Animation(attack_sprite, 4, 0.1),
-            hurt: new Animation(hurt_sprite, 2, 0.1)
+            hurt: hurtAnim
         };
 
         this.currentAnimation = this.animations.idle;

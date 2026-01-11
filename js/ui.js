@@ -135,7 +135,7 @@ class UI {
         ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
     }
 
-    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1) {
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null) {
         const padding = 20;
 
         // Health bar
@@ -176,6 +176,50 @@ class UI {
             ctx.textAlign = 'center';
             ctx.font = 'bold 24px Arial';
             ctx.fillText(`STAGE ${levelNumber}`, this.width / 2, padding + 10);
+
+            // Objective / clear condition descriptor
+            if (objectiveInfo && (objectiveInfo.title || objectiveInfo.detail)) {
+                const title = String(objectiveInfo.title || '');
+                const detail = String(objectiveInfo.detail || '');
+
+                const boxW = Math.min(this.width - 40, 560);
+                const boxX = Math.floor((this.width - boxW) / 2);
+                const boxY = padding + 42;
+                const boxH = detail ? 44 : 28;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.55)';
+                ctx.fillRect(boxX, boxY, boxW, boxH);
+                ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(title, this.width / 2, boxY + 6);
+
+                if (detail) {
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                    ctx.fillText(detail, this.width / 2, boxY + 24);
+                }
+
+                // Optional boss HP bar (during boss fight)
+                if (typeof objectiveInfo.bossHpPct === 'number') {
+                    const p = Math.max(0, Math.min(1, objectiveInfo.bossHpPct));
+                    const barW = boxW - 24;
+                    const barH = 6;
+                    const barX = boxX + 12;
+                    const barY = boxY + boxH + 6;
+                    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+                    ctx.fillRect(barX, barY, barW, barH);
+                    ctx.fillStyle = p > 0.5 ? '#ff4444' : p > 0.25 ? '#ff8844' : '#ffcc44';
+                    ctx.fillRect(barX, barY, Math.max(0, Math.floor(barW * p)), barH);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                    ctx.strokeRect(barX, barY, barW, barH);
+                }
+            }
             ctx.restore();
         } catch (e) {}
 

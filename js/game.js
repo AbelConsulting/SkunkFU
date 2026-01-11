@@ -981,8 +981,53 @@ class Game {
         } catch (e) {}
 
         if (this.state === "PLAYING") {
-            // Pass current level info to HUD
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1);
+            // Pass current level info + clear condition descriptor to HUD
+            let objectiveInfo = null;
+            try {
+                const cc = this.level && this.level.completionConfig ? this.level.completionConfig : null;
+                const hasBoss = !!(this.level && this.level.bossConfig && cc && typeof cc.bossTriggerX === 'number');
+                const exitX = (cc && typeof cc.exitX === 'number') ? cc.exitX : (this.level.width - 100);
+
+                if (hasBoss) {
+                    const bossTriggerX = cc.bossTriggerX;
+                    if (!this.bossEncountered) {
+                        const pct = bossTriggerX > 0 ? Math.max(0, Math.min(100, Math.floor((this.player.x / bossTriggerX) * 100))) : 0;
+                        objectiveInfo = {
+                            title: 'CLEAR: Reach boss arena → Defeat boss → Reach exit',
+                            detail: `${pct}% to boss (x ${Math.floor(this.player.x)}/${Math.floor(bossTriggerX)})`
+                        };
+                    } else if (!this.bossDefeated) {
+                        let bossHpPct = null;
+                        try {
+                            const b = this.enemyManager && this.enemyManager.bossInstance ? this.enemyManager.bossInstance : null;
+                            if (b && typeof b.health === 'number' && typeof b.maxHealth === 'number' && b.maxHealth > 0) {
+                                bossHpPct = Math.max(0, Math.min(1, b.health / b.maxHealth));
+                            }
+                        } catch (e) {}
+                        objectiveInfo = {
+                            title: 'CLEAR: Defeat the boss',
+                            detail: (bossHpPct !== null) ? `Boss HP: ${Math.max(0, Math.floor((bossHpPct || 0) * 100))}%` : 'Boss fight in progress',
+                            bossHpPct
+                        };
+                    } else {
+                        const remaining = Math.max(0, Math.floor(exitX - this.player.x));
+                        objectiveInfo = {
+                            title: 'CLEAR: Reach the exit',
+                            detail: `${remaining}px remaining (exit at x ${Math.floor(exitX)})`
+                        };
+                    }
+                } else {
+                    const remaining = Math.max(0, Math.floor(exitX - this.player.x));
+                    objectiveInfo = {
+                        title: 'CLEAR: Reach the exit',
+                        detail: `${remaining}px remaining (exit at x ${Math.floor(exitX)})`
+                    };
+                }
+            } catch (e) {
+                objectiveInfo = null;
+            }
+
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo);
         } else if (this.state === "LEVEL_COMPLETE") {
             // Draw Level Complete screen
             if (this.ui && typeof this.ui.drawLevelComplete === 'function') {
