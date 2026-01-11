@@ -28,6 +28,11 @@ const Config = {
     ENEMY_ATTACK_DAMAGE: 10,
     ENEMY_POINTS: 100,
 
+    // Enemy AI behavior
+    // When true, enemies will avoid walking off ledges in patrol/chase.
+    // Default false so enemies can fall off platforms naturally.
+    ENEMY_AVOID_LEDGES: false,
+
     // Colors
     WHITE: '#FFFFFF',
     BLACK: '#000000',

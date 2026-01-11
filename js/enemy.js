@@ -307,14 +307,20 @@ class Enemy {
             } catch (e) {}
         }
 
-        // Check for ledge before moving
         const nextX = this.x + this.velocityX * dt;
-        if (!this.checkGround(nextX, this.y, level)) {
-            // Turn around if no ground ahead
-            this.velocityX = -this.velocityX;
-            this.facingRight = !this.facingRight;
+        const avoidLedges = (typeof Config !== 'undefined' && Config && Config.ENEMY_AVOID_LEDGES === true);
+        if (avoidLedges) {
+            // Check for ledge before moving
+            if (!this.checkGround(nextX, this.y, level)) {
+                // Turn around if no ground ahead
+                this.velocityX = -this.velocityX;
+                this.facingRight = !this.facingRight;
+            } else {
+                // Move if safe
+                this.x = nextX;
+            }
         } else {
-            // Move if safe
+            // Default: allow enemies to run/fall off ledges.
             this.x = nextX;
         }
 
@@ -342,14 +348,16 @@ class Enemy {
         }
 
         const nextX = this.x + this.velocityX * dt;
-        // If we have level info, avoid chasing off ledges (same rule as patrol).
-        if (level && typeof this.checkGround === 'function') {
+        const avoidLedges = (typeof Config !== 'undefined' && Config && Config.ENEMY_AVOID_LEDGES === true);
+        if (avoidLedges && level && typeof this.checkGround === 'function') {
+            // Optional: avoid chasing off ledges.
             if (this.checkGround(nextX, this.y, level)) {
                 this.x = nextX;
             } else {
                 this.velocityX = 0;
             }
         } else {
+            // Default: allow enemies to run/fall off ledges.
             this.x = nextX;
         }
     }
