@@ -303,7 +303,7 @@ class GameApp {
             window.setMobilePerformanceMode = (mode) => {
                 try {
                     if (!this.isMobile) {
-                        console.log('setMobilePerformanceMode: not mobile, still applying settings');
+                        if (typeof Config !== 'undefined' && Config.DEBUG) console.log('setMobilePerformanceMode: not mobile, still applying settings');
                     }
                     if (mode === 'low') {
                         Config.MOBILE_FPS = 20;
@@ -330,7 +330,7 @@ class GameApp {
                         Config.FPS = Math.min(Config.FPS || 60, Config.MOBILE_FPS || 30);
                         try { this.adjustCanvasForMobile(); } catch (e) {}
                     }
-                    try { console.log('Mobile performance mode set to', mode, { MOBILE_FPS: Config.MOBILE_FPS, MOBILE_DPR_SCALE_REDUCTION: Config.MOBILE_DPR_SCALE_REDUCTION }); } catch (e) {}
+                    try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Mobile performance mode set to', mode, { MOBILE_FPS: Config.MOBILE_FPS, MOBILE_DPR_SCALE_REDUCTION: Config.MOBILE_DPR_SCALE_REDUCTION }); } catch (e) {}
                     try { localStorage.setItem('mobilePerfMode', mode); } catch (e) {}
                     return true;
                 } catch (e) { console.warn('setMobilePerformanceMode failed', e); return false; }
@@ -669,14 +669,16 @@ class GameApp {
         // Loaded after startup to reduce initial load time.
         this._deferredSoundList = [
             ['metal_pad', 'assets/audio/sfx/metal_pad.wav'],
-            ['boss_spawn', 'assets/audio/sfx/boss_spawn.wav'],
-            ['boss_defeat', 'assets/audio/sfx/boss_defeat.wav'],
-            ['boss_attack', 'assets/audio/sfx/boss_attack.wav'],
-            ['boss_hurt', 'assets/audio/sfx/boss_hurt.wav'],
-            ['level_complete', 'assets/audio/sfx/level_complete.wav'],
-            ['powerup', 'assets/audio/sfx/powerup.wav'],
-            ['coin_collect', 'assets/audio/sfx/coin_collect.wav'],
-            ['footstep', 'assets/audio/sfx/footstep.wav']
+            // Some optional cues don't have dedicated files in assets/audio/sfx.
+            // Map them to existing sounds to avoid 404 noise.
+            ['boss_spawn', 'assets/audio/sfx/combo.wav'],
+            ['boss_defeat', 'assets/audio/sfx/enemy_death.wav'],
+            ['boss_attack', 'assets/audio/sfx/attack3.wav'],
+            ['boss_hurt', 'assets/audio/sfx/enemy_hit.wav'],
+            ['level_complete', 'assets/audio/sfx/combo.wav'],
+            ['powerup', 'assets/audio/sfx/shadow_strike.wav'],
+            ['coin_collect', 'assets/audio/sfx/menu_move.wav'],
+            ['footstep', 'assets/audio/sfx/land.wav']
         ];
         // Defer music loading until game start to reduce initial bandwidth and decoding on mobile
         const musicList = [];

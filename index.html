@@ -315,8 +315,16 @@
 // --- UTILITIES ---
     // Touch-control visibility debug helper
     window.touchDebug = window.touchDebug || [];
+    function isTouchDebugEnabled() {
+        try {
+            return (location.search.indexOf('debugTouch=1') !== -1) || (localStorage.getItem('debugTouch') === '1');
+        } catch (e) {
+            return false;
+        }
+    }
     function logTouchControlEvent(name, data) {
         try {
+            if (!isTouchDebugEnabled()) return;
             const ts = Date.now();
             const entry = { ts, name, data };
             window.touchDebug.push(entry);
@@ -325,7 +333,7 @@
             console.log('touchDebug:', name, data);
             // update on-screen badge if present
             const badge = document.getElementById('touch-debug-badge');
-            if (badge && (location.search.indexOf('debugTouch=1') !== -1 || localStorage.getItem('debugTouch') === '1')) {
+            if (badge) {
                 badge.textContent = `${name} @ ${new Date(ts).toLocaleTimeString()}`;
                 badge.style.display = 'block';
                 badge.style.opacity = '1';
