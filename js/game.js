@@ -376,17 +376,18 @@ class Game {
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
-            // Place player at spawn point (mobile: left platform, desktop: right platform)
+            // Place player at a spawn point near the level start.
+            // (Previous logic spawned on the rightmost platform on desktop, which can
+            // unintentionally drop you into the boss arena on long levels.)
             if (this.level.platforms && this.level.platforms.length > 0) {
                 let spawnPlatform;
-                if (this.isMobile) {
-                    // For mobile, use the leftmost non-ground platform
-                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
-                    spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x < a.x ? b : a), nonGroundPlatforms[0]);
-                } else {
-                    // For desktop, use the rightmost non-ground platform
-                    const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
-                    spawnPlatform = nonGroundPlatforms.reduce((a, b) => (b.x > a.x ? b : a), nonGroundPlatforms[0]);
+                const nonGroundPlatforms = this.level.platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
+                if (nonGroundPlatforms.length > 0) {
+                    // Prefer an early platform within the first ~20% of the level.
+                    const earlyLimit = Math.max(800, Math.floor(this.level.width * 0.2));
+                    const earlyPlatforms = nonGroundPlatforms.filter(p => typeof p.x === 'number' && p.x >= 0 && p.x <= earlyLimit);
+                    const pool = (earlyPlatforms.length > 0) ? earlyPlatforms : nonGroundPlatforms;
+                    spawnPlatform = pool.reduce((a, b) => (b.x < a.x ? b : a), pool[0]);
                 }
                 const spawnX = Math.floor(spawnPlatform.x + (spawnPlatform.width - this.player.width) / 2);
                 const spawnY = spawnPlatform.y - this.player.height - 8;
