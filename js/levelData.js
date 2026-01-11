@@ -183,9 +183,9 @@ const LEVEL_CONFIGS = [
         ],
         enemyConfig: {
             spawnInterval: 1.8,
-            maxEnemies: 8,,
+            maxEnemies: 8,
+            aggression: 1.0,
             allowedTypes: ['FAST_BASIC', 'SECOND_BASIC']
-            aggression: 1.0
         }
     }
 ];
