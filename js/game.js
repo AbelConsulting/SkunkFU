@@ -477,12 +477,18 @@ class Game {
             this.level.loadLevel(config);
             this.currentLevelIndex = index;
 
+            // Boss state is per-level; always reset when loading a new level.
+            this.bossEncountered = false;
+            this.bossDefeated = false;
+            if (this.enemyManager) this.enemyManager.bossInstance = null;
+
             // Update Enemy settings
             if (this.enemyManager && config.enemyConfig) {
                 this.enemyManager.spawnInterval = config.enemyConfig.spawnInterval || 3.0;
                 this.enemyManager.maxEnemies = config.enemyConfig.maxEnemies || 5;
                 // Update allowed types
                 this.enemyManager.allowedEnemyTypes = config.enemyConfig.allowedTypes || null;
+                this.enemyManager.spawningEnabled = true;
             }
             
             // Reset player position safely
@@ -580,9 +586,11 @@ class Game {
                 if (this.player.x > triggerX) {
                     this.bossEncountered = true;
                     // Stop spawning regular enemies to focus on boss
-                    if (this.enemyManager) this.enemyManager.spawnInterval = 999999; 
-                    
-                    this.enemyManager.spawnBoss(this.level.bossConfig);
+                    if (this.enemyManager) {
+                        this.enemyManager.spawningEnabled = false;
+                        this.enemyManager.clearNonBossEnemies && this.enemyManager.clearNonBossEnemies();
+                        this.enemyManager.spawnBoss(this.level.bossConfig, this.level);
+                    }
                     
                     // Visual/Audio cue
                     try {
@@ -598,6 +606,11 @@ class Game {
                 if (this.enemyManager.bossInstance && (this.enemyManager.bossInstance.health <= 0 || this.enemyManager.enemies.indexOf(this.enemyManager.bossInstance) === -1)) {
                      this.bossDefeated = true;
                      console.log('Boss Defeated! Exit Unlocked.');
+                            if (this.enemyManager) {
+                                this.enemyManager.spawningEnabled = true;
+                                this.enemyManager.bossInstance = null;
+                                this.enemyManager.spawnTimer = 0;
+                            }
                 }
                 
                 // Arena Constraint: Prevent leaving until boss is defeated

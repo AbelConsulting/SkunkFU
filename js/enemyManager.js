@@ -11,6 +11,7 @@ class EnemyManager {
         this.maxEnemies = 5;
         this.waveNumber = 1;
         this.enemiesDefeated = 0;
+        this.spawningEnabled = true;
         this.bossInstance = null;
     }
 
@@ -19,28 +20,62 @@ class EnemyManager {
         this.spawnTimer = 0;
         this.waveNumber = 1;
         this.enemiesDefeated = 0;
+        this.spawningEnabled = true;
         this.bossInstance = null;
     }
 
-    spawnBoss(bossConfig) {
-        if (!bossConfig) return;
-        
-        // Clear existing enemies for the duel (optional, but cleaner)
-        // this.enemies = []; 
-        
-        const enemy = new Enemy(bossConfig.spawnX, bossConfig.spawnY, 'BOSS', this.audioManager);
-        
-        // Apply modifiers
-        if (bossConfig.healthMultiplier) {
-            enemy.health = Math.floor(enemy.health * bossConfig.healthMultiplier);
-            enemy.maxHealth = enemy.health;
+    getBoss() {
+        return this.enemies.find(e => e && e.enemyType === 'BOSS') || null;
+    }
+
+    hasBossAlive() {
+        const boss = this.getBoss();
+        return !!(boss && boss.health > 0);
+    }
+
+    clearNonBossEnemies() {
+        this.enemies = this.enemies.filter(e => e && e.enemyType === 'BOSS');
+    }
+
+    spawnBoss(bossConfig, level = null) {
+        if (!bossConfig) return null;
+
+        // Only one boss at a time
+        const existing = this.getBoss();
+        if (existing) {
+            this.bossInstance = existing;
+            return existing;
         }
-        if (bossConfig.speedMultiplier) enemy.speed *= bossConfig.speedMultiplier;
-        if (bossConfig.attackDamageMultiplier) enemy.attackDamage = Math.floor(enemy.attackDamage * bossConfig.attackDamageMultiplier);
-        
-        this.enemies.push(enemy);
-        this.bossInstance = enemy;
-        console.log('Boss Spawned!', bossConfig);
+
+        const fallbackX = (level && typeof level.width === 'number') ? (level.width - 520) : 0;
+        const x = (typeof bossConfig.spawnX === 'number') ? bossConfig.spawnX : fallbackX;
+        const y = (typeof bossConfig.spawnY === 'number') ? bossConfig.spawnY : 520;
+
+        const boss = new Enemy(x, y, 'BOSS', this.audioManager);
+
+        // Apply multipliers if provided
+        const hm = (typeof bossConfig.healthMultiplier === 'number') ? bossConfig.healthMultiplier : 5.0;
+        const sm = (typeof bossConfig.speedMultiplier === 'number') ? bossConfig.speedMultiplier : 1.0;
+        const dm = (typeof bossConfig.attackDamageMultiplier === 'number') ? bossConfig.attackDamageMultiplier : 2.0;
+
+        boss.maxHealth = Math.max(1, Math.floor(boss.maxHealth * hm));
+        boss.health = boss.maxHealth;
+        boss.speed = boss.speed * sm;
+        boss.attackDamage = boss.attackDamage * dm;
+
+        // Ensure movement uses updated speed
+        boss.velocityX = -boss.speed;
+
+        // Make boss feel more “boss-like” without new AI
+        boss.detectionRange = Math.max(boss.detectionRange || 300, 520);
+        boss.attackRange = Math.max(boss.attackRange || 80, 110);
+
+        this.enemies.push(boss);
+        this.bossInstance = boss;
+        try {
+            console.log('EnemyManager.spawnBoss', { x: boss.x, y: boss.y, hp: boss.maxHealth });
+        } catch (e) {}
+        return boss;
     }
 
     spawnEnemy(level) {
@@ -89,7 +124,7 @@ class EnemyManager {
     update(dt, player, level) {
         // Update spawn timer
         this.spawnTimer += dt;
-        if (this.spawnTimer >= this.spawnInterval) {
+        if (this.spawningEnabled && this.spawnTimer >= this.spawnInterval) {
             this.spawnTimer = 0;
             this.spawnEnemy(level);
         }
