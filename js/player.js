@@ -459,6 +459,7 @@ class Player {
 
         // Draw shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
         ctx.ellipse(this.x + this.width / 2, this.y + this.height, this.width / 2, 10, 0, 0, Math.PI * 2);
         ctx.fill();
 
