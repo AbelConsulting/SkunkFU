@@ -7,6 +7,9 @@ const Config = {
     // When true, enables verbose console logs and cache-busting helpers.
     DEBUG: false,
 
+    // When true, draws collision hitboxes (useful for gameplay tuning)
+    SHOW_HITBOXES: false,
+
     // Screen settings
     SCREEN_WIDTH: 1280,
     SCREEN_HEIGHT: 720,

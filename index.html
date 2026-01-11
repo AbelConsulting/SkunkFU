@@ -315,6 +315,19 @@
 // --- UTILITIES ---
     // Touch-control visibility debug helper
     window.touchDebug = window.touchDebug || [];
+    // Hitbox debug helper: enable with ?hitboxes=1 or localStorage.hitboxes=1
+    function isHitboxDebugEnabled() {
+        try {
+            return (location.search.indexOf('hitboxes=1') !== -1) || (localStorage.getItem('hitboxes') === '1');
+        } catch (e) {
+            return false;
+        }
+    }
+    try {
+        if (typeof Config !== 'undefined' && isHitboxDebugEnabled()) {
+            Config.SHOW_HITBOXES = true;
+        }
+    } catch (e) {}
     function isTouchDebugEnabled() {
         try {
             return (location.search.indexOf('debugTouch=1') !== -1) || (localStorage.getItem('debugTouch') === '1');

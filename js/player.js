@@ -56,10 +56,11 @@ class Player {
         // Shadow strike state
         this.isShadowStriking = false;
         // Keep the move duration in sync with the animation timing.
-        // Asset spec: 4 frames at 0.1s/frame (10 FPS) => 0.4s total.
+        // Shadow Strike should have enough active frames to feel consistent.
         const shadowStrikeAnim = this.animations && this.animations.shadow_strike;
         this.shadowStrikeDuration = shadowStrikeAnim ? (shadowStrikeAnim.frameCount * shadowStrikeAnim.frameDuration) : 0.4;
-        this.shadowStrikeSpeed = 600;
+        // Tune dash distance (speed * duration). With 4 frames @ 0.08s => 0.32s total.
+        this.shadowStrikeSpeed = 380;
 
         // Shadow strike tuning: active damage window and hitbox size
         // Default: active on all frames except the first/last (windup/recovery)
@@ -114,7 +115,7 @@ class Player {
                 // Shadow Strike: play 4 frames, extra-snappy timing.
                 // Explicitly lock sheet slicing (and disable auto-centering) so we
                 // always use the first frames even if the source sheet has more frames.
-                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.035, { frameWidth: 64, frameHeight: 64, frameStride: 65, frameOffset: 0 }),
+                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65, frameOffset: 0 }),
                 hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1)
             };
         } else {
@@ -478,7 +479,7 @@ class Player {
         }
 
         // Debug: draw hitbox
-        if (this.isAttacking && typeof Config !== 'undefined' && Config.DEBUG) {
+        if (this.isAttacking && typeof Config !== 'undefined' && (Config.DEBUG || Config.SHOW_HITBOXES)) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
             ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
         }
