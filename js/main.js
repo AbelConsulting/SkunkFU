@@ -16,7 +16,46 @@ class GameApp {
         this.running = false;
         this._accumulator = 0;
 
+        // Non-essential audio gets loaded after startup to keep the
+        // loading screen snappy (especially on mobile).
+        this._deferredSoundList = null;
+
         this.init();
+    }
+
+    // Load extra SFX in small chunks after the game starts.
+    // This avoids a big upfront fetch/decode burst during the loading screen.
+    loadDeferredAudio() {
+        try {
+            if (!this.audioManager || !this._deferredSoundList || this._deferredSoundList.length === 0) return;
+            if (window._fileProtocol && !window._allowFileStart) return;
+
+            const list = this._deferredSoundList.slice();
+            this._deferredSoundList = null;
+
+            const chunkSize = 4;
+            const runner = async () => {
+                for (let i = 0; i < list.length; i += chunkSize) {
+                    const chunk = list.slice(i, i + chunkSize);
+                    try {
+                        await this.audioManager.loadAssets(chunk, []);
+                    } catch (e) {
+                        // Don't block gameplay on optional sounds
+                    }
+                    // Yield to the browser between chunks
+                    await new Promise(r => setTimeout(r, 0));
+                }
+            };
+
+            const schedule = (fn) => {
+                if (typeof requestIdleCallback === 'function') requestIdleCallback(() => fn(), { timeout: 1500 });
+                else setTimeout(fn, 250);
+            };
+
+            schedule(runner);
+        } catch (e) {
+            // no-op
+        }
     }
 
     adjustCanvasForMobile() {
@@ -310,6 +349,9 @@ class GameApp {
             // Expose for diagnostic tests and external tooling
             try { window.game = this.game; window.gameApp = this; } catch (e) { /* ignore in strict contexts */ }
 
+            // Load extra SFX after the game is live to smooth startup.
+            this.loadDeferredAudio();
+
             // Create a mobile score badge outside the canvas so score remains visible
             try {
                 if (this.isMobile) {
@@ -588,6 +630,9 @@ class GameApp {
 
         // Load audio (SFX only for now; defer music until gameplay starts)
         this.audioManager = new AudioManager();
+
+        // Keep initial load to the “core” sounds.
+        // Additional/rare sounds will be loaded in the background.
         const soundList = [
             ['jump', 'assets/audio/sfx/jump.wav'],
             ['attack1', 'assets/audio/sfx/attack1.wav'],
@@ -601,10 +646,13 @@ class GameApp {
             ['menu_select', 'assets/audio/sfx/menu_select.wav'],
             ['menu_move', 'assets/audio/sfx/menu_move.wav'],
             ['pause', 'assets/audio/sfx/pause.wav'],
-            ['combo', 'assets/audio/sfx/combo.wav'],
             ['game_over', 'assets/audio/sfx/game_over.wav'],
+            ['combo', 'assets/audio/sfx/combo.wav']
+        ];
+
+        // Loaded after startup to reduce initial load time.
+        this._deferredSoundList = [
             ['metal_pad', 'assets/audio/sfx/metal_pad.wav'],
-            // New sound effects
             ['boss_spawn', 'assets/audio/sfx/boss_spawn.wav'],
             ['boss_defeat', 'assets/audio/sfx/boss_defeat.wav'],
             ['boss_attack', 'assets/audio/sfx/boss_attack.wav'],

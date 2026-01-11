@@ -128,10 +128,8 @@ class Enemy {
 
         if (this.audioManager) {
             if (this.health <= 0) {
-                // Boss-specific death sound
-                if (this.enemyType === 'BOSS') {
-                    this.audioManager.playSound('boss_hurt', 0.8);
-                } else {
+                // For bosses, let the Game logic play the big defeat sting.
+                if (this.enemyType !== 'BOSS') {
                     this.audioManager.playSound('enemy_death', 0.7);
                 }
             } else {

@@ -342,6 +342,8 @@ class Player {
         this.y += this.velocityY * dt;
 
         // Check platform collisions (pass prevRect)
+        // Preserve pre-collision vertical velocity so we can detect hard landings.
+        const preCollisionVY = this.velocityY;
         const rect = { x: this.x, y: this.y, width: this.width, height: this.height };
         const collision = level.checkPlatformCollision(rect, prevRect, this.velocityY);
 
@@ -350,11 +352,10 @@ class Player {
             this.velocityY = 0;
             this.onGround = true;
             
-            // Play landing sound if falling from significant height
-            if (!wasOnGround && this.velocityY < -200) { // Falling faster than 200 units/sec
-                if (this.audioManager) {
-                    this.audioManager.playSound('land', 0.6);
-                }
+            // Play landing sound if falling from significant height.
+            // Note: velocity is positive when falling (downwards).
+            if (!wasOnGround && preCollisionVY > 450) {
+                if (this.audioManager) this.audioManager.playSound('land', 0.6);
             }
         } else {
             this.onGround = false;
