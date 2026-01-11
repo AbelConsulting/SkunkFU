@@ -478,10 +478,29 @@ class Player {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
 
-        // Debug: draw hitbox
-        if (this.isAttacking && typeof Config !== 'undefined' && (Config.DEBUG || Config.SHOW_HITBOXES)) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-            ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
+        // Debug: draw collision boxes
+        if (typeof Config !== 'undefined' && (Config.DEBUG || Config.SHOW_HITBOXES)) {
+            // Player body
+            ctx.strokeStyle = 'rgba(0, 180, 255, 0.65)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+            // Attack hitbox (only while attacking)
+            if (this.isAttacking) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.55)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
+
+                // Shadow strike swept hitbox (helps visualize dash collisions)
+                try {
+                    const swept = (typeof this.getAttackHitboxForCollision === 'function') ? this.getAttackHitboxForCollision() : null;
+                    if (swept && this.isShadowStriking) {
+                        ctx.strokeStyle = 'rgba(180, 0, 255, 0.45)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(swept.x, swept.y, swept.width, swept.height);
+                    }
+                } catch (e) {}
+            }
         }
 
         ctx.restore();

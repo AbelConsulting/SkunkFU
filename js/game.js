@@ -141,6 +141,16 @@ class Game {
                 window.toggleCameraDebug = () => { this.debugOverlay = !this.debugOverlay; };
                 window.rebuildStaticLayer = () => { try { if (this.level && typeof this.level.renderStaticLayer === 'function') this.level.renderStaticLayer(this.viewWidth, this.viewHeight); } catch (e) { console.warn('rebuildStaticLayer failed', e); } };
 
+                window.toggleHitboxes = (enable) => {
+                    try {
+                        if (typeof Config === 'undefined') return;
+                        if (typeof enable === 'boolean') Config.SHOW_HITBOXES = enable;
+                        else Config.SHOW_HITBOXES = !Config.SHOW_HITBOXES;
+                        try { localStorage.setItem('hitboxes', Config.SHOW_HITBOXES ? '1' : '0'); } catch (e) {}
+                        console.log('SHOW_HITBOXES =', !!Config.SHOW_HITBOXES);
+                    } catch (e) { console.warn('toggleHitboxes failed', e); }
+                };
+
                 window.toggleLevelDebugVisuals = (enable) => {
                     try {
                         if (typeof enable === 'boolean') this.levelDebugVisuals = enable;
@@ -201,6 +211,15 @@ class Game {
                     this.cameraX = 0;
                 } else if (key === 'keyo') {
                     this.debugOverlay = !this.debugOverlay;
+                } else if (key === 'keyh') {
+                    // Toggle hitbox visualization without enabling all debug logging
+                    try {
+                        if (typeof Config !== 'undefined') {
+                            Config.SHOW_HITBOXES = !Config.SHOW_HITBOXES;
+                            try { localStorage.setItem('hitboxes', Config.SHOW_HITBOXES ? '1' : '0'); } catch (e) {}
+                            console.log('SHOW_HITBOXES =', !!Config.SHOW_HITBOXES);
+                        }
+                    } catch (e) {}
                 }
             });
 

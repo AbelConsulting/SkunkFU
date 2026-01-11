@@ -439,6 +439,21 @@ class Enemy {
         ctx.fillStyle = healthPercent > 0.5 ? '#00FF00' : healthPercent > 0.25 ? '#FFFF00' : '#FF0000';
         ctx.fillRect(this.x, barY, barWidth * healthPercent, barHeight);
 
+        // Debug: draw collision boxes
+        if (typeof Config !== 'undefined' && (Config.DEBUG || Config.SHOW_HITBOXES)) {
+            // Enemy body
+            ctx.strokeStyle = 'rgba(255, 140, 0, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+            // Enemy attack hitbox (only while attacking)
+            if (this.isAttacking && this.attackHitbox) {
+                ctx.strokeStyle = 'rgba(255, 0, 255, 0.45)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
+            }
+        }
+
         ctx.restore();
     }
 
