@@ -59,6 +59,8 @@ class Enemy {
         this.isAttacking = false;
         this.attackTimer = 0;
         this.attackDuration = 0.5;
+        // Small windup before the hitbox becomes damaging (fair reaction time)
+        this.attackWindup = 0.12;
         this.attackCooldown = 2.0;
         this.attackCooldownTimer = 0;
         this.attackRange = 80;
@@ -68,6 +70,7 @@ class Enemy {
         if (this.enemyType === 'BOSS') {
             this.attackRange = 120;
             this.attackDuration = 0.65;
+            this.attackWindup = 0.18;
             this.attackCooldown = 1.6;
             this.attackHitbox = { x: 0, y: 0, width: 120, height: 80 };
         }
@@ -383,6 +386,18 @@ class Enemy {
                 this.animations.attack.reset();
             }
         }
+    }
+
+    isAttackDamageActive() {
+        if (!this.isAttacking) return false;
+        const dur = this.attackDuration || 0;
+        if (dur <= 0) return false;
+
+        const elapsed = dur - (this.attackTimer || 0);
+        // Active after windup; end slightly before the final frame to avoid “late” hits.
+        const windup = Math.max(0, this.attackWindup || 0);
+        const endEarly = 0.06;
+        return elapsed >= windup && elapsed <= Math.max(0, dur - endEarly);
     }
 
     updateAnimation(dt) {

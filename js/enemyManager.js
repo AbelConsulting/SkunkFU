@@ -198,6 +198,12 @@ class EnemyManager {
     checkEnemyAttacks(player) {
         for (const enemy of this.enemies) {
             if (enemy.isAttacking) {
+                // If enemy exposes an active-frame window for attacks, respect it.
+                try {
+                    if (typeof enemy.isAttackDamageActive === 'function' && !enemy.isAttackDamageActive()) {
+                        continue;
+                    }
+                } catch (e) { /* ignore */ }
                 if (Utils.rectCollision(enemy.attackHitbox, player.getRect())) {
                     return player.takeDamage(enemy.attackDamage, enemy);
                 }
