@@ -15,6 +15,11 @@ EXPECTED = {
     'ninja_attack': 4,
     'ninja_shadow_strike': 8,
     'ninja_hurt': 2,
+
+    # Enemies
+    'boss_idle': 4,
+    'boss_walk': 4,
+    'boss_attack1': 4,
 }
 
 BASE = Path(__file__).resolve().parents[1]
