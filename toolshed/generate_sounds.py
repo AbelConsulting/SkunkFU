@@ -151,6 +151,44 @@ def create_all_sounds():
     game_over = generate_sweep(440, 220, 0.5, volume=0.25)
     save_sound(game_over, 'game_over.wav')
     
+    # Boss spawn - ominous rising tone
+    boss_spawn = generate_sweep(100, 300, 0.8, volume=0.4)
+    save_sound(boss_spawn, 'boss_spawn.wav')
+    
+    # Boss defeat - triumphant rising chord
+    boss_defeat1 = generate_tone(440, 0.2, volume=0.3)
+    boss_defeat2 = generate_tone(550, 0.2, volume=0.3)
+    boss_defeat3 = generate_tone(660, 0.2, volume=0.3)
+    boss_defeat = np.concatenate([boss_defeat1, boss_defeat2, boss_defeat3])
+    save_sound(boss_defeat, 'boss_defeat.wav')
+    
+    # Boss attack - heavy impact
+    boss_attack = generate_sweep(150, 80, 0.15, volume=0.4)
+    save_sound(boss_attack, 'boss_attack.wav')
+    
+    # Boss hurt - deep rumble
+    boss_hurt = generate_tone(80, 0.25, volume=0.35)
+    save_sound(boss_hurt, 'boss_hurt.wav')
+    
+    # Level complete - celebratory fanfare
+    level_complete1 = generate_tone(523, 0.1, volume=0.3)  # C
+    level_complete2 = generate_tone(659, 0.1, volume=0.3)  # E
+    level_complete3 = generate_tone(784, 0.1, volume=0.3)  # G
+    level_complete = np.concatenate([level_complete1, level_complete2, level_complete3])
+    save_sound(level_complete, 'level_complete.wav')
+    
+    # Powerup - magical rising tone
+    powerup = generate_sweep(300, 600, 0.3, volume=0.25)
+    save_sound(powerup, 'powerup.wav')
+    
+    # Coin collect - pleasant chime
+    coin_collect = generate_tone(800, 0.08, volume=0.2)
+    save_sound(coin_collect, 'coin_collect.wav')
+    
+    # Footstep - subtle tap
+    footstep = generate_tone(200, 0.04, volume=0.15)
+    save_sound(footstep, 'footstep.wav')
+    
     print("\n✅ All sound effects generated successfully!")
     print(f"📁 Saved to: assets/audio/sfx/")
 

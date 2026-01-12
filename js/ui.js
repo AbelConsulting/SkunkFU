@@ -6,6 +6,7 @@ class UI {
     constructor(width, height) {
         this.width = width;
         this.height = height;
+        this.bossWarningTime = 0;
     }
 
     drawMenu(ctx) {
@@ -15,14 +16,9 @@ class UI {
 
         // Title
         ctx.font = 'bold 72px Arial';
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = '#FF0000';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
-        const gradient = ctx.createLinearGradient(0, this.height / 2 - 100, 0, this.height / 2);
-        gradient.addColorStop(0, '#FFFFFF');
-        gradient.addColorStop(1, '#AAAAAA');
-        ctx.fillStyle = gradient;
         
         ctx.fillText('SKUNK FU', this.width / 2, this.height / 2 - 100);
 
@@ -34,22 +30,24 @@ class UI {
         // Instructions
         ctx.font = '24px Arial';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Press ENTER to Start', this.width / 2, this.height / 2 + 50);
+        
+        let startY = this.height / 2 + 50;
+        ctx.fillText('Press ENTER to Start New Game', this.width / 2, startY);
 
         // Controls
         ctx.font = '18px Arial';
         ctx.fillStyle = '#AAAAAA';
         ctx.textAlign = 'left';
-        const startX = this.width / 2 - 200;
-        const startY = this.height / 2 + 120;
+        const ctrlX = this.width / 2 - 200;
+        const ctrlY = startY + 70;
         const lineHeight = 25;
 
-        ctx.fillText('Controls:', startX, startY);
-        ctx.fillText('Arrow Keys / A,D - Move', startX, startY + lineHeight);
-        ctx.fillText('Spacebar - Jump', startX, startY + lineHeight * 2);
-        ctx.fillText('X - Attack', startX, startY + lineHeight * 3);
-        ctx.fillText('Z - Shadow Strike', startX, startY + lineHeight * 4);
-        ctx.fillText('ESC - Pause', startX, startY + lineHeight * 5);
+        ctx.fillText('Controls:', ctrlX, ctrlY);
+        ctx.fillText('Arrow Keys / A,D - Move', ctrlX, ctrlY + lineHeight);
+        ctx.fillText('Spacebar - Jump', ctrlX, ctrlY + lineHeight * 2);
+        ctx.fillText('X - Attack', ctrlX, ctrlY + lineHeight * 3);
+        ctx.fillText('Z - Shadow Strike', ctrlX, ctrlY + lineHeight * 4);
+        ctx.fillText('ESC - Pause', ctrlX, ctrlY + lineHeight * 5);
     }
 
     drawPauseMenu(ctx) {
@@ -92,7 +90,44 @@ class UI {
         ctx.fillText('Press ENTER to Restart', this.width / 2, this.height / 2 + 120);
     }
 
-    drawHUD(ctx, player, score, combo) {
+    drawLevelComplete(ctx, levelNum) {
+        // Background overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.font = 'bold 64px Arial';
+        ctx.fillStyle = '#44FF44'; // Green for success
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('STAGE CLEAR!', this.width / 2, this.height / 2 - 40);
+
+        ctx.font = '32px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`Proceeding to Stage ${levelNum + 1}...`, this.width / 2, this.height / 2 + 30);
+    }
+
+    drawVictory(ctx, score) {
+        // Background overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.font = 'bold 72px Arial';
+        ctx.fillStyle = '#FFD700'; // Gold
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('MISSION ACCOMPLISHED!', this.width / 2, this.height / 2 - 60);
+
+        ctx.font = '36px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`Final Score: ${score}`, this.width / 2, this.height / 2 + 20);
+        
+        ctx.font = '24px Arial';
+        ctx.fillStyle = '#AAAAAA';
+        ctx.fillText('The Skunk Squad is safe... for now.', this.width / 2, this.height / 2 + 80);
+        ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
+    }
+
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null) {
         const padding = 20;
 
         // Health bar
@@ -126,10 +161,121 @@ class UI {
         ctx.fillText(`HP: ${Math.max(0, Math.floor(player.health))} / ${player.maxHealth}`, 
                      healthBarX + 10, healthBarY + 6);
 
-        // Score
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(`Score: ${score}`, this.width - padding, padding);
+        // Stage Indicator
+        try {
+            ctx.save();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText(`STAGE ${levelNumber}`, this.width / 2, padding + 10);
+
+            // Objective / clear condition descriptor
+            if (objectiveInfo && (objectiveInfo.title || objectiveInfo.detail)) {
+                const title = String(objectiveInfo.title || '');
+                const detail = String(objectiveInfo.detail || '');
+
+                const boxW = Math.min(this.width - 40, 560);
+                const boxX = Math.floor((this.width - boxW) / 2);
+                const boxY = padding + 42;
+                const boxH = detail ? 44 : 28;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.55)';
+                ctx.fillRect(boxX, boxY, boxW, boxH);
+                ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(title, this.width / 2, boxY + 6);
+
+                if (detail) {
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                    ctx.fillText(detail, this.width / 2, boxY + 24);
+                }
+
+                // Optional boss HP bar (during boss fight)
+                if (typeof objectiveInfo.bossHpPct === 'number') {
+                    const p = Math.max(0, Math.min(1, objectiveInfo.bossHpPct));
+                    const barW = boxW - 24;
+                    const barH = 6;
+                    const barX = boxX + 12;
+                    const barY = boxY + boxH + 6;
+                    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+                    ctx.fillRect(barX, barY, barW, barH);
+                    ctx.fillStyle = p > 0.5 ? '#ff4444' : p > 0.25 ? '#ff8844' : '#ffcc44';
+                    ctx.fillRect(barX, barY, Math.max(0, Math.floor(barW * p)), barH);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                    ctx.strokeRect(barX, barY, barW, barH);
+                }
+            }
+            ctx.restore();
+        } catch (e) {}
+
+        // Boss Warning Overlay
+        if (this.bossWarningTime > Date.now()) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.3)'; // Dim bg slightly
+            ctx.fillRect(0, this.height/2 - 100, this.width, 200);
+
+            // Flashing effect
+            if (Math.floor(Date.now() / 200) % 2 === 0) {
+                ctx.fillStyle = '#FF0000';
+            } else {
+                ctx.fillStyle = '#FFFFFF';
+            }
+            
+            ctx.font = 'bold 80px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 10;
+            ctx.fillText('WARNING', this.width / 2, this.height / 2 - 20);
+            
+            ctx.fillStyle = '#FFDD00';
+            ctx.font = 'bold 40px Arial';
+            ctx.shadowBlur = 0;
+            ctx.fillText('BOSS APPROACHING', this.width / 2, this.height / 2 + 50);
+            ctx.restore();
+        }
+
+        // Score (neon number with pulse animation)
+        try {
+            const s = typeof score === 'number' ? String(score) : String(score || 0);
+            const scoreX = this.width - padding;
+            const scoreY = padding;
+            const p = Math.max(0, Math.min(1, pulse || 0));
+            const scale = 1 + p * 0.28;
+
+            ctx.save();
+            ctx.translate(scoreX, scoreY);
+            ctx.scale(scale, scale);
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+
+            // Small label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#cfe';
+            ctx.fillText('SCORE', 0, 0);
+
+            // Neon number with glow
+            const numY = 16;
+            ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#39FF14';
+            ctx.shadowColor = '#39FF14';
+            ctx.shadowBlur = 10 + p * 18;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+            ctx.strokeText(s, 0, numY);
+            ctx.fillText(s, 0, numY);
+
+            // reset
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        } catch (e) {}
 
         // Combo counter
         if (combo > 1) {
@@ -163,5 +309,27 @@ class UI {
             ctx.lineWidth = 1;
             ctx.strokeRect(cooldownBarX, cooldownBarY, cooldownBarWidth, cooldownBarHeight);
         }
+    }
+
+    drawTransition(ctx, alpha, text = "") {
+        if (alpha <= 0) return;
+        
+        ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        if (text && alpha > 0.5) {
+            ctx.save();
+            ctx.globalAlpha = (alpha - 0.5) * 2; // Fade text in later
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, this.width / 2, this.height / 2);
+            ctx.restore();
+        }
+    }
+
+    showBossWarning() {
+        this.bossWarningTime = Date.now() + 3000;
     }
 }

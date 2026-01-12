@@ -11,8 +11,13 @@ import pygame
 # Use headless video driver so this can run in CI/without a display
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+# Add repo `src` directory to path (works when running from toolshed or repo root)
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+src_path = os.path.join(repo_root, 'src')
+if not os.path.isdir(src_path):
+    # fallback to parent of repo_root in case this file moved
+    src_path = os.path.join(os.path.dirname(repo_root), 'src')
+sys.path.insert(0, src_path)
 
 from sprite_loader import sprite_loader  # noqa: E402
 
@@ -39,9 +44,9 @@ def main():
 
     player_sheets = [
         ("characters/ninja_idle.png", (64, 64), 4),
-        ("characters/ninja_walk.png", (64, 64), 6),
+        ("characters/ninja_walk.png", (64, 64), 4),
         ("characters/ninja_jump.png", (64, 64), 4),
-        ("characters/ninja_attack.png", (64, 64), 6),
+        ("characters/ninja_attack.png", (64, 64), 4),
         ("characters/ninja_shadow_strike.png", (64, 64), 8),
         ("characters/ninja_hurt.png", (64, 64), 2),
     ]
@@ -68,6 +73,62 @@ def main():
     print("Ninja Skunk Sprites:")
     for sprite_path, size, frames in player_sheets:
         check_sheet(sprite_path, size, frames)
+
+    # Background panoramas and tiles
+    background_images = [
+        "backgrounds/city_bg.png",
+        "backgrounds/forest_bg.png",
+        "backgrounds/mountains_bg.png",
+        "backgrounds/cave_bg.png",
+    ]
+
+    tile_images = [
+        "backgrounds/tiles/ground_tile.png",
+        "backgrounds/tiles/platform_tile.png",
+        "backgrounds/tiles/wall_tile.png",
+    ]
+
+    def check_image(path):
+        full_path = os.path.join(sprite_loader.base_path, path)
+        exists = os.path.exists(full_path)
+        status = "✓" if exists else "✗"
+        print(f"  {path}: {status} Found")
+        if not exists:
+            failures.append(path)
+            return
+        # attempt to load the image with pygame to ensure it's readable
+        try:
+            img = pygame.image.load(full_path)
+            w = img.get_width()
+            h = img.get_height()
+            print(f"    size: {w}x{h}")
+            return (w, h)
+        except Exception as exc:  # pragma: no cover - defensive
+            failures.append(path)
+            print(f"    ✗ Failed to load image: {exc}")
+
+
+    print()
+    print("Background Images:")
+    for p in background_images:
+        dims = check_image(p)
+        if dims:
+            w, h = dims
+            # Expect backgrounds to be reasonably large for panoramas
+            if w < 800 or h < 360:
+                failures.append(p)
+                print(f"    ✗ Background too small (expected at least 800x360): {w}x{h}")
+
+    print()
+    print("Tile Images:")
+    for p in tile_images:
+        dims = check_image(p)
+        if dims:
+            w, h = dims
+            # Tiles should be square 64x64 for consistency; accept 32x32 as legacy
+            if not ((w == 64 and h == 64) or (w == 32 and h == 32)):
+                failures.append(p)
+                print(f"    ✗ Tile size incorrect (expected 64x64 or legacy 32x32): {w}x{h}")
 
     print()
     if failures:

@@ -50,10 +50,22 @@ class Player {
         this.attackHitbox = { x: 0, y: 0, width: this.defaultAttackWidth, height: this.defaultAttackHeight };
         this.hitEnemies = new Set();
 
+        // Track previous-frame attack hitbox (used for swept collision checks)
+        this._prevAttackHitbox = null;
+
         // Shadow strike state
         this.isShadowStriking = false;
-        this.shadowStrikeDuration = 0.25;
-        this.shadowStrikeSpeed = 600;
+        // Keep the move duration in sync with the animation timing.
+        // Shadow Strike should have enough active frames to feel consistent.
+        const shadowStrikeAnim = this.animations && this.animations.shadow_strike;
+        this.shadowStrikeDuration = shadowStrikeAnim ? (shadowStrikeAnim.frameCount * shadowStrikeAnim.frameDuration) : 0.4;
+        // Tune dash distance (speed * duration). With 4 frames @ 0.08s => 0.32s total.
+        this.shadowStrikeSpeed = 380;
+
+        // Shadow strike tuning: active damage window and hitbox size
+        // Default: active on all frames except the first/last (windup/recovery)
+        this.shadowStrikeHitboxWidth = 120;
+        this.shadowStrikeHitboxHeight = 70;
 
         // Combo system
         this.comboCount = 0;
@@ -66,43 +78,71 @@ class Player {
         this.invulnerableTimer = 0;
         this.invulnerableDuration = 0.5;
 
+        // Footstep sounds
+        this.footstepTimer = 0;
+        this.footstepInterval = 0.25; // Footstep every 0.25 seconds when walking
+
         // Animation state
         this.animationState = "IDLE";
         this.currentAnimation = null;
 
         // Input
         this.keys = {};
+
+        // Attack stats hooks (consumed by Game for accuracy tracking)
+        this._attackJustStarted = false;
+        this._attackDidHit = false;
     }
 
     loadSprites() {
         const ninja_idle = spriteLoader.getSprite('ninja_idle');
         const ninja_walk = spriteLoader.getSprite('ninja_walk');
         const ninja_jump = spriteLoader.getSprite('ninja_jump');
-        const ninja_attack = spriteLoader.getSprite('ninja_attack');
+                const ninja_attack = spriteLoader.getSprite('ninja_attack');
         const ninja_shadow_strike = spriteLoader.getSprite('ninja_shadow_strike');
         const ninja_hurt = spriteLoader.getSprite('ninja_hurt');
 
-        this.animations = {
-            idle: new Animation(ninja_idle, 4, 0.15),
-            walk: new Animation(ninja_walk, 6, 0.1),
-            jump: new Animation(ninja_jump, 4, 0.12),
-            attack: new Animation(ninja_attack, 6, 0.08),
-            shadow_strike: new Animation(ninja_shadow_strike, 8, 0.05),
-            hurt: new Animation(ninja_hurt, 2, 0.1)
-        };
+        // Use spriteLoader.createAnimation when available so frameStride can be
+        // inferred from sheet dimensions (handles padding between frames).
+        if (spriteLoader && typeof spriteLoader.createAnimation === 'function') {
+            // Let the SpriteLoader infer frame width/stride (it can detect
+            // per-sheet padding) instead of forcing a hardcoded value.
+            this.animations = {
+                idle: spriteLoader.createAnimation('ninja_idle', 4, 0.15),
+                        walk: spriteLoader.createAnimation('ninja_walk', 4, 0.1),
+                jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12),
+                        attack: spriteLoader.createAnimation('ninja_attack', 4, 0.08),
+                // Shadow Strike: play 4 frames, extra-snappy timing.
+                // Explicitly lock sheet slicing (and disable auto-centering) so we
+                // always use the first frames even if the source sheet has more frames.
+                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65, frameOffset: 0 }),
+                hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1)
+            };
+        } else {
+            this.animations = {
+                idle: new Animation(ninja_idle, 4, 0.15, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                        walk: new Animation(ninja_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                jump: new Animation(ninja_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                        attack: new Animation(ninja_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                    shadow_strike: new Animation(ninja_shadow_strike, 4, 0.035, { frameWidth: 64, frameHeight: 64, frameStride: 65, frameOffset: 0 }),
+                hurt: new Animation(ninja_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
+            };
+        }
 
         this.currentAnimation = this.animations.idle;
     }
 
     handleInput(key, isDown) {
-        this.keys[key] = isDown;
+        // Normalize key (accept both event.code and event.key forms)
+        const k = (key || '').toString().toLowerCase();
+        this.keys[k] = isDown;
 
         if (isDown) {
-            if (key === ' ' || key === 'Spacebar') {
+            if (k === 'space' || k === 'spacebar' || k === ' ') {
                 this.jumpBufferTimer = this.jumpBufferTime;
-            } else if (key === 'x' || key === 'X') {
+            } else if (k === 'keyx' || k === 'x') {
                 this.attack();
-            } else if (key === 'z' || key === 'Z') {
+            } else if (k === 'keyz' || k === 'z') {
                 this.specialAttack();
             }
         }
@@ -125,6 +165,15 @@ class Player {
             this.attackTimer = this.attackDuration;
             this.attackCooldownTimer = this.attackCooldown;
             this.hitEnemies.clear();
+
+            // Mark attack start for Game stats (count once per attack)
+            this._attackJustStarted = true;
+            this._attackDidHit = false;
+
+            // Ensure hitbox is positioned immediately (not one frame later)
+            this.attackHitbox.width = this.defaultAttackWidth;
+            this.attackHitbox.height = this.defaultAttackHeight;
+            this._updateAttackHitboxPosition();
 
             // Update combo
             if (this.comboTimer > 0) {
@@ -156,9 +205,14 @@ class Player {
             this.attackCooldownTimer = this.attackCooldown * 1.5;
             this.hitEnemies.clear();
 
+            // Mark attack start for Game stats (count once per attack)
+            this._attackJustStarted = true;
+            this._attackDidHit = false;
+
             // Enhanced hitbox for shadow strike
-            this.attackHitbox.width = 100;
-            this.attackHitbox.height = 60;
+            this.attackHitbox.width = this.shadowStrikeHitboxWidth;
+            this.attackHitbox.height = this.shadowStrikeHitboxHeight;
+            this._updateAttackHitboxPosition();
 
             // Dash forward
             this.velocityX = this.facingRight ? this.shadowStrikeSpeed : -this.shadowStrikeSpeed;
@@ -175,6 +229,10 @@ class Player {
     }
 
     takeDamage(damage, source = null) {
+        // Shadow Strike grants brief i-frames without the normal invuln flashing
+        if (this.isShadowStriking) {
+            return false;
+        }
         if (this.invulnerableTimer <= 0) {
             this.health -= damage;
             this.invulnerableTimer = this.invulnerableDuration;
@@ -213,6 +271,18 @@ class Player {
     }
 
     update(dt, level) {
+        // Snapshot prior attack hitbox for swept collision checks (important for dash attacks)
+        if (this.isAttacking) {
+            this._prevAttackHitbox = {
+                x: this.attackHitbox.x,
+                y: this.attackHitbox.y,
+                width: this.attackHitbox.width,
+                height: this.attackHitbox.height
+            };
+        } else {
+            this._prevAttackHitbox = null;
+        }
+
         // Update timers
         if (this.coyoteTimer > 0) this.coyoteTimer -= dt;
         if (this.jumpBufferTimer > 0) this.jumpBufferTimer -= dt;
@@ -224,14 +294,17 @@ class Player {
         if (this.hitStunTimer > 0) this.hitStunTimer -= dt;
         if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
 
+        // Update footstep timer
+        if (this.footstepTimer > 0) this.footstepTimer -= dt;
+
         // Determine target velocity based on input
         this.targetVelocityX = 0;
         if (this.hitStunTimer <= 0) {
-            if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) {
+            if (this.keys['arrowleft'] || this.keys['a'] || this.keys['keya']) {
                 this.targetVelocityX = -this.speed;
                 if (!this.isAttacking) this.facingRight = false;
             }
-            if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) {
+            if (this.keys['arrowright'] || this.keys['d'] || this.keys['keyd']) {
                 this.targetVelocityX = this.speed;
                 if (!this.isAttacking) this.facingRight = true;
             }
@@ -282,6 +355,8 @@ class Player {
         this.y += this.velocityY * dt;
 
         // Check platform collisions (pass prevRect)
+        // Preserve pre-collision vertical velocity so we can detect hard landings.
+        const preCollisionVY = this.velocityY;
         const rect = { x: this.x, y: this.y, width: this.width, height: this.height };
         const collision = level.checkPlatformCollision(rect, prevRect, this.velocityY);
 
@@ -289,6 +364,12 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            
+            // Play landing sound if falling from significant height.
+            // Note: velocity is positive when falling (downwards).
+            if (!wasOnGround && preCollisionVY > 450) {
+                if (this.audioManager) this.audioManager.playSound('land', 0.6);
+            }
         } else {
             this.onGround = false;
         }
@@ -298,6 +379,14 @@ class Player {
             this.coyoteTimer = this.coyoteTime;
         } else if (this.onGround) {
             this.coyoteTimer = 0;
+        }
+
+        // Play footstep sounds when walking on ground
+        if (this.onGround && Math.abs(this.velocityX) > 50 && this.footstepTimer <= 0 && !this.isAttacking && !this.isShadowStriking) {
+            if (this.audioManager) {
+                this.audioManager.playSound('footstep', 0.3);
+            }
+            this.footstepTimer = this.footstepInterval;
         }
 
         // Handle jump buffering
@@ -312,10 +401,11 @@ class Player {
             if (this.attackTimer <= 0) {
                 this.isAttacking = false;
                 this.isShadowStriking = false;
+                this._attackDidHit = false;
                 this.attackHitbox.width = this.defaultAttackWidth;
                 this.attackHitbox.height = this.defaultAttackHeight;
                 if (Math.abs(this.velocityX) > this.speed) {
-                    this.velocityX = 0;
+                    this.velocityX = Utils.clamp(this.velocityX, -this.speed, this.speed);
                 }
             }
         }
@@ -326,9 +416,7 @@ class Player {
 
         // Update attack hitbox position
         if (this.isAttacking) {
-            const offsetX = this.facingRight ? this.width : -this.attackHitbox.width;
-            this.attackHitbox.x = this.x + offsetX;
-            this.attackHitbox.y = this.y + (this.height - this.attackHitbox.height) / 2;
+            this._updateAttackHitboxPosition();
         }
 
         // Update animations
@@ -372,6 +460,7 @@ class Player {
 
         // Draw shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
         ctx.ellipse(this.x + this.width / 2, this.y + this.height, this.width / 2, 10, 0, 0, Math.PI * 2);
         ctx.fill();
 
@@ -389,10 +478,29 @@ class Player {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
 
-        // Debug: draw hitbox
-        if (this.isAttacking) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-            ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
+        // Debug: draw collision boxes
+        if (typeof Config !== 'undefined' && (Config.DEBUG || Config.SHOW_HITBOXES)) {
+            // Player body
+            ctx.strokeStyle = 'rgba(0, 180, 255, 0.65)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+            // Attack hitbox (only while attacking)
+            if (this.isAttacking) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.55)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
+
+                // Shadow strike swept hitbox (helps visualize dash collisions)
+                try {
+                    const swept = (typeof this.getAttackHitboxForCollision === 'function') ? this.getAttackHitboxForCollision() : null;
+                    if (swept && this.isShadowStriking) {
+                        ctx.strokeStyle = 'rgba(180, 0, 255, 0.45)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(swept.x, swept.y, swept.width, swept.height);
+                    }
+                } catch (e) {}
+            }
         }
 
         ctx.restore();
@@ -400,5 +508,40 @@ class Player {
 
     getRect() {
         return { x: this.x, y: this.y, width: this.width, height: this.height };
+    }
+
+    _updateAttackHitboxPosition() {
+        const offsetX = this.facingRight ? this.width : -this.attackHitbox.width;
+        this.attackHitbox.x = this.x + offsetX;
+        this.attackHitbox.y = this.y + (this.height - this.attackHitbox.height) / 2;
+    }
+
+    isAttackDamageActive() {
+        if (!this.isAttacking) return false;
+        if (!this.isShadowStriking) return true;
+
+        const anim = this.animations && this.animations.shadow_strike;
+        if (anim && typeof anim.currentFrame === 'number' && typeof anim.frameCount === 'number') {
+            // Active on all frames except first/last
+            return anim.currentFrame > 0 && anim.currentFrame < (anim.frameCount - 1);
+        }
+
+        // Fallback: active for the middle 70% of the move
+        const dur = this.shadowStrikeDuration || 0.4;
+        const elapsed = dur - (this.attackTimer || 0);
+        const t = Utils.clamp(elapsed / dur, 0, 1);
+        return t >= 0.15 && t <= 0.85;
+    }
+
+    getAttackHitboxForCollision() {
+        if (!this.isAttacking) return null;
+        if (!this.isShadowStriking || !this._prevAttackHitbox) return this.attackHitbox;
+
+        // Swept AABB: union of previous and current hitbox
+        const x1 = Math.min(this._prevAttackHitbox.x, this.attackHitbox.x);
+        const y1 = Math.min(this._prevAttackHitbox.y, this.attackHitbox.y);
+        const x2 = Math.max(this._prevAttackHitbox.x + this._prevAttackHitbox.width, this.attackHitbox.x + this.attackHitbox.width);
+        const y2 = Math.max(this._prevAttackHitbox.y + this._prevAttackHitbox.height, this.attackHitbox.y + this.attackHitbox.height);
+        return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
     }
 }

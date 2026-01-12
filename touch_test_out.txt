@@ -1,0 +1,13 @@
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:8000/
+Call log:
+[2m  - navigating to "http://localhost:8000/", waiting until "load"[22m
+
+    at C:\Users\marcf\Documents\GitHub\skunksquadnft.com\SkunkFU\tools\touch_controls_landscape_test.js:7:14 {
+  name: 'Error'
+}
+
+Node.js v24.5.0

@@ -1,0 +1,217 @@
+{
+  "logs": [
+    {
+      "type": "log",
+      "text": "game.js loaded"
+    },
+    {
+      "type": "log",
+      "text": "Game class defined"
+    },
+    {
+      "type": "warning",
+      "text": "Running from file:// — audio and some assets may not load. You can click \"Start Anyway\" to continue in a degraded mode."
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_idle -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ground_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded platform_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_walk -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded wall_tile -> 64x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_city -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_forest -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_mountains -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_jump -> 260x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded bg_cave -> 1920x1080"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_attack -> 390x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_shadow_strike -> 520x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_idle -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded ninja_hurt -> 130x64"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_walk -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_attack -> 192x48"
+    },
+    {
+      "type": "log",
+      "text": "SpriteLoader: loaded basic_hurt -> 192x48"
+    },
+    {
+      "type": "warning",
+      "text": "File protocol detected: skipping audio asset loading. Click \"Start Anyway\" to attempt enabling audio."
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: adjustCanvas_mobile_viewClamp {cssHeight: 720, overlayH: 0, cappedOverlayH: 0, finalEffectiveCssHeight: 720}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: gameReady_pending_check {}"
+    },
+    {
+      "type": "log",
+      "text": "Game.keydown {key: enter, state: MENU}"
+    },
+    {
+      "type": "log",
+      "text": "Game.startGame() called"
+    },
+    {
+      "type": "log",
+      "text": "Spawn placed on floor at 1248 628 floor: 0 700 2560 40"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_nonmobile {}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 0, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraY diagnostic {cameraY: 0, targetCameraY: 304.41666666666663, viewHeight: 720, levelHeight: 720}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 1, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 2, playerX: 1248, playerCenterX: 1280, cameraX: 640, targetCameraX: 640}"
+    },
+    {
+      "type": "log",
+      "text": "Game.keydown {key: arrowright, state: PLAYING}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 3, playerX: 1248.6944444444443, playerCenterX: 1280.6944444444443, cameraX: 640.6944444444443, targetCameraX: 640.6944444444443}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 4, playerX: 1250.0833333333333, playerCenterX: 1282.0833333333333, cameraX: 642.0833333333333, targetCameraX: 642.0833333333333}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 5, playerX: 1252.1666666666665, playerCenterX: 1284.1666666666665, cameraX: 644.1666666666665, targetCameraX: 644.1666666666665}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 6, playerX: 1254.9444444444443, playerCenterX: 1286.9444444444443, cameraX: 646.9444444444443, targetCameraX: 646.9444444444443}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 7, playerX: 1258.4166666666665, playerCenterX: 1290.4166666666665, cameraX: 650.4166666666665, targetCameraX: 650.4166666666665}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 8, playerX: 1262.5833333333333, playerCenterX: 1294.5833333333333, cameraX: 654.5833333333333, targetCameraX: 654.5833333333333}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_hidden_nonmobile {}"
+    },
+    {
+      "type": "info",
+      "text": "MediaElementAudioSource outputs zeroes due to CORS access restrictions for file:///C:/Users/Jewel/Documents/GitHub/SkunkFU/assets/audio/music/gameplay.wav"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 9, playerX: 1267.4444444444443, playerCenterX: 1299.4444444444443, cameraX: 659.4444444444443, targetCameraX: 659.4444444444443}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 10, playerX: 1273, playerCenterX: 1305, cameraX: 665, targetCameraX: 665}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 11, playerX: 1279.25, playerCenterX: 1311.25, cameraX: 671.25, targetCameraX: 671.25}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 12, playerX: 1285.9166666666667, playerCenterX: 1317.9166666666667, cameraX: 677.9166666666667, targetCameraX: 677.9166666666667}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 13, playerX: 1292.5833333333335, playerCenterX: 1324.5833333333335, cameraX: 684.5833333333335, targetCameraX: 684.5833333333335}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 14, playerX: 1299.2500000000002, playerCenterX: 1331.2500000000002, cameraX: 691.2500000000002, targetCameraX: 691.2500000000002}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 15, playerX: 1305.916666666667, playerCenterX: 1337.916666666667, cameraX: 697.916666666667, targetCameraX: 697.916666666667}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 16, playerX: 1312.5833333333337, playerCenterX: 1344.5833333333337, cameraX: 704.5833333333337, targetCameraX: 704.5833333333337}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 17, playerX: 1319.2500000000005, playerCenterX: 1351.2500000000005, cameraX: 711.2500000000005, targetCameraX: 711.2500000000005}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 18, playerX: 1325.9166666666672, playerCenterX: 1357.9166666666672, cameraX: 717.9166666666672, targetCameraX: 717.9166666666672}"
+    },
+    {
+      "type": "log",
+      "text": "CameraX trace {frame: 19, playerX: 1332.583333333334, playerCenterX: 1364.583333333334, cameraX: 724.5833333333339, targetCameraX: 724.5833333333339}"
+    },
+    {
+      "type": "log",
+      "text": "touchDebug: touchControls_observer_attached {}"
+    }
+  ],
+  "fps": 60
+}

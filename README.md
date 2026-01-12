@@ -43,14 +43,12 @@ cd SkunkFU
 
      ```bash
      # Python 3
-     python -m http.server 8000
-     # Then open http://localhost:8000 in your browser
-     
-     # Or with Node.js
-     npx http-server -p 8000
-     # Then open http://localhost:8000 in your browser
-     ```
-
+    python -m http.server 8000
+    # Then open http://localhost:8000 in your browser
+    
+    # Or with Node.js
+    npx http-server -p 8000
+    # Then open http://localhost:8000 in your browser
 2. Start playing! No installation required.
 
 **Browser Requirements:**
@@ -89,6 +87,37 @@ python main.py
 
 ## Controls
 
+### Useful developer scripts (npm)
+
+- **Start local Node server:** `npm start` (runs `tools/csp_server.js`)
+- **Start simple Python HTTP server:** `npm run serve:py`
+- **Run Playwright tests (landscape):** `npm run test:touch-landscape`
+- **Run full mobile test suite:** `npm run test:mobile-all` (runs several playwright tests)
+- **Check sprite frames (Python):** `npm run check:sprite-frames` (validates frame/padding)
+- **Fix sprite sheets (Python):** `npm run fix:sprites` (pads sprite sheets where needed, creates backups)
+- **Extract ninja walk frames (Python):** `npm run extract:ninja-walk` (writes frames to `tmp-frames`)
+- **Preview sprites (Python):** `npm run preview:sprites` (opens a small pygame preview window)
+
+These scripts run tools in `tools/` and `toolshed/` to help testing, sprite maintenance and diagnostics.
+
+### Entrypoint & CI/Docker 🔧
+
+- **Expected entrypoint:** `index.js` (root shim) with `"main": "index.js"` in `package.json`. `npm start` still runs `node tools/csp_server.js` for local development.
+- **Docker / container platforms:** If your platform runs `node index.js` by default, no change is needed. To override, set the container CMD/ENTRYPOINT, for example:
+
+```Dockerfile
+# Run the root shim
+CMD ["node", "index.js"]
+# or run the server directly
+CMD ["node", "tools/csp_server.js"]
+```
+
+- **CI (GitHub Actions / other):** Use `npm start` or `node index.js` to start the server in your job. If you prefer a different entrypoint, update the `main` field in `package.json` or set the explicit command in your CI job.
+
+> Tip: keep `npm start` pointing to the dev server (`tools/csp_server.js`) so local `npm start` behavior is predictable.
+
+## Controls
+
 | Action | Keys |
 |--------|------|
 | Move Left/Right | Arrow Keys or A/D |
@@ -117,7 +146,7 @@ SkunkFU/
 │   ├── spriteLoader.js     # Sprite loading and animation
 │   ├── audioManager.js     # Audio system
 │   └── visualEffects.js    # Visual effects (damage numbers, etc.)
-├── src/                    # Python/Pygame version
+├── python/                 # Python/Pygame version (tucked away)
 │   ├── main.py             # Game entry point
 │   ├── game.py             # Main game controller
 │   ├── config.py           # Game configuration and constants
