@@ -162,6 +162,22 @@ class Game {
         }
     }
 
+    _clearAllInput() {
+        try {
+            // Clear any active touch keys from the split-screen touch controls
+            if (this._touchKeys && this._touchKeys.clear) this._touchKeys.clear();
+        } catch (e) {}
+
+        try {
+            if (this.player) {
+                if (typeof this.player.clearInputState === 'function') this.player.clearInputState();
+                // Stop any lingering movement immediately (prevents "auto-run")
+                this.player.targetVelocityX = 0;
+                this.player.velocityX = 0;
+            }
+        } catch (e) {}
+    }
+
     
         setupInput() {
             // Normalize input and use consistent keys (use event.code when available)
@@ -221,6 +237,19 @@ class Game {
                         }
                     } catch (e) {}
                 }
+            });
+
+            // If the window loses focus, keyup events may never fire.
+            // Clear input to avoid stuck movement when returning.
+            window.addEventListener('blur', () => {
+                this._clearAllInput();
+            });
+
+            // Also clear input when the tab is hidden.
+            document.addEventListener('visibilitychange', () => {
+                try {
+                    if (document.hidden) this._clearAllInput();
+                } catch (e) {}
             });
 
             // Listen for on-screen touch UI events
@@ -503,6 +532,8 @@ class Game {
                 this.player.x = 100;
                 this.player.y = 500;
                 this.player.velocityX = 0;
+                this.player.velocityY = 0;
+                this._clearAllInput();
             }
 
             // Show level toast if UI available

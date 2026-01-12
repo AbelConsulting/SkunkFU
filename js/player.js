@@ -265,9 +265,26 @@ class Player {
         this.health = this.maxHealth;
         this.velocityX = 0;
         this.velocityY = 0;
+        this.targetVelocityX = 0;
         this.comboCount = 0;
         this.hitStunTimer = 0;
         this.invulnerableTimer = 0;
+
+        // Reset attack state and clear any stuck input (e.g., missed keyup
+        // during transitions) so the player doesn't auto-run on respawn.
+        this.isAttacking = false;
+        this.isShadowStriking = false;
+        this.attackTimer = 0;
+        this.attackCooldownTimer = 0;
+        try { this.hitEnemies && this.hitEnemies.clear && this.hitEnemies.clear(); } catch (e) {}
+        this._prevAttackHitbox = null;
+        this.clearInputState();
+    }
+
+    clearInputState() {
+        // Clear held keys; used when focus is lost or levels transition.
+        this.keys = {};
+        this.targetVelocityX = 0;
     }
 
     update(dt, level) {
