@@ -431,17 +431,33 @@ class Animation {
     draw(ctx, x, y, width, height, flipHorizontal = false) {
         if (!this.spriteSheet) return;
 
+        // Subpixel destination coordinates can cause sampling/"seam" artifacts
+        // on sprite sheets (especially when scaled). Snap to whole pixels
+        // when enabled.
+        let dx = x;
+        let dy = y;
+        let dw = width;
+        let dh = height;
+        try {
+            if (typeof Config !== 'undefined' && Config.PIXEL_SNAP) {
+                dx = Math.round(x);
+                dy = Math.round(y);
+                dw = Math.max(1, Math.round(width));
+                dh = Math.max(1, Math.round(height));
+            }
+        } catch (e) {}
+
         const sheetFrameIndex = this.frameIndices ? (this.frameIndices[this.currentFrame] || 0) : this.currentFrame;
         const sx = Math.floor(this.frameOffset + (sheetFrameIndex * this.frameStride));
         const sy = 0;
 
         ctx.save();
         if (flipHorizontal) {
-            ctx.translate(x + width, y);
+            ctx.translate(dx + dw, dy);
             ctx.scale(-1, 1);
-            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, 0, 0, width, height);
+            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, 0, 0, dw, dh);
         } else {
-            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, x, y, width, height);
+            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, dx, dy, dw, dh);
         }
         ctx.restore();
     }

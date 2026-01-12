@@ -10,6 +10,10 @@ const Config = {
     // When true, draws collision hitboxes (useful for gameplay tuning)
     SHOW_HITBOXES: false,
 
+    // Pixel-art rendering helper: when true, sprite draw calls snap destination
+    // coordinates/sizes to whole pixels to reduce seam artifacts.
+    PIXEL_SNAP: true,
+
     // Screen settings
     SCREEN_WIDTH: 1280,
     SCREEN_HEIGHT: 720,
