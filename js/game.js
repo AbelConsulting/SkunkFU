@@ -662,9 +662,13 @@ class Game {
             }
 
         // Update hit pause
+        // Shadow Strike should not freeze the whole game loop on hits; it makes
+        // the special feel sluggish and can tank perceived performance.
         if (this.hitPauseTimer > 0) {
             this.hitPauseTimer -= dt;
-            return; // Pause game during hit pause
+            if (!(this.player && this.player.isShadowStriking)) {
+                return; // Pause game during hit pause
+            }
         }
 
         // Update damage numbers and effects
@@ -768,9 +772,9 @@ class Game {
 
             // Screen shake and hit pause for impactful hits
             if (this.player.isShadowStriking) {
-                // Shadow Strike: no screen shake (mobile-friendly)
+                // Shadow Strike: no screen shake, no hit-pause (keeps the dash snappy)
                 this.screenShake = null;
-                this.hitPauseTimer = 0.07;
+                this.hitPauseTimer = 0;
             } else if (this.player.comboCount >= 3) {
                 this.screenShake = new ScreenShake(0.08, 5);
                 this.audioManager.playSound('combo', 0.8);
