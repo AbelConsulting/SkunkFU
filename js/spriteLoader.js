@@ -33,7 +33,10 @@ class SpriteLoader {
             'second_idle': 4,
             'second_walk': 4,
             'second_attack': 4,
-            'second_hurt': 2
+            'second_hurt': 2,
+            'boss_idle': 4,
+            'boss_walk': 4,
+            'boss_attack1': 4
         };
     }
 
@@ -226,6 +229,11 @@ class SpriteLoader {
             ['second_walk', 'assets/sprites/enemies/second_walk.png'],
             ['second_attack', 'assets/sprites/enemies/second_attack.png'],
             ['second_hurt', 'assets/sprites/enemies/second_hurt.png'],
+
+            // Boss sprites
+            ['boss_idle', 'assets/sprites/enemies/boss_idle.png'],
+            ['boss_walk', 'assets/sprites/enemies/boss_walk.png'],
+            ['boss_attack1', 'assets/sprites/enemies/boss_attack1.png'],
 
             // Background / tile sprites
             ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
