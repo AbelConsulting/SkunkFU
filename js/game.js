@@ -1128,6 +1128,19 @@ class Game {
                 ctx.fillRect(8, 8, 320, 110);
                 ctx.fillStyle = '#0f0';
                 ctx.font = '12px monospace';
+                const allowedTypesText = (this.enemyManager && Array.isArray(this.enemyManager.allowedEnemyTypes) && this.enemyManager.allowedEnemyTypes.length > 0)
+                    ? this.enemyManager.allowedEnemyTypes.join(',')
+                    : 'default';
+                let b = 0, f = 0, s = 0;
+                try {
+                    const enemies = (this.enemyManager && Array.isArray(this.enemyManager.enemies)) ? this.enemyManager.enemies : [];
+                    for (const e of enemies) {
+                        if (!e || !e.enemyType) continue;
+                        if (e.enemyType === 'BASIC') b++;
+                        else if (e.enemyType === 'FAST_BASIC') f++;
+                        else if (e.enemyType === 'SECOND_BASIC') s++;
+                    }
+                } catch (e) {}
                 const lines = [
                         `cameraX: ${this.cameraX.toFixed(1)}`,
                     `player.x: ${this.player.x.toFixed(1)}`,
@@ -1135,6 +1148,8 @@ class Game {
                     `viewWidth: ${this.viewWidth}`,
                     `cameraMax: ${Math.max(0, this.level.width - (this.viewWidth || this.width)).toFixed(1)}`,
                     `state: ${this.state}`,
+                    `enemy.allowed: ${allowedTypesText}`,
+                    `enemies B/F/S: ${b}/${f}/${s}`,
                     `levelVisuals: ${this.levelDebugVisuals ? 'ON' : 'OFF'}`
                 ];
                 for (let i = 0; i < lines.length; i++) {
