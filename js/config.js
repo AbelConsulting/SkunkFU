@@ -40,6 +40,11 @@ const Config = {
     // Default false so enemies can fall off platforms naturally.
     ENEMY_AVOID_LEDGES: false,
 
+    // Items / pickups
+    HEALTH_REGEN_ITEM_SIZE: 32,
+    HEALTH_REGEN_ITEM_DURATION: 6.0, // seconds
+    HEALTH_REGEN_HP_PER_SECOND: 8.0,
+
     // Colors
     WHITE: '#FFFFFF',
     BLACK: '#000000',
