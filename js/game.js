@@ -112,6 +112,8 @@ class Game {
 
         this.enemyManager = new EnemyManager(this.audioManager);
         this.itemManager = new ItemManager(this.audioManager);
+        // Link itemManager to enemyManager for item drops
+        if (this.enemyManager) this.enemyManager.itemManager = this.itemManager;
         this.ui = new UI(this.width, this.height);
 
         // Camera

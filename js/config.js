@@ -46,6 +46,10 @@ const Config = {
     HEALTH_REGEN_HP_PER_SECOND: 8.0,
     EXTRA_LIFE_ITEM_SIZE: 32,
 
+    // Item drop rates (0.0 - 1.0, where 1.0 = 100% chance)
+    HEALTH_REGEN_DROP_RATE: 0.15, // 15% chance per enemy
+    EXTRA_LIFE_DROP_RATE: 0.05,   // 5% chance per enemy
+
     // Colors
     WHITE: '#FFFFFF',
     BLACK: '#000000',

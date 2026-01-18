@@ -3,8 +3,9 @@
  */
 
 class EnemyManager {
-    constructor(audioManager = null) {
+    constructor(audioManager = null, itemManager = null) {
         this.audioManager = audioManager;
+        this.itemManager = itemManager;
         this.enemies = [];
         this.spawnTimer = 0;
         this.spawnInterval = 3.0; // Seconds between spawns
@@ -136,6 +137,9 @@ class EnemyManager {
 
             // Remove dead enemies
             if (enemy.health <= 0) {
+                // Try to drop an item at enemy location
+                this.tryDropItem(enemy);
+                
                 this.enemies.splice(i, 1);
                 this.enemiesDefeated++;
             }
@@ -220,5 +224,29 @@ class EnemyManager {
 
     getEnemies() {
         return this.enemies;
+    }
+
+    /**
+     * Try to drop an item when an enemy is defeated
+     */
+    tryDropItem(enemy) {
+        if (!this.itemManager || !enemy) return;
+
+        const dropX = enemy.x + (enemy.width || 48) / 2;
+        const dropY = enemy.y + (enemy.height || 48) / 2;
+
+        // Boss enemies have higher drop rates
+        const isBoss = enemy.enemyType === 'BOSS';
+        const healthRegenRate = isBoss ? 0.5 : (Config.HEALTH_REGEN_DROP_RATE || 0.15);
+        const extraLifeRate = isBoss ? 0.3 : (Config.EXTRA_LIFE_DROP_RATE || 0.05);
+
+        // Roll for extra life first (rarer)
+        if (Math.random() < extraLifeRate) {
+            this.itemManager.spawnExtraLife(dropX, dropY);
+        }
+        // Then roll for health regen
+        else if (Math.random() < healthRegenRate) {
+            this.itemManager.spawnHealthRegen(dropX, dropY);
+        }
     }
 }
