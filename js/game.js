@@ -111,6 +111,7 @@ class Game {
         }
 
         this.enemyManager = new EnemyManager(this.audioManager);
+        this.itemManager = new ItemManager(this.audioManager);
         this.ui = new UI(this.width, this.height);
 
         // Camera
@@ -157,6 +158,17 @@ class Game {
                         else this.levelDebugVisuals = !this.levelDebugVisuals;
                         console.log('levelDebugVisuals =', this.levelDebugVisuals);
                     } catch (e) { console.warn('toggleLevelDebugVisuals failed', e); }
+                };
+
+                // Debug: spawn health regen item at player location
+                window.spawnHealthRegen = (x, y) => {
+                    try {
+                        if (!this.itemManager) return console.warn('itemManager not initialized');
+                        const px = (typeof x === 'number') ? x : (this.player ? this.player.x : 100);
+                        const py = (typeof y === 'number') ? y : (this.player ? this.player.y : 300);
+                        this.itemManager.spawnHealthRegen(px, py);
+                        console.log('Spawned health regen at', px, py);
+                    } catch (e) { console.warn('spawnHealthRegen failed', e); }
                 };
             } catch (e) {}
         }
@@ -405,6 +417,7 @@ class Game {
             
             if (this.player && typeof this.player.reset === 'function') this.player.reset();
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
+            if (this.itemManager && typeof this.itemManager.reset === 'function') this.itemManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
             // Place player at a spawn point near the level start.
@@ -727,6 +740,16 @@ class Game {
         // Update enemies
         this.enemyManager.update(dt, this.player, this.level);
 
+        // Update item manager
+        if (this.itemManager) {
+            this.itemManager.update(dt);
+            // Check item collection
+            const collected = this.itemManager.checkPlayerCollision(this.player);
+            for (const item of collected) {
+                this.itemManager.applyItemEffect(this.player, item);
+            }
+        }
+
         // Track attack attempts once per attack (instead of per-frame)
         try {
             if (this.player && this.player._attackJustStarted) {
@@ -963,8 +986,14 @@ class Game {
 
         // Render game world (level, player, enemies) using logical coordinates
         this.level.draw(this.ctx, this.cameraX, this.cameraY, this.viewWidth, this.viewHeight);
-        this.player.draw(this.ctx, this.cameraX, this.cameraY);
         this.enemyManager.draw(this.ctx, this.cameraX, this.cameraY);
+
+        // Draw items
+        if (this.itemManager) {
+            this.itemManager.draw(this.ctx, this.cameraX, this.cameraY);
+        }
+
+        this.player.draw(this.ctx, this.cameraX, this.cameraY);
 
         // Render visual effects
         this.ctx.save();

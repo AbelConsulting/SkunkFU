@@ -82,6 +82,9 @@ class Player {
         this.footstepTimer = 0;
         this.footstepInterval = 0.25; // Footstep every 0.25 seconds when walking
 
+        // Health regeneration effect (applied by health regen pickups)
+        this.healthRegen = null;
+
         // Animation state
         this.animationState = "IDLE";
         this.currentAnimation = null;
@@ -308,6 +311,19 @@ class Player {
         } else {
             this.comboCount = 0;
         }
+
+        // Update health regeneration effect
+        if (this.healthRegen) {
+            this.healthRegen.timer += dt;
+            const healAmount = this.healthRegen.hpPerSecond * dt;
+            this.health = Math.min(this.maxHealth, this.health + healAmount);
+            
+            // Remove effect when duration expires
+            if (this.healthRegen.timer >= this.healthRegen.duration) {
+                this.healthRegen = null;
+            }
+        }
+
         if (this.hitStunTimer > 0) this.hitStunTimer -= dt;
         if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
 
