@@ -239,6 +239,9 @@ class SpriteLoader {
             ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
             ['platform_tile', 'assets/sprites/backgrounds/tiles/platform_tile.png'],
             ['wall_tile', 'assets/sprites/backgrounds/tiles/wall_tile.png'],
+
+            // Items / pickups
+            ['health_regen_item', 'assets/sprites/items/health_regen_item.svg'],
             // Background panoramas are large; load them lazily per-level to
             // avoid decoding and memory spikes on startup. Leave them out of
             // the global preload list so Level can request only what it needs.

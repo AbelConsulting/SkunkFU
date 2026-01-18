@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- Placeholder sprite: Health Regen item (32x32) -->
+  <rect x="0" y="0" width="32" height="32" fill="#0b3d1e"/>
+  <rect x="1" y="1" width="30" height="30" fill="#16a34a"/>
+
+  <!-- subtle border -->
+  <rect x="1" y="1" width="30" height="1" fill="#064e3b"/>
+  <rect x="1" y="30" width="30" height="1" fill="#064e3b"/>
+  <rect x="1" y="1" width="1" height="30" fill="#064e3b"/>
+  <rect x="30" y="1" width="1" height="30" fill="#064e3b"/>
+
+  <!-- white plus -->
+  <rect x="14" y="7" width="4" height="18" fill="#ffffff"/>
+  <rect x="7" y="14" width="18" height="4" fill="#ffffff"/>
+
+  <!-- inner highlight to read on bright backgrounds -->
+  <rect x="15" y="8" width="2" height="16" fill="#d1fae5"/>
+  <rect x="8" y="15" width="16" height="2" fill="#d1fae5"/>
+</svg>
