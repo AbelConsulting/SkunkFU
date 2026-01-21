@@ -239,32 +239,6 @@ class UI {
             }
         } catch (e) {}
 
-        // Stage toast (big for ~3s, then fades out)
-        try {
-            const now = Date.now();
-            if (this._levelTitleUntil && now < this._levelTitleUntil) {
-                const remaining = this._levelTitleUntil - now;
-                const fadeMs = 900;
-                const alpha = remaining < fadeMs ? (remaining / fadeMs) : 1;
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.65)';
-                ctx.shadowBlur = 10;
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 52px Arial';
-                ctx.fillText(this._levelTitleText || `STAGE ${levelNumber}`, this.width / 2, this.height * 0.22);
-                if (this._levelNameText) {
-                    ctx.shadowBlur = 0;
-                    ctx.font = '20px Arial';
-                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-                    ctx.fillText(this._levelNameText, this.width / 2, this.height * 0.22 + 44);
-                }
-                ctx.restore();
-            }
-        } catch (e) {}
-
         // Top-center progress bar (distance to boss/exit, or boss HP)
         try {
             if (objectiveInfo && (typeof objectiveInfo.progress === 'number' || typeof objectiveInfo.bossHpPct === 'number')) {
