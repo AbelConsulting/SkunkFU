@@ -235,8 +235,6 @@
         <!-- Pause Button (desktop & mobile) -->
         <button id="pause-btn" aria-label="Pause game" title="Pause" style="display:none;">⏸</button>
         <button id="perf-mode-btn" title="Performance mode">Perf</button>
-        <button id="view-highscores-btn" title="View High Scores" style="position:absolute; top:12px; right:72px; z-index:502; padding:8px 10px; border-radius:6px; background:rgba(0,0,0,0.6); color:#fff; border:none;">🏆 Scores</button>
-        <button id="view-achievements-btn" title="View Achievements" style="position:absolute; top:12px; right:140px; z-index:502; padding:8px 10px; border-radius:6px; background:rgba(0,0,0,0.6); color:#fff; border:none;">🎖️ Achievements</button>
 
         <div id="mobile-start-overlay" style="display:none;">
             <button id="mobile-start-btn">Tap to Start</button>
@@ -246,6 +244,10 @@
         <div id="pause-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; flex-direction:column;">
             <h1 style="color:#fff; font-size:48px; margin:0;">PAUSED</h1>
             <button id="resume-btn" style="margin-top:20px; padding:12px 24px; font-size:18px; background:#00fff7; color:#000; border:none; border-radius:8px; cursor:pointer;">Resume</button>
+            <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                <button id="view-highscores-btn" title="View High Scores" style="padding:10px 14px; font-size:16px; border-radius:10px; background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.12);">🏆 High Scores</button>
+                <button id="view-achievements-btn" title="View Achievements" style="padding:10px 14px; font-size:16px; border-radius:10px; background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.12);">🎖️ Achievements</button>
+            </div>
         </div>
 
         <!-- Level Editor Toggle & Panel -->

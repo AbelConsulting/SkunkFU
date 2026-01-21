@@ -7,6 +7,21 @@ class UI {
         this.width = width;
         this.height = height;
         this.bossWarningTime = 0;
+
+        // Transient stage toast shown briefly at level start
+        this._levelTitleUntil = 0;
+        this._levelTitleText = '';
+        this._levelNameText = '';
+    }
+
+    showLevelTitle(levelName, levelNumber) {
+        try {
+            this._levelTitleUntil = Date.now() + 3000;
+            this._levelTitleText = `STAGE ${levelNumber}`;
+            this._levelNameText = String(levelName || '');
+        } catch (e) {
+            // no-op
+        }
     }
 
     drawMenu(ctx) {
@@ -128,13 +143,32 @@ class UI {
     }
 
     drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null) {
-        const padding = 20;
+        const padding = 12;
 
-        // Health bar
-        const healthBarWidth = 300;
-        const healthBarHeight = 30;
-        const healthBarX = padding;
+        // Health bar (compact)
+        const iconSize = 14;
+        const iconGap = 8;
+        const healthBarWidth = 210;
+        const healthBarHeight = 16;
+        const healthBarX = padding + iconSize + iconGap;
         const healthBarY = padding;
+
+        // Health icon (simple heart)
+        try {
+            const cx = padding + iconSize * 0.5;
+            const cy = healthBarY + healthBarHeight * 0.5;
+            const s = iconSize;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.fillStyle = 'rgba(255,80,80,0.95)';
+            ctx.beginPath();
+            ctx.moveTo(0, s * 0.28);
+            ctx.bezierCurveTo(-s * 0.5, -s * 0.15, -s * 0.55, s * 0.35, 0, s * 0.72);
+            ctx.bezierCurveTo(s * 0.55, s * 0.35, s * 0.5, -s * 0.15, 0, s * 0.28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        } catch (e) {}
 
         // Health bar background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -149,70 +183,91 @@ class UI {
         ctx.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercent, healthBarHeight);
 
         // Health bar border
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 1;
         ctx.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
-        // Health text
-        ctx.font = 'bold 18px Arial';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillText(`HP: ${Math.max(0, Math.floor(player.health))} / ${player.maxHealth}`, 
-                     healthBarX + 10, healthBarY + 6);
-
-        // Stage Indicator
+        // Optional numeric HP (only when low, small + subtle)
         try {
-            ctx.save();
-            ctx.fillStyle = '#FFFFFF';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 24px Arial';
-            ctx.fillText(`STAGE ${levelNumber}`, this.width / 2, padding + 10);
-
-            // Objective / clear condition descriptor
-            if (objectiveInfo && (objectiveInfo.title || objectiveInfo.detail)) {
-                const title = String(objectiveInfo.title || '');
-                const detail = String(objectiveInfo.detail || '');
-
-                const boxW = Math.min(this.width - 40, 560);
-                const boxX = Math.floor((this.width - boxW) / 2);
-                const boxY = padding + 42;
-                const boxH = detail ? 44 : 28;
-
-                ctx.fillStyle = 'rgba(0,0,0,0.55)';
-                ctx.fillRect(boxX, boxY, boxW, boxH);
-                ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(boxX, boxY, boxW, boxH);
-
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
+            if ((player.health / player.maxHealth) <= 0.3) {
+                ctx.font = '12px Arial';
+                ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
-                ctx.fillText(title, this.width / 2, boxY + 6);
-
-                if (detail) {
-                    ctx.font = '12px Arial';
-                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-                    ctx.fillText(detail, this.width / 2, boxY + 24);
-                }
-
-                // Optional boss HP bar (during boss fight)
-                if (typeof objectiveInfo.bossHpPct === 'number') {
-                    const p = Math.max(0, Math.min(1, objectiveInfo.bossHpPct));
-                    const barW = boxW - 24;
-                    const barH = 6;
-                    const barX = boxX + 12;
-                    const barY = boxY + boxH + 6;
-                    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-                    ctx.fillRect(barX, barY, barW, barH);
-                    ctx.fillStyle = p > 0.5 ? '#ff4444' : p > 0.25 ? '#ff8844' : '#ffcc44';
-                    ctx.fillRect(barX, barY, Math.max(0, Math.floor(barW * p)), barH);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-                    ctx.strokeRect(barX, barY, barW, barH);
-                }
+                ctx.fillText(`${Math.max(0, Math.floor(player.health))}/${player.maxHealth}`, healthBarX + 6, healthBarY + 2);
             }
-            ctx.restore();
+        } catch (e) {}
+
+        // Stage toast (big for ~3s, then fades out)
+        try {
+            const now = Date.now();
+            if (this._levelTitleUntil && now < this._levelTitleUntil) {
+                const remaining = this._levelTitleUntil - now;
+                const fadeMs = 900;
+                const alpha = remaining < fadeMs ? (remaining / fadeMs) : 1;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.65)';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 52px Arial';
+                ctx.fillText(this._levelTitleText || `STAGE ${levelNumber}`, this.width / 2, this.height * 0.22);
+                if (this._levelNameText) {
+                    ctx.shadowBlur = 0;
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                    ctx.fillText(this._levelNameText, this.width / 2, this.height * 0.22 + 44);
+                }
+                ctx.restore();
+            }
+        } catch (e) {}
+
+        // Top-center progress bar (distance to boss/exit, or boss HP)
+        try {
+            if (objectiveInfo && (typeof objectiveInfo.progress === 'number' || typeof objectiveInfo.bossHpPct === 'number')) {
+                const barW = Math.min(Math.floor(this.width * 0.46), 520);
+                const barH = 6;
+                const barX = Math.floor((this.width - barW) / 2);
+                const barY = padding + 4;
+
+                // Background
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                ctx.fillRect(barX, barY, barW, barH);
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(barX, barY, barW, barH);
+
+                // Fill
+                let p = null;
+                let fill = '#39FF14';
+                if (typeof objectiveInfo.bossHpPct === 'number') {
+                    // Boss HP bar
+                    p = Math.max(0, Math.min(1, objectiveInfo.bossHpPct));
+                    fill = '#ff4444';
+                } else {
+                    p = Math.max(0, Math.min(1, objectiveInfo.progress));
+                    fill = '#39FF14';
+                }
+                ctx.fillStyle = fill;
+                ctx.fillRect(barX, barY, Math.max(0, Math.floor(barW * p)), barH);
+
+                // Marker (little "skunk" dot)
+                const mx = barX + Math.floor(barW * p);
+                const my = barY + Math.floor(barH / 2);
+                ctx.beginPath();
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.arc(mx, my, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.arc(mx - 1, my - 1, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
         } catch (e) {}
 
         // Boss Warning Overlay
@@ -242,38 +297,43 @@ class UI {
             ctx.restore();
         }
 
-        // Score (neon number with pulse animation)
+        // Score (top-right, simple + readable)
         try {
             const s = typeof score === 'number' ? String(score) : String(score || 0);
-            const scoreX = this.width - padding;
-            const scoreY = padding;
             const p = Math.max(0, Math.min(1, pulse || 0));
-            const scale = 1 + p * 0.28;
+            const scorePadX = 10;
+            const scorePadY = 8;
 
+            const label = 'SCORE';
             ctx.save();
-            ctx.translate(scoreX, scoreY);
-            ctx.scale(scale, scale);
             ctx.textAlign = 'right';
             ctx.textBaseline = 'top';
 
-            // Small label
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#cfe';
-            ctx.fillText('SCORE', 0, 0);
+            const labelFont = '12px Arial';
+            const valueFont = 'bold 22px Arial';
+            ctx.font = valueFont;
+            const valueW = ctx.measureText(s).width;
+            ctx.font = labelFont;
+            const labelW = ctx.measureText(label).width;
+            const boxW = Math.ceil(Math.max(valueW, labelW) + scorePadX * 2);
+            const boxH = 34;
+            const boxX = this.width - padding - boxW;
+            const boxY = padding;
 
-            // Neon number with glow
-            const numY = 16;
-            ctx.font = 'bold 28px Arial';
-            ctx.fillStyle = '#39FF14';
-            ctx.shadowColor = '#39FF14';
-            ctx.shadowBlur = 10 + p * 18;
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-            ctx.strokeText(s, 0, numY);
-            ctx.fillText(s, 0, numY);
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-            // reset
-            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.font = labelFont;
+            ctx.fillText(label, boxX + boxW - scorePadX, boxY + scorePadY - 2);
+
+            ctx.fillStyle = p > 0 ? '#7CFF6B' : '#39FF14';
+            ctx.font = valueFont;
+            ctx.fillText(s, boxX + boxW - scorePadX, boxY + scorePadY + 10);
+
             ctx.restore();
         } catch (e) {}
 

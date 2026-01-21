@@ -502,12 +502,9 @@ class Game {
                 this.state = 'PAUSED';
                 this.audioManager.playSound && this.audioManager.playSound('pause');
                 this.audioManager.pauseMusic && this.audioManager.pauseMusic();
-                // Show pause overlay on mobile or when touch controls are present
-                const hasTouchControls = document.getElementById('touch-controls') || document.getElementById('btn-pause');
-                if (this.isMobile || hasTouchControls) {
-                    const overlay = document.getElementById('pause-overlay');
-                    if (overlay) overlay.style.display = 'flex';
-                }
+                // Show pause overlay when available (keeps gameplay UI clean; hosts pause actions)
+                const overlay = document.getElementById('pause-overlay');
+                if (overlay) overlay.style.display = 'flex';
                 this.dispatchGameStateChange();
             } else if (this.state === 'PAUSED') {
                 this.state = 'PLAYING';
@@ -1149,7 +1146,7 @@ class Game {
         this.ctx.scale(scaleX, scaleY);
 
         if (this.state === "PLAYING") {
-            // Pass current level info + clear condition descriptor to HUD
+            // Pass structured progress info to HUD (rendered as a thin progress bar)
             let objectiveInfo = null;
             try {
                 const cc = this.level && this.level.completionConfig ? this.level.completionConfig : null;
@@ -1159,11 +1156,8 @@ class Game {
                 if (hasBoss) {
                     const bossTriggerX = cc.bossTriggerX;
                     if (!this.bossEncountered) {
-                        const pct = bossTriggerX > 0 ? Math.max(0, Math.min(100, Math.floor((this.player.x / bossTriggerX) * 100))) : 0;
-                        objectiveInfo = {
-                            title: 'CLEAR: Reach boss arena → Defeat boss → Reach exit',
-                            detail: `${pct}% to boss (x ${Math.floor(this.player.x)}/${Math.floor(bossTriggerX)})`
-                        };
+                        const progress = bossTriggerX > 0 ? Utils.clamp(this.player.x / bossTriggerX, 0, 1) : 0;
+                        objectiveInfo = { mode: 'toBoss', progress };
                     } else if (!this.bossDefeated) {
                         let bossHpPct = null;
                         try {
@@ -1172,24 +1166,14 @@ class Game {
                                 bossHpPct = Math.max(0, Math.min(1, b.health / b.maxHealth));
                             }
                         } catch (e) {}
-                        objectiveInfo = {
-                            title: 'CLEAR: Defeat the boss',
-                            detail: (bossHpPct !== null) ? `Boss HP: ${Math.max(0, Math.floor((bossHpPct || 0) * 100))}%` : 'Boss fight in progress',
-                            bossHpPct
-                        };
+                        objectiveInfo = { mode: 'boss', bossHpPct };
                     } else {
-                        const remaining = Math.max(0, Math.floor(exitX - this.player.x));
-                        objectiveInfo = {
-                            title: 'CLEAR: Reach the exit',
-                            detail: `${remaining}px remaining (exit at x ${Math.floor(exitX)})`
-                        };
+                        const progress = exitX > 0 ? Utils.clamp(this.player.x / exitX, 0, 1) : 0;
+                        objectiveInfo = { mode: 'toExit', progress };
                     }
                 } else {
-                    const remaining = Math.max(0, Math.floor(exitX - this.player.x));
-                    objectiveInfo = {
-                        title: 'CLEAR: Reach the exit',
-                        detail: `${remaining}px remaining (exit at x ${Math.floor(exitX)})`
-                    };
+                    const progress = exitX > 0 ? Utils.clamp(this.player.x / exitX, 0, 1) : 0;
+                    objectiveInfo = { mode: 'toExit', progress };
                 }
             } catch (e) {
                 objectiveInfo = null;
