@@ -15,7 +15,6 @@ const filesInOrder = [
   'audioManager.js',
   'visualEffects.js',
   'level.js',
-  'levelEditor.js',
   'player.js',
   'enemy.js',
   'enemyManager.js',
