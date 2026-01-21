@@ -85,8 +85,8 @@
         .touch-btn {
             width: 70px;
             height: 70px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.22), rgba(0,0,0,0.45));
+            border: 2px solid rgba(255,255,255,0.22);
             border-radius: 50%;
             color: white;
             font-size: 24px;
@@ -99,11 +99,19 @@
             /* Disable browser touch actions */
             touch-action: none; 
             -webkit-tap-highlight-color: transparent;
+            backdrop-filter: blur(6px);
+            box-shadow:
+                0 12px 22px rgba(0,0,0,0.35),
+                0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 90ms ease, filter 160ms ease, box-shadow 160ms ease;
         }
 
         .touch-btn:active {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(0.95);
+            filter: brightness(1.12);
+            transform: scale(0.94);
+            box-shadow:
+                0 10px 18px rgba(0,0,0,0.32),
+                0 0 18px rgba(255,255,255,0.10);
         }
 
         /* --- OVERLAYS --- */
@@ -148,15 +156,17 @@
             width: 44px;
             height: 44px;
             border-radius: 8px;
-            border: none;
-            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.14);
+            background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.14), rgba(0,0,0,0.55));
             color: #fff;
             font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 120ms ease, filter 180ms ease, box-shadow 180ms ease;
         }
 
         /* Mobile performance toggle (small button) */
@@ -168,14 +178,94 @@
             padding: 6px 8px;
             font-size: 12px;
             border-radius: 6px;
-            background: rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, rgba(80,255,244,0.22), rgba(0,0,0,0.55));
             color: #fff;
-            border: none;
+            border: 1px solid rgba(80,255,244,0.25);
             display: none; /* shown via JS only on mobile */
             cursor: pointer;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 10px 18px rgba(0,0,0,0.25);
+            transition: transform 120ms ease, filter 180ms ease;
         }
 
-        #pause-btn:hover { background: rgba(255,255,255,0.06); }
+        #pause-btn:hover { filter: brightness(1.08); }
+        #pause-btn:active { transform: scale(0.96); }
+        #perf-mode-btn:active { transform: scale(0.96); }
+
+        /* Reusable neon button styles */
+        .menu-btn {
+            appearance: none;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.55));
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            box-shadow:
+                0 14px 28px rgba(0,0,0,0.35),
+                0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 120ms ease, filter 180ms ease, box-shadow 180ms ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .menu-btn:hover { filter: brightness(1.10); }
+        .menu-btn:active { transform: scale(0.98); }
+
+        .menu-btn--primary {
+            border-color: rgba(80,255,244,0.35);
+            background: linear-gradient(180deg, rgba(80,255,244,0.22), rgba(0,0,0,0.55));
+            box-shadow:
+                0 14px 28px rgba(0,0,0,0.35),
+                0 0 22px rgba(80,255,244,0.18);
+        }
+
+        /* Pause overlay panel */
+        #pause-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(120% 120% at 50% 20%, rgba(0,0,0,0.65), rgba(0,0,0,0.92));
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pause-panel {
+            width: min(560px, 92vw);
+            padding: 18px 16px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: linear-gradient(180deg, rgba(10,12,16,0.88), rgba(0,0,0,0.72));
+            box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .pause-title {
+            margin: 0;
+            color: #fff;
+            font-size: 44px;
+            letter-spacing: 0.06em;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.55);
+        }
+
+        .pause-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
         #mobile-restart-btn {
             padding: 15px 40px;
@@ -240,13 +330,15 @@
             <button id="mobile-start-btn">Tap to Start</button>
         </div>
 
-        <!-- Pause Overlay for Mobile -->
-        <div id="pause-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; flex-direction:column;">
-            <h1 style="color:#fff; font-size:48px; margin:0;">PAUSED</h1>
-            <button id="resume-btn" style="margin-top:20px; padding:12px 24px; font-size:18px; background:#00fff7; color:#000; border:none; border-radius:8px; cursor:pointer;">Resume</button>
-            <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                <button id="view-highscores-btn" title="View High Scores" style="padding:10px 14px; font-size:16px; border-radius:10px; background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.12);">🏆 High Scores</button>
-                <button id="view-achievements-btn" title="View Achievements" style="padding:10px 14px; font-size:16px; border-radius:10px; background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.12);">🎖️ Achievements</button>
+        <!-- Pause Overlay -->
+        <div id="pause-overlay" style="display:none;">
+            <div class="pause-panel">
+                <h1 class="pause-title">PAUSED</h1>
+                <div class="pause-actions">
+                    <button id="resume-btn" class="menu-btn menu-btn--primary">Resume</button>
+                    <button id="view-highscores-btn" title="View High Scores" class="menu-btn">🏆 High Scores</button>
+                    <button id="view-achievements-btn" title="View Achievements" class="menu-btn">🎖️ Achievements</button>
+                </div>
             </div>
         </div>
 
