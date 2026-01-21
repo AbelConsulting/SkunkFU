@@ -1211,7 +1211,7 @@ class Game {
                 objectiveInfo = null;
             }
 
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo);
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo, this.lives);
         } else if (this.state === "LEVEL_COMPLETE") {
             // Draw Level Complete screen
             if (this.ui && typeof this.ui.drawLevelComplete === 'function') {

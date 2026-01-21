@@ -142,7 +142,7 @@ class UI {
         ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
     }
 
-    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null) {
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null, lives = 1) {
         const padding = 12;
 
         // Health bar (compact)
@@ -186,6 +186,47 @@ class UI {
         ctx.strokeStyle = 'rgba(255,255,255,0.85)';
         ctx.lineWidth = 1;
         ctx.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+        // Life icons (hearts) below health bar
+        const lifeIconSize = 20;
+        const lifeIconGap = 6;
+        const lifeIconsY = healthBarY + healthBarHeight + 8;
+        const maxDisplayLives = 9; // Don't crowd the UI
+        const livesToShow = Math.min(lives || 1, maxDisplayLives);
+        
+        for (let i = 0; i < livesToShow; i++) {
+            const lifeX = healthBarX + (i * (lifeIconSize + lifeIconGap));
+            
+            // Try to use the extra_life sprite if available
+            try {
+                if (typeof spriteLoader !== 'undefined' && spriteLoader.getSprite) {
+                    const lifeSprite = spriteLoader.getSprite('extra_life');
+                    if (lifeSprite && lifeSprite.width) {
+                        ctx.drawImage(lifeSprite, lifeX, lifeIconsY, lifeIconSize, lifeIconSize);
+                        continue;
+                    }
+                }
+            } catch (e) {}
+            
+            // Fallback: draw a simple heart icon
+            const cx = lifeX + lifeIconSize * 0.5;
+            const cy = lifeIconsY + lifeIconSize * 0.5;
+            const s = lifeIconSize * 0.7;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(0, s * 0.28);
+            ctx.bezierCurveTo(-s * 0.5, -s * 0.15, -s * 0.55, s * 0.35, 0, s * 0.72);
+            ctx.bezierCurveTo(s * 0.55, s * 0.35, s * 0.5, -s * 0.15, 0, s * 0.28);
+            ctx.closePath();
+            ctx.fill();
+            // White outline
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
 
         // Optional numeric HP (only when low, small + subtle)
         try {
