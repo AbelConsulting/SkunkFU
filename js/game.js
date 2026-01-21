@@ -412,7 +412,7 @@ class Game {
             this.loadLevel(levelIndex);
             this.state = 'PLAYING';
             this.score = 0;
-            this.lives = 3;
+            this.lives = 1;
             
             // Boss state
             this.bossEncountered = false;
