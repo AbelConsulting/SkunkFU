@@ -1,6 +1,6 @@
 /*
  * TouchControls - on-screen touch buttons and sensitivity slider
- * Emits `touchcontrol` CustomEvent with detail { action: 'left'|'right'|'jump'|'attack'|'pause', down: boolean }
+ * Emits `touchcontrol` CustomEvent with detail { action: 'left'|'right'|'jump'|'attack'|'special'|'pause'|'restart', down: boolean }
  */
 (function(){
     class TouchControls {
@@ -31,6 +31,7 @@
             const rightBtn = this._createButton('⟹', 'right-btn touch-btn--move', 'Move right');
             const jumpBtn = this._createButton('⤒', 'jump-btn touch-btn--jump', 'Jump');
             const attackBtn = this._createButton('🗡', 'attack-btn touch-btn--attack', 'Attack');
+            const specialBtn = this._createButton('💥', 'special-btn touch-btn--special', 'Special');
 
             const leftGroup = document.createElement('div');
             leftGroup.style.position = 'absolute';
@@ -47,6 +48,7 @@
             rightGroup.style.pointerEvents = 'auto';
             rightGroup.appendChild(jumpBtn);
             rightGroup.appendChild(attackBtn);
+            rightGroup.appendChild(specialBtn);
 
             // Pause button for quick mobile pause/resume - DISABLED: using overlay pause instead
             // const pauseBtn = this._createButton('⏸', 'pause-btn');
@@ -60,7 +62,7 @@
             // this._pauseBtn = pauseBtn;
 
             // Restart button (hidden by default, shown on game over)
-            const restartBtn = this._createButton('Restart', 'restart-btn');
+            const restartBtn = this._createButton('⟲', 'restart-btn touch-btn--restart', 'Restart');
             restartBtn.style.position = 'absolute';
             restartBtn.style.left = '50%';
             restartBtn.style.bottom = '12px';
@@ -151,6 +153,7 @@
             this._bindButton(rightBtn, 'right');
             this._bindButton(jumpBtn, 'jump');
             this._bindButton(attackBtn, 'attack');
+            this._bindButton(specialBtn, 'special');
             if (typeof pauseBtn !== 'undefined' && pauseBtn) this._bindButton(pauseBtn, 'pause');
 
             // Create restart confirmation overlay (hidden)

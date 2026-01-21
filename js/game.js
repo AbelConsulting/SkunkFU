@@ -292,6 +292,9 @@ class Game {
                 } else if (action === 'attack') {
                     if (down) this.player.handleInput('keyx', true);
                     else this.player.handleInput('keyx', false);
+                } else if (action === 'special') {
+                    if (down) this.player.handleInput('keyz', true);
+                    else this.player.handleInput('keyz', false);
                 } else if (action === 'pause') {
                     // Toggle pause on button down (single press)
                     if (down) this.togglePause();
