@@ -986,7 +986,8 @@ class Game {
                 } catch (e) {}
 
                 this.isRespawning = true;
-                this.respawnTimer = (this.player && typeof this.player.deathDuration === 'number') ? this.player.deathDuration : 0.8;
+                const baseDeath = (this.player && typeof this.player.deathDuration === 'number') ? this.player.deathDuration : 0.8;
+                this.respawnTimer = baseDeath + 1.0;
                 this._pendingRespawn = { deathX: this.player ? this.player.x : 100 };
             } else {
                 // Game Over
