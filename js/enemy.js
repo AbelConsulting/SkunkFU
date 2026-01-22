@@ -94,7 +94,7 @@ class Enemy {
               this.enemyType === "SECOND_BASIC" ? "second" :
               this.enemyType === "FLYING" ? "fly" :
               this.enemyType === "BOSS2" ? "boss2" :
-              this.enemyType === "BOSS3" ? "boss2" : "boss";
+              this.enemyType === "BOSS3" ? "boss3" : "boss";
 
         const idle_sprite = spriteLoader.getSprite(`${prefix}_idle`);
         const walk_sprite = spriteLoader.getSprite(`${prefix}_walk`);
@@ -102,6 +102,7 @@ class Enemy {
         // Handle naming variance for boss
         const attackName = (prefix === 'boss') ? 'boss_attack1'
             : (prefix === 'boss2') ? 'boss2_attack'
+            : (prefix === 'boss3') ? 'boss3_attack'
             : `${prefix}_attack`;
         const attack_sprite = spriteLoader.getSprite(attackName);
         
