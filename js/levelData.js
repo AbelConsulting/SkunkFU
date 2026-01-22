@@ -265,7 +265,7 @@ const LEVEL_CONFIGS = [
             exitX: 16000 - 100
         },
         boss: {
-            type: "BOSS2",
+            type: "BOSS",
             spawnX: 16000 - 520,
             spawnY: 520,
             healthMultiplier: 8.5,
@@ -343,6 +343,145 @@ const LEVEL_CONFIGS = [
             spawnInterval: 1.5,
             maxEnemies: 10,
             aggression: 1.2,
+            allowedTypes: ['BASIC', 'FAST_BASIC', 'SECOND_BASIC']
+        }
+    },
+
+    // --- LEVEL 5: CRYSTAL CAVERNS DEPTHS ---
+    {
+        name: "Crystal Caverns Depths",
+        id: "level_5",
+        width: 16000,
+        // Clear condition: reach the boss trigger, defeat the boss, then reach the exit.
+        completion: {
+            bossTriggerX: 16000 - 1100,
+            exitX: 16000 - 100
+        },
+        boss: {
+            type: "BOSS2",
+            spawnX: 16000 - 520,
+            spawnY: 520,
+            healthMultiplier: 10.0,
+            speedMultiplier: 1.25,
+            attackDamageMultiplier: 2.9
+        },
+        background: 'bg_cave',
+        spawnPoints: [ 
+            { x: 'right', y: 300 }, 
+            { x: 'left', y: 300 },
+            { x: 1600, y: 300 },
+            { x: 3200, y: 300 },
+            { x: 4800, y: 300 },
+            { x: 6400, y: 300 },
+            { x: 8000, y: 300 },
+            { x: 9600, y: 300 },
+            { x: 11200, y: 300 },
+            { x: 12800, y: 300 },
+            { x: 14400, y: 300 }
+        ],
+        platforms: [
+            { x: 0, y: 700, width: 16000, height: 40, type: 'static', tile: 'ground_tile' },
+            // Reuse Level 4 layout for now
+            { x: 300, y: 550, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 600, y: 450, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 900, y: 350, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1300, y: 450, width: 140, height: 24, type: 'moving', axis: 'y', range: 120, speed: 1.8, tile: 'platform_tile' },
+            { x: 1650, y: 550, width: 140, height: 24, type: 'moving', axis: 'y', range: 120, speed: 2.2, timeOffset: 1.0, tile: 'platform_tile' },
+            { x: 2000, y: 450, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 2500, y: 520, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 3500, y: 400, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 3850, y: 300, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4300, y: 450, width: 120, height: 24, type: 'moving', axis: 'x', range: 100, speed: 1.5, tile: 'platform_tile' },
+            { x: 4700, y: 550, width: 120, height: 24, type: 'moving', axis: 'x', range: 100, speed: 1.5, timeOffset: 1.5, tile: 'platform_tile' },
+            { x: 5100, y: 450, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 5600, y: 380, width: 140, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 5900, y: 280, width: 140, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6200, y: 380, width: 140, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6500, y: 480, width: 140, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6800, y: 580, width: 140, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7300, y: 500, width: 900, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 8400, y: 400, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 8800, y: 500, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 9300, y: 450, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.0, tile: 'platform_tile' },
+            { x: 9650, y: 350, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.4, timeOffset: 1.2, tile: 'platform_tile' },
+            { x: 10000, y: 450, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.0, timeOffset: 2.4, tile: 'platform_tile' },
+            { x: 10500, y: 360, width: 1200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12000, y: 460, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12450, y: 560, width: 280, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 13000, y: 480, width: 150, height: 24, type: 'moving', axis: 'x', range: 120, speed: 2.0, tile: 'platform_tile' },
+            { x: 13400, y: 380, width: 150, height: 24, type: 'moving', axis: 'x', range: 120, speed: 2.0, timeOffset: 1.5, tile: 'platform_tile' },
+            { x: 14000, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 15000, y: 450, width: 300, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        enemyConfig: {
+            spawnInterval: 1.2,
+            maxEnemies: 12,
+            aggression: 1.4,
+            allowedTypes: ['BASIC', 'FAST_BASIC', 'SECOND_BASIC']
+        }
+    },
+
+    // --- LEVEL 6: NEON CROSSROADS ---
+    {
+        name: "Neon Crossroads",
+        id: "level_6",
+        width: 12000,
+        // Clear condition: reach the boss trigger, defeat the boss, then reach the exit.
+        completion: {
+            bossTriggerX: 12000 - 900,
+            exitX: 12000 - 100
+        },
+        boss: {
+            type: "BOSS3",
+            spawnX: 12000 - 520,
+            spawnY: 520,
+            healthMultiplier: 7.8,
+            speedMultiplier: 1.2,
+            attackDamageMultiplier: 2.6
+        },
+        background: 'bg_city',
+        spawnPoints: [ 
+            { x: 'right', y: 300 }, 
+            { x: 1000, y: 300 },
+            { x: 2000, y: 300 },
+            { x: 3000, y: 100 },
+            { x: 4000, y: 300 },
+            { x: 5000, y: 100 },
+            { x: 6500, y: 300 },
+            { x: 7800, y: 120 },
+            { x: 9000, y: 300 },
+            { x: 10400, y: 120 }
+        ],
+        platforms: [
+            { x: 0, y: 700, width: 12000, height: 40, type: 'static', tile: 'ground_tile' },
+            // Reuse Level 2 layout for the city-themed finale
+            { x: 300, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 500, y: 400, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 800, y: 400, width: 120, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.0, tile: 'platform_tile' },
+            { x: 1100, y: 500, width: 400, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1800, y: 400, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 2200, y: 300, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 2600, y: 400, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 3200, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4200, y: 600, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4500, y: 500, width: 150, height: 24, type: 'moving', axis: 'x', range: 100, speed: 2, tile: 'platform_tile' },
+            { x: 4900, y: 400, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 5300, y: 500, width: 500, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6200, y: 520, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6550, y: 420, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 6950, y: 320, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7350, y: 420, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7900, y: 520, width: 200, height: 24, type: 'moving', axis: 'y', range: 140, speed: 2.1, tile: 'platform_tile' },
+            { x: 8300, y: 430, width: 300, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 8800, y: 350, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 9500, y: 500, width: 900, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 10700, y: 560, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11100, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        enemyConfig: {
+            spawnInterval: 1.6,
+            maxEnemies: 9,
+            aggression: 1.15,
             allowedTypes: ['BASIC', 'FAST_BASIC', 'SECOND_BASIC']
         }
     }

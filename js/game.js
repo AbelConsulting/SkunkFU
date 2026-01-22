@@ -85,7 +85,7 @@ class Game {
 
         // Initialize Level logic
         this.currentLevelIndex = 0;
-        // Arcade is short (3 levels): no continue/progress system.
+        // Arcade is short (6 levels): no continue/progress system.
         this.savedLevelIndex = 0;
         
         // Load the first level
