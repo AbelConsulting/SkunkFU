@@ -513,6 +513,7 @@ class Player {
         this.isAttacking = false;
         this.isShadowStriking = false;
         this.hitStunTimer = 0;
+        this.invulnerableTimer = 0;
         if (this.animations && this.animations.death) {
             this.animations.death.reset();
         }
@@ -541,7 +542,7 @@ class Player {
         ctx.fill();
 
         // Flash when invulnerable
-        if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 20) % 2 === 0) {
+        if (!this.isDying && this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 20) % 2 === 0) {
             ctx.restore();
             return;
         }
