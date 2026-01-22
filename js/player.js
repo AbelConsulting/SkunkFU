@@ -81,7 +81,7 @@ class Player {
         // Death animation state
         this.isDying = false;
         this.deathTimer = 0;
-        this.deathDuration = 0.8;
+        this.deathDuration = 1.8;
 
         // Footstep sounds
         this.footstepTimer = 0;
@@ -126,7 +126,7 @@ class Player {
                 // SpriteLoader infer correct slicing.
                 shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.06),
                 hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1),
-                death: spriteLoader.createAnimation('ninja_death', 4, 0.12)
+                death: spriteLoader.createAnimation('ninja_death', 4, 0.37)
             };
         } else {
             this.animations = {
@@ -136,7 +136,7 @@ class Player {
                         attack: new Animation(ninja_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                     shadow_strike: new Animation(ninja_shadow_strike, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
                 hurt: new Animation(ninja_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                death: new Animation(ninja_death, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
+                death: new Animation(ninja_death, 4, 0.37, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
             };
         }
 
