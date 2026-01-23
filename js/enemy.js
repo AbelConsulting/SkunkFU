@@ -97,8 +97,20 @@ class Enemy {
               this.enemyType === "BOSS3" ? "boss3" :
               this.enemyType === "BOSS4" ? "boss4" : "boss";
 
-        const idle_sprite = spriteLoader.getSprite(`${prefix}_idle`);
-        const walk_sprite = spriteLoader.getSprite(`${prefix}_walk`);
+        const getSpriteSafe = (key, fallbackKey = null) => {
+            try {
+                if (typeof spriteLoader !== 'undefined' && spriteLoader.getSprite) {
+                    let spr = spriteLoader.getSprite(key);
+                    if (!spr && fallbackKey) spr = spriteLoader.getSprite(fallbackKey);
+                    return spr;
+                }
+            } catch (e) {}
+            return null;
+        };
+
+        const fallbackPrefix = (prefix === 'boss4') ? 'boss3' : (prefix === 'boss3') ? 'boss2' : (prefix === 'boss2') ? 'boss' : null;
+        const idle_sprite = getSpriteSafe(`${prefix}_idle`, fallbackPrefix ? `${fallbackPrefix}_idle` : null);
+        const walk_sprite = getSpriteSafe(`${prefix}_walk`, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
         
         // Handle naming variance for boss
         const attackName = (prefix === 'boss') ? 'boss_attack1'
@@ -106,9 +118,15 @@ class Enemy {
             : (prefix === 'boss3') ? 'boss3_attack'
             : (prefix === 'boss4') ? 'boss4_attack'
             : `${prefix}_attack`;
-        const attack_sprite = spriteLoader.getSprite(attackName);
+        const fallbackAttack = fallbackPrefix
+            ? (fallbackPrefix === 'boss') ? 'boss_attack1'
+            : (fallbackPrefix === 'boss2') ? 'boss2_attack'
+            : (fallbackPrefix === 'boss3') ? 'boss3_attack'
+            : null
+            : null;
+        const attack_sprite = getSpriteSafe(attackName, fallbackAttack);
         
-        const hurt_sprite = spriteLoader.getSprite(`${prefix}_hurt`);
+        const hurt_sprite = getSpriteSafe(`${prefix}_hurt`, fallbackPrefix ? `${fallbackPrefix}_hurt` : null);
 
         // Some enemy sets (boss) don't have a dedicated hurt sheet.
         // Fall back to the idle sheet to avoid missing animations.
