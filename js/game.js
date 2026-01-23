@@ -122,6 +122,10 @@ class Game {
         if (this.enemyManager) this.enemyManager.itemManager = this.itemManager;
         this.ui = new UI(this.width, this.height);
 
+        // Golden idol collection tracking (per-run)
+        this.idolProgress = {};
+        this.currentLevelId = null;
+
         // Camera
         this.cameraX = 0;
         this.cameraY = 0;
@@ -437,8 +441,14 @@ class Game {
                 totalDamage: 0,
                 attacksAttempted: 0,
                 attacksHit: 0,
-                accuracy: 0
+                accuracy: 0,
+                idolsCollected: 0,
+                idolSetsCompleted: 0
             };
+
+            // Reset idol tracking for a new run
+            this.idolProgress = {};
+            this.currentLevelId = null;
             
             if (this.player && typeof this.player.reset === 'function') this.player.reset();
             if (this.enemyManager && typeof this.enemyManager.reset === 'function') this.enemyManager.reset();
