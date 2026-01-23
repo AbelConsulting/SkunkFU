@@ -587,6 +587,8 @@ class Game {
             this.currentLevelIndex = index;
             this.currentLevelId = config.id || `level_${index + 1}`;
 
+            if (!this.idolProgress) this.idolProgress = {};
+
             // Reset items on level load and spawn golden idols
             if (this.itemManager && typeof this.itemManager.reset === 'function') {
                 this.itemManager.reset();
@@ -944,6 +946,7 @@ class Game {
                 if (result && result.type === 'EXTRA_LIFE' && result.success) {
                     this.lives = Math.min(this.lives + (result.lives || 1), 9);
                 } else if (result && result.type === 'GOLDEN_IDOL' && result.success) {
+                    if (!this.idolProgress) this.idolProgress = {};
                     const levelId = result.levelId || this.currentLevelId || 'level_unknown';
                     if (!this.idolProgress[levelId]) this.idolProgress[levelId] = [false, false, false];
                     const idx = (typeof result.idolIndex === 'number') ? result.idolIndex : null;
@@ -951,16 +954,26 @@ class Game {
                         this.idolProgress[levelId][idx] = true;
                         this.gameStats.idolsCollected = (this.gameStats.idolsCollected || 0) + 1;
                         this.score += (Config.IDOL_SCORE || 250);
+                        try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
                         try { this._scorePulse = 1.0; } catch (e) {}
 
                         // If all idols in the level are collected, grant a set bonus
                         const allCollected = this.idolProgress[levelId].every(Boolean);
-                        if (allCollected) {
+                        if (allCollected && !this.idolProgress[levelId]._bonusGranted) {
+                            this.idolProgress[levelId]._bonusGranted = true;
                             this.gameStats.idolSetsCompleted = (this.gameStats.idolSetsCompleted || 0) + 1;
                             this.score += (Config.IDOL_SET_BONUS || 1000);
+                            try { this.dispatchScoreChange && this.dispatchScoreChange(); } catch(e) {}
                             try { this._scorePulse = 1.0; } catch (e) {}
                             try { this.audioManager && this.audioManager.playSound && this.audioManager.playSound('powerup', 0.7); } catch (e) {}
                         }
+
+                        // Check achievements mid-run
+                        try {
+                            if (window.Highscores && typeof Highscores.checkAchievements === 'function') {
+                                Highscores.checkAchievements(this.gameStats);
+                            }
+                        } catch (e) {}
                     }
                 }
             }
