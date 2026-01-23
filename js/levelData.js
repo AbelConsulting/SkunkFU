@@ -74,6 +74,11 @@ const LEVEL_CONFIGS = [
             ,{ x: 9000, y: 450, width: 220, height: 24, type: 'static', tile: 'platform_tile' }
             ,{ x: 9400, y: 550, width: 320, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 600, y: 420 },
+            { x: 3100, y: 470 },
+            { x: 8500, y: 490 }
+        ],
         enemyConfig: {
             spawnInterval: 3.0,
             maxEnemies: 5,
@@ -159,6 +164,11 @@ const LEVEL_CONFIGS = [
             { x: 9500, y: 500, width: 900, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 10700, y: 560, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 11100, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        idols: [
+            { x: 560, y: 370 },
+            { x: 3500, y: 470 },
+            { x: 8300, y: 400 }
         ],
         enemyConfig: {
             spawnInterval: 2.2,
@@ -253,6 +263,11 @@ const LEVEL_CONFIGS = [
             // Approach to boss arena
             { x: 13500, y: 500, width: 700, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 14400, y: 450, width: 260, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        idols: [
+            { x: 1500, y: 370 },
+            { x: 5600, y: 320 },
+            { x: 11250, y: 330 }
         ],
         enemyConfig: {
             spawnInterval: 1.8,
@@ -350,6 +365,11 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 15000, y: 450, width: 300, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 980, y: 320 },
+            { x: 2700, y: 490 },
+            { x: 10600, y: 330 }
+        ],
         enemyConfig: {
             spawnInterval: 1.5,
             maxEnemies: 10,
@@ -427,6 +447,11 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 15000, y: 450, width: 300, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 1700, y: 520 },
+            { x: 5700, y: 350 },
+            { x: 12150, y: 430 }
+        ],
         enemyConfig: {
             spawnInterval: 1.2,
             maxEnemies: 12,
@@ -494,6 +519,11 @@ const LEVEL_CONFIGS = [
             { x: 9500, y: 500, width: 900, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 10700, y: 560, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 11100, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        idols: [
+            { x: 1200, y: 470 },
+            { x: 6400, y: 490 },
+            { x: 9800, y: 470 }
         ],
         enemyConfig: {
             spawnInterval: 1.6,
@@ -571,6 +601,11 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 15000, y: 450, width: 300, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 3600, y: 370 },
+            { x: 7600, y: 470 },
+            { x: 13500, y: 350 }
+        ],
         enemyConfig: {
             spawnInterval: 1.4,
             maxEnemies: 11,
@@ -647,6 +682,11 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 500, width: 800, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 15000, y: 450, width: 300, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 2100, y: 420 },
+            { x: 7700, y: 470 },
+            { x: 14300, y: 470 }
+        ],
         enemyConfig: {
             spawnInterval: 1.2,
             maxEnemies: 12,
@@ -714,6 +754,11 @@ const LEVEL_CONFIGS = [
             { x: 10700, y: 560, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 11100, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' }
         ],
+        idols: [
+            { x: 1900, y: 370 },
+            { x: 6650, y: 390 },
+            { x: 10750, y: 530 }
+        ],
         enemyConfig: {
             spawnInterval: 1.5,
             maxEnemies: 10,
@@ -780,6 +825,11 @@ const LEVEL_CONFIGS = [
             { x: 9500, y: 500, width: 900, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 10700, y: 560, width: 240, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 11100, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' }
+        ],
+        idols: [
+            { x: 2300, y: 270 },
+            { x: 7600, y: 390 },
+            { x: 11250, y: 430 }
         ],
         enemyConfig: {
             spawnInterval: 1.3,

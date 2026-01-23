@@ -142,7 +142,7 @@ class UI {
         ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
     }
 
-    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null, lives = 1) {
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null, lives = 1, idolStatus = null) {
         const padding = 12;
 
         // Health bar (compact)
@@ -168,6 +168,41 @@ class UI {
             ctx.closePath();
             ctx.fill();
             ctx.restore();
+
+            // Golden idol counter (3 icons) below score box
+            if (Array.isArray(idolStatus) && idolStatus.length > 0) {
+                const idolSize = 16;
+                const idolGap = 6;
+                const maxIcons = Math.min(3, idolStatus.length);
+                const totalW = (idolSize * maxIcons) + (idolGap * (maxIcons - 1));
+                const idolX = boxX + boxW - totalW;
+                const idolY = boxY + boxH + 6;
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                ctx.fillRect(idolX - 6, idolY - 4, totalW + 12, idolSize + 8);
+                ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(idolX - 6, idolY - 4, totalW + 12, idolSize + 8);
+
+                for (let i = 0; i < maxIcons; i++) {
+                    const collected = !!idolStatus[i];
+                    ctx.globalAlpha = collected ? 1.0 : 0.35;
+                    const ix = idolX + i * (idolSize + idolGap);
+                    const iy = idolY;
+                    try {
+                        if (typeof Utils !== 'undefined' && Utils.drawGoldenIdol) {
+                            Utils.drawGoldenIdol(ctx, ix, iy, idolSize);
+                        } else if (typeof spriteLoader !== 'undefined' && spriteLoader.getSprite) {
+                            const idolSprite = spriteLoader.getSprite('golden_idol');
+                            if (idolSprite && idolSprite.width) {
+                                ctx.drawImage(idolSprite, ix, iy, idolSize, idolSize);
+                            }
+                        }
+                    } catch (e) {}
+                }
+                ctx.restore();
+            }
         } catch (e) {}
 
         // Health bar background

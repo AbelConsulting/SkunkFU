@@ -108,6 +108,9 @@
       { id: 'precision_95', name: 'Deadeye', desc: 'Achieve 95% accuracy', check: () => gameStats.accuracy >= 0.95 },
       { id: 'high_scorer', name: 'High Scorer', desc: 'Score over 10,000 points', check: () => gameStats.score >= 10000 },
       { id: 'score_50k', name: 'Elite Scorer', desc: 'Score over 50,000 points', check: () => gameStats.score >= 50000 },
+      { id: 'idol_hunter', name: 'Idol Hunter', desc: 'Collect all 3 idols in a level', check: () => (gameStats.idolSetsCompleted || 0) >= 1 },
+      { id: 'idol_raider', name: 'Relic Raider', desc: 'Collect 3 idol sets', check: () => (gameStats.idolSetsCompleted || 0) >= 3 },
+      { id: 'idol_hoarder', name: 'Idol Hoarder', desc: 'Collect 20 golden idols', check: () => (gameStats.idolsCollected || 0) >= 20 },
       { id: 'beat_game', name: 'Victory', desc: 'Beat the game', check: () => !!gameStats.gameCompleted }
     ];
 
@@ -157,6 +160,9 @@
       { id: 'precision_95', name: 'Deadeye', desc: 'Achieve 95% accuracy', icon: '👁️' },
       { id: 'high_scorer', name: 'High Scorer', desc: 'Score over 10,000 points', icon: '💎' },
       { id: 'score_50k', name: 'Elite Scorer', desc: 'Score over 50,000 points', icon: '🏆' },
+      { id: 'idol_hunter', name: 'Idol Hunter', desc: 'Collect all 3 idols in a level', icon: '🗿' },
+      { id: 'idol_raider', name: 'Relic Raider', desc: 'Collect 3 idol sets', icon: '🥇' },
+      { id: 'idol_hoarder', name: 'Idol Hoarder', desc: 'Collect 20 golden idols', icon: '✨' },
       { id: 'beat_game', name: 'Victory', desc: 'Beat the game', icon: '👑' }
     ];
 

@@ -126,6 +126,26 @@ class Game {
         this.idolProgress = {};
         this.currentLevelId = null;
 
+        // If the first level was loaded before itemManager existed, spawn its idols now
+        try {
+            if (typeof LEVEL_CONFIGS !== 'undefined' && LEVEL_CONFIGS[this.currentLevelIndex]) {
+                const config = LEVEL_CONFIGS[this.currentLevelIndex];
+                this.currentLevelId = config.id || `level_${this.currentLevelIndex + 1}`;
+                const idolSpawns = Array.isArray(config.idols) ? config.idols : [];
+                if (!this.idolProgress[this.currentLevelId]) {
+                    this.idolProgress[this.currentLevelId] = idolSpawns.map(() => false);
+                }
+                if (this.itemManager && typeof this.itemManager.spawnGoldenIdol === 'function') {
+                    idolSpawns.forEach((spawn, idx) => {
+                        const alreadyCollected = this.idolProgress[this.currentLevelId] && this.idolProgress[this.currentLevelId][idx];
+                        if (!alreadyCollected && spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                            this.itemManager.spawnGoldenIdol(spawn.x, spawn.y, idx, this.currentLevelId);
+                        }
+                    });
+                }
+            }
+        } catch (e) {}
+
         // Camera
         this.cameraX = 0;
         this.cameraY = 0;
@@ -565,6 +585,26 @@ class Game {
             
             this.level.loadLevel(config);
             this.currentLevelIndex = index;
+            this.currentLevelId = config.id || `level_${index + 1}`;
+
+            // Reset items on level load and spawn golden idols
+            if (this.itemManager && typeof this.itemManager.reset === 'function') {
+                this.itemManager.reset();
+            }
+
+            const idolSpawns = Array.isArray(config.idols) ? config.idols : [];
+            if (!this.idolProgress[this.currentLevelId]) {
+                this.idolProgress[this.currentLevelId] = idolSpawns.map(() => false);
+            }
+
+            if (this.itemManager && typeof this.itemManager.spawnGoldenIdol === 'function') {
+                idolSpawns.forEach((spawn, idx) => {
+                    const alreadyCollected = this.idolProgress[this.currentLevelId] && this.idolProgress[this.currentLevelId][idx];
+                    if (!alreadyCollected && spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                        this.itemManager.spawnGoldenIdol(spawn.x, spawn.y, idx, this.currentLevelId);
+                    }
+                });
+            }
 
             // Boss state is per-level; always reset when loading a new level.
             this.bossEncountered = false;
@@ -903,6 +943,25 @@ class Game {
                 // Grant extra life if applicable
                 if (result && result.type === 'EXTRA_LIFE' && result.success) {
                     this.lives = Math.min(this.lives + (result.lives || 1), 9);
+                } else if (result && result.type === 'GOLDEN_IDOL' && result.success) {
+                    const levelId = result.levelId || this.currentLevelId || 'level_unknown';
+                    if (!this.idolProgress[levelId]) this.idolProgress[levelId] = [false, false, false];
+                    const idx = (typeof result.idolIndex === 'number') ? result.idolIndex : null;
+                    if (idx !== null && this.idolProgress[levelId][idx] !== true) {
+                        this.idolProgress[levelId][idx] = true;
+                        this.gameStats.idolsCollected = (this.gameStats.idolsCollected || 0) + 1;
+                        this.score += (Config.IDOL_SCORE || 250);
+                        try { this._scorePulse = 1.0; } catch (e) {}
+
+                        // If all idols in the level are collected, grant a set bonus
+                        const allCollected = this.idolProgress[levelId].every(Boolean);
+                        if (allCollected) {
+                            this.gameStats.idolSetsCompleted = (this.gameStats.idolSetsCompleted || 0) + 1;
+                            this.score += (Config.IDOL_SET_BONUS || 1000);
+                            try { this._scorePulse = 1.0; } catch (e) {}
+                            try { this.audioManager && this.audioManager.playSound && this.audioManager.playSound('powerup', 0.7); } catch (e) {}
+                        }
+                    }
                 }
             }
         }
@@ -1348,7 +1407,8 @@ class Game {
                 objectiveInfo = null;
             }
 
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo, this.lives);
+            const idolStatus = (this.currentLevelId && this.idolProgress[this.currentLevelId]) ? this.idolProgress[this.currentLevelId] : null;
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo, this.lives, idolStatus);
         } else if (this.state === "LEVEL_COMPLETE") {
             // Draw Level Complete screen
             if (this.ui && typeof this.ui.drawLevelComplete === 'function') {
