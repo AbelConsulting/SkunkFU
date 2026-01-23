@@ -36,7 +36,9 @@ const LEVEL_CONFIGS = [
         ],
         platforms: [
             // Ground
-            { x: 0, y: 700, width: 10000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 680, width: 3000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3200, y: 670, width: 3300, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 6750, y: 680, width: 3250, height: 40, type: 'static', tile: 'ground_tile' },
             
             // Section 1: Intro stepping stones
             { x: 200, y: 550, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
@@ -113,7 +115,10 @@ const LEVEL_CONFIGS = [
         ],
         platforms: [
             // Ground
-            { x: 0, y: 700, width: 12000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 660, width: 2600, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 2850, y: 650, width: 3200, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 6350, y: 670, width: 2600, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 9200, y: 660, width: 2800, height: 40, type: 'static', tile: 'ground_tile' },
             
             // Urban District 1
             { x: 300, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
@@ -196,7 +201,10 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 15000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 650, width: 3400, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3700, y: 640, width: 3500, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 7550, y: 660, width: 3500, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 11400, y: 650, width: 3600, height: 40, type: 'static', tile: 'ground_tile' },
             
             // Courtyard
             { x: 400, y: 550, width: 100, height: 24, type: 'static', tile: 'platform_tile' },
@@ -287,7 +295,10 @@ const LEVEL_CONFIGS = [
             { x: 14400, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 16000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 640, width: 3200, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3550, y: 630, width: 3400, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 7350, y: 650, width: 3600, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 11350, y: 640, width: 4650, height: 40, type: 'static', tile: 'ground_tile' },
             
             // Cavern Entrance
             { x: 300, y: 550, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
@@ -380,7 +391,10 @@ const LEVEL_CONFIGS = [
             { x: 14400, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 16000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 630, width: 3000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3400, y: 620, width: 3200, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 7000, y: 640, width: 3300, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 10750, y: 630, width: 5250, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 4 layout for now
             { x: 300, y: 550, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 600, y: 450, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
@@ -453,7 +467,10 @@ const LEVEL_CONFIGS = [
             { x: 10400, y: 120 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 12000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 620, width: 2400, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 2750, y: 610, width: 2700, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 5800, y: 630, width: 2700, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 8850, y: 620, width: 3150, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 2 layout for the city-themed finale
             { x: 300, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 500, y: 400, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
@@ -518,7 +535,10 @@ const LEVEL_CONFIGS = [
             { x: 14400, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 16000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 610, width: 2800, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3200, y: 600, width: 3100, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 6750, y: 620, width: 3200, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 10400, y: 610, width: 5600, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 4 layout
             { x: 300, y: 550, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 600, y: 450, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
@@ -591,7 +611,10 @@ const LEVEL_CONFIGS = [
             { x: 14400, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 16000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 600, width: 2600, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 3050, y: 590, width: 3000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 6550, y: 610, width: 3200, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 10250, y: 600, width: 5750, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 5 layout
             { x: 300, y: 550, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 600, y: 450, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
@@ -663,7 +686,10 @@ const LEVEL_CONFIGS = [
             { x: 10400, y: 120 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 12000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 590, width: 2300, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 2750, y: 580, width: 2600, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 5800, y: 600, width: 2500, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 8750, y: 590, width: 3250, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 2 layout
             { x: 300, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 500, y: 400, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
@@ -727,7 +753,10 @@ const LEVEL_CONFIGS = [
             { x: 10400, y: 120 }
         ],
         platforms: [
-            { x: 0, y: 700, width: 12000, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 0, y: 580, width: 2100, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 2600, y: 570, width: 2500, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 5600, y: 590, width: 2400, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 8500, y: 580, width: 3500, height: 40, type: 'static', tile: 'ground_tile' },
             // Reuse Level 6 layout
             { x: 300, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 500, y: 400, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
