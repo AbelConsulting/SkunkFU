@@ -9,6 +9,34 @@ class AudioManager {
         this.currentMusic = null;
         this.soundEnabled = true;
         this.musicEnabled = true;
+
+        // SFX voice management
+        this.maxSfxVoices = (typeof Config !== 'undefined' && typeof Config.SFX_MAX_VOICES === 'number') ? Config.SFX_MAX_VOICES : 10;
+        this.perSoundLimits = {
+            footstep: 2,
+            attack1: 2,
+            attack2: 2,
+            attack3: 2,
+            enemy_hit: 3,
+            player_hit: 1
+        };
+        this.soundCooldownsMs = {
+            footstep: 120,
+            attack1: 80,
+            attack2: 80,
+            attack3: 80,
+            enemy_hit: 60,
+            player_hit: 120
+        };
+        this._lastPlayTimes = {};
+        this._activeSfx = [];
+        this._gainPool = [];
+
+        // Music ducking
+        this.duckTarget = 0.4;
+        this.duckAttack = 0.02;
+        this.duckRelease = 0.25;
+        this._duckTimer = null;
         
         // Gain Nodes for Volume Control (guard for environments without WebAudio)
         this.musicGain = 1.0; // fallback if WebAudio music routing not used
@@ -37,6 +65,59 @@ class AudioManager {
         // Defaults
         this.setSoundVolume(0.7);
         this.setMusicVolume(0.5);
+
+        // Visibility-based suspend/resume
+        try {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) this.suspend();
+                else this.resume();
+            });
+        } catch (e) {}
+    }
+
+    _now() {
+        if (this.audioCtx && typeof this.audioCtx.currentTime === 'number') return this.audioCtx.currentTime;
+        return (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
+    }
+
+    _cleanupActiveSfx() {
+        const now = this._now();
+        this._activeSfx = this._activeSfx.filter(entry => entry && entry.endTime && entry.endTime > now);
+    }
+
+    _getGainNode() {
+        if (this._gainPool.length > 0) return this._gainPool.pop();
+        return this.audioCtx ? this.audioCtx.createGain() : null;
+    }
+
+    _releaseGainNode(node) {
+        if (!node) return;
+        try { node.disconnect(); } catch (e) {}
+        this._gainPool.push(node);
+    }
+
+    _applyDuck() {
+        if (!this.audioCtx || !this.musicGainNode) return;
+        const now = this.audioCtx.currentTime;
+        const target = Math.max(0, Math.min(1, this.duckTarget));
+        try {
+            this.musicGainNode.gain.cancelScheduledValues(now);
+            this.musicGainNode.gain.setValueAtTime(this.musicGainNode.gain.value, now);
+            this.musicGainNode.gain.linearRampToValueAtTime(target, now + this.duckAttack);
+        } catch (e) {}
+
+        if (this._duckTimer) {
+            try { clearTimeout(this._duckTimer); } catch (e) {}
+        }
+        this._duckTimer = setTimeout(() => {
+            if (!this.audioCtx || !this.musicGainNode) return;
+            const t = this.audioCtx.currentTime;
+            try {
+                this.musicGainNode.gain.cancelScheduledValues(t);
+                this.musicGainNode.gain.setValueAtTime(this.musicGainNode.gain.value, t);
+                this.musicGainNode.gain.linearRampToValueAtTime(this.musicGain, t + this.duckRelease);
+            } catch (e) {}
+        }, Math.max(50, Math.floor(this.duckRelease * 1000)));
     }
 
     /**
@@ -157,20 +238,67 @@ class AudioManager {
 
         if (!this.audioCtx) return;
 
+        const nowMs = this._now() * 1000;
+        const cooldown = this.soundCooldownsMs[name];
+        if (typeof cooldown === 'number') {
+            const last = this._lastPlayTimes[name] || 0;
+            if (nowMs - last < cooldown) return;
+            this._lastPlayTimes[name] = nowMs;
+        }
+
+        this._cleanupActiveSfx();
+        const perLimit = this.perSoundLimits[name];
+        if (typeof perLimit === 'number') {
+            const activeForSound = this._activeSfx.filter(s => s && s.name === name).length;
+            if (activeForSound >= perLimit) return;
+        }
+        if (this._activeSfx.length >= this.maxSfxVoices) {
+            const oldest = this._activeSfx.shift();
+            try { oldest && oldest.source && oldest.source.stop(); } catch (e) {}
+        }
+
         const source = this.audioCtx.createBufferSource();
         source.buffer = buffer;
 
-        const gainNode = this.audioCtx.createGain();
+        const gainNode = this._getGainNode();
+        if (!gainNode) return;
         gainNode.gain.value = volumeScale;
 
-        source.connect(gainNode);
+        // Optional panning support: pass { pan: -1..1 } via volumeScale object
+        let panner = null;
+        if (volumeScale && typeof volumeScale === 'object' && typeof volumeScale.pan === 'number') {
+            const vol = typeof volumeScale.volume === 'number' ? volumeScale.volume : 1.0;
+            gainNode.gain.value = vol;
+            if (this.audioCtx.createStereoPanner) {
+                panner = this.audioCtx.createStereoPanner();
+                panner.pan.value = Math.max(-1, Math.min(1, volumeScale.pan));
+                source.connect(panner);
+                panner.connect(gainNode);
+            }
+        }
+
+        if (!panner) source.connect(gainNode);
         gainNode.connect(this.sfxGain);
+
+        const startTime = this.audioCtx.currentTime;
+        const endTime = startTime + buffer.duration + 0.02;
+        this._activeSfx.push({ name, source, endTime });
+
+        source.onended = () => {
+            this._releaseGainNode(gainNode);
+            try { if (panner) panner.disconnect(); } catch (e) {}
+        };
 
         source.start();
         if (typeof Config !== 'undefined' && Config.DEBUG) console.log(`AudioManager: Playing sound '${name}'`);
+
+        // Duck music on impactful SFX
+        if (name === 'player_hit' || name === 'enemy_hit' || name === 'boss_attack') {
+            this._applyDuck();
+        }
     }
 
-    playMusic(name, loop = true) {
+    playMusic(name, loop = true, opts = {}) {
         if (!this.musicEnabled) return;
         const audioEl = this.musicElements[name];
         if (!audioEl) {
@@ -183,27 +311,53 @@ class AudioManager {
             return;
         }
 
-        this.stopMusic();
+        const fadeOut = typeof opts.fadeOut === 'number' ? opts.fadeOut : 0.4;
+        const fadeIn = typeof opts.fadeIn === 'number' ? opts.fadeIn : 0.4;
+        this.stopMusic(fadeOut);
 
         this.currentMusic = audioEl;
         this.currentMusic.loop = loop;
         // If routed through WebAudio, control volume via gain node; otherwise use element volume
         if (this.audioCtx) {
-            this.musicGainNode.gain.setValueAtTime(this.musicGain, this.audioCtx.currentTime);
+            const now = this.audioCtx.currentTime;
+            this.musicGainNode.gain.cancelScheduledValues(now);
+            this.musicGainNode.gain.setValueAtTime(0, now);
+            this.musicGainNode.gain.linearRampToValueAtTime(this.musicGain, now + fadeIn);
             const playPromise = this.currentMusic.play();
             if (playPromise !== undefined) playPromise.catch(e => { if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('Auto-play blocked for music', e); });
         } else {
-            this.currentMusic.volume = this.musicGain;
+            this.currentMusic.volume = 0;
             const playPromise = this.currentMusic.play();
             if (playPromise !== undefined) playPromise.catch(e => { if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('Auto-play blocked for music', e); });
+            try {
+                const stepMs = 16;
+                const start = Date.now();
+                const target = this.musicGain;
+                const timer = setInterval(() => {
+                    const t = (Date.now() - start) / (fadeIn * 1000);
+                    const v = Math.min(1, Math.max(0, t)) * target;
+                    this.currentMusic.volume = v;
+                    if (t >= 1) clearInterval(timer);
+                }, stepMs);
+            } catch (e) {}
         }
         if (typeof Config !== 'undefined' && Config.DEBUG) console.log(`AudioManager: Playing music '${name}'`);
     }
 
-    stopMusic() {
+    stopMusic(fadeOut = 0.3) {
         if (this.currentMusic) {
-            this.currentMusic.pause();
-            this.currentMusic.currentTime = 0;
+            const toStop = this.currentMusic;
+            if (this.audioCtx && this.musicGainNode) {
+                const now = this.audioCtx.currentTime;
+                this.musicGainNode.gain.cancelScheduledValues(now);
+                this.musicGainNode.gain.setValueAtTime(this.musicGainNode.gain.value, now);
+                this.musicGainNode.gain.linearRampToValueAtTime(0, now + fadeOut);
+                setTimeout(() => {
+                    try { toStop.pause(); toStop.currentTime = 0; } catch (e) {}
+                }, Math.max(0, fadeOut * 1000));
+            } else {
+                try { toStop.pause(); toStop.currentTime = 0; } catch (e) {}
+            }
             this.currentMusic = null;
         }
     }
@@ -230,6 +384,20 @@ class AudioManager {
         if (!this.musicEnabled) this.stopMusic();
         // Web Audio mute
         if (this.audioCtx && this.masterGain) this.masterGain.gain.setValueAtTime(this.soundEnabled ? 1 : 0, this.audioCtx.currentTime);
+    }
+
+    suspend() {
+        try {
+            if (this.audioCtx && this.audioCtx.state === 'running') this.audioCtx.suspend();
+        } catch (e) {}
+        try { this.pauseMusic(); } catch (e) {}
+    }
+
+    resume() {
+        try {
+            if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        } catch (e) {}
+        try { this.unpauseMusic(); } catch (e) {}
     }
 
     setSoundVolume(val) {
