@@ -439,7 +439,6 @@ class Game {
             // If starting a new game (level 0), reset progress unless this logic is handled elsewhere
             // But we want to allow replaying unlocked levels? For now, standard arcade: unlocked levels are checkpoints.
             
-            this.loadLevel(levelIndex);
             this.state = 'PLAYING';
             this.score = 0;
             this.lives = 1;
@@ -475,6 +474,9 @@ class Game {
             if (this.itemManager && typeof this.itemManager.reset === 'function') this.itemManager.reset();
             this.damageNumbers = [];
             this.hitSparks = [];
+
+            // Load the level after resets so idol spawns are preserved
+            this.loadLevel(levelIndex);
             // Place player at a spawn point near the level start.
             // (Previous logic spawned on the rightmost platform on desktop, which can
             // unintentionally drop you into the boss arena on long levels.)
