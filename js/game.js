@@ -364,6 +364,14 @@ class Game {
             const onTouchStart = (ev) => {
                 if (!ev) return;
                 ev.preventDefault();
+                
+                // Allow tapping to start/restart in non-playing states
+                if (this.state === 'MENU' || this.state === 'GAME_OVER' || this.state === 'VICTORY') {
+                    this.audioManager.playSound && this.audioManager.playSound('ui_confirm');
+                    this.startGame(0);
+                    return;
+                }
+
                 const rect = this.canvas.getBoundingClientRect();
                 const touches = Array.from(ev.touches || []);
 

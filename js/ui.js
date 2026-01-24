@@ -47,7 +47,7 @@ class UI {
         ctx.fillStyle = '#FFFFFF';
         
         let startY = this.height / 2 + 50;
-        ctx.fillText('Press ENTER to Start New Game', this.width / 2, startY);
+        ctx.fillText('Press ENTER or Tap to Start', this.width / 2, startY);
 
         // Controls
         ctx.font = '18px Arial';
