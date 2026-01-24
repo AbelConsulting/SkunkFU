@@ -570,8 +570,8 @@ class Player {
                 const fxH = hb.height;
                 const grad = ctx.createLinearGradient(fxX, fxY, fxX + fxW, fxY + fxH);
                 if (this.isShadowStriking) {
-                    grad.addColorStop(0, 'rgba(160, 80, 255, 0.15)');
-                    grad.addColorStop(1, 'rgba(80, 220, 255, 0.25)');
+                    grad.addColorStop(0, 'rgba(255, 215, 0, 0.18)');
+                    grad.addColorStop(1, 'rgba(255, 180, 60, 0.28)');
                 } else {
                     grad.addColorStop(0, 'rgba(255, 160, 80, 0.12)');
                     grad.addColorStop(1, 'rgba(255, 80, 80, 0.22)');
@@ -606,7 +606,9 @@ class Player {
 
             // Attack hitbox (only while attacking)
             if (this.isAttacking) {
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.55)';
+                ctx.strokeStyle = this.isShadowStriking
+                    ? 'rgba(255, 215, 0, 0.7)'
+                    : 'rgba(255, 0, 0, 0.55)';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
 
@@ -614,7 +616,7 @@ class Player {
                 try {
                     const swept = (typeof this.getAttackHitboxForCollision === 'function') ? this.getAttackHitboxForCollision() : null;
                     if (swept && this.isShadowStriking) {
-                        ctx.strokeStyle = 'rgba(180, 0, 255, 0.45)';
+                        ctx.strokeStyle = 'rgba(255, 200, 80, 0.5)';
                         ctx.lineWidth = 2;
                         ctx.strokeRect(swept.x, swept.y, swept.width, swept.height);
                     }

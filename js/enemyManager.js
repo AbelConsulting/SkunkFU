@@ -208,7 +208,7 @@ class EnemyManager {
                 if (Utils.rectCollision(attackBox, enemy.getRect())) {
                     const knockbackDir = player.facingRight ? 1 : -1;
                     const isShadow = !!player.isShadowStriking;
-                    const damage = isShadow ? (player.attackDamage * 1.75) : player.attackDamage;
+                    const damage = isShadow ? 30 : player.attackDamage;
                     
                     if (isShadow) {
                         enemy.takeDamage(damage, knockbackDir, { knockback: 420, hitStun: 0.45 });
