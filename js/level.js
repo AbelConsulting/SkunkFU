@@ -208,6 +208,28 @@ class Level {
             }
             ctx.fillStyle = this.backgroundGradient;
             ctx.fillRect(0, 0, w, h);
+
+            // Draw a row of stylized trees at the bottom for the 'forest' theme
+            if (this.backgroundName && this.backgroundName.includes('forest')) {
+                const treeHeight = 120; // Increased from 60
+                const treeWidth = 100;  // Increased from 50
+                const treeSpacing = 80; // Increased from 40
+                const groundY = h - 30;
+                ctx.fillStyle = '#0b3d1e'; // Dark green for trees
+
+                const treeCount = Math.ceil(w / treeSpacing) + 2;
+                const startX = -((cameraX * 0.1) % treeSpacing);
+
+                for (let i = 0; i < treeCount; i++) {
+                    const x = startX + i * treeSpacing;
+                    ctx.beginPath();
+                    ctx.moveTo(x, groundY);
+                    ctx.lineTo(x + treeWidth / 2, groundY - treeHeight);
+                    ctx.lineTo(x + treeWidth, groundY);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
         }
 
         // Background layers (drawn on top of main background for depth)
