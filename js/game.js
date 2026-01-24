@@ -47,7 +47,15 @@ class Game {
 
         // Initialize audio (use provided AudioManager if available)
         this.audioManager = audioManager || new AudioManager();
-        this.achievements = new Achievements();
+        this.achievements = null;
+        try {
+            if (typeof Achievements !== 'undefined') {
+                this.achievements = new Achievements();
+            }
+        } catch (e) {
+            try { if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('Achievements init failed', e); } catch (err) {}
+            this.achievements = null;
+        }
 
 
         // Game state

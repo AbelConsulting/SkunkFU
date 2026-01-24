@@ -3,6 +3,16 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const context = await browser.newContext({viewport:{width:640,height:360}, deviceScaleFactor:0.75, userAgent: 'Mozilla/5.0 (Linux; Android 9; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0 Mobile Safari/537.36'});
   const page = await context.newPage();
+  page.on('console', (msg) => {
+    try {
+      console.log(`[console:${msg.type()}] ${msg.text()}`);
+    } catch (e) {
+      console.log('[console] (unreadable)');
+    }
+  });
+  page.on('pageerror', (err) => {
+    console.log('[pageerror]', err && err.message ? err.message : String(err));
+  });
   await page.goto((process.env.TEST_SERVER || 'http://localhost:8000') + '?mobile=true');
 
   // Wait for game and readiness

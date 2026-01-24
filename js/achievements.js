@@ -47,11 +47,18 @@ class Achievements {
     }
 
     save() {
-        localStorage.setItem('achievements', JSON.stringify(Array.from(this.unlocked)));
+        try {
+            localStorage.setItem('achievements', JSON.stringify(Array.from(this.unlocked)));
+        } catch (e) {}
     }
 
     load() {
-        const unlocked = JSON.parse(localStorage.getItem('achievements'));
+        let unlocked = null;
+        try {
+            unlocked = JSON.parse(localStorage.getItem('achievements'));
+        } catch (e) {
+            unlocked = null;
+        }
         if (unlocked) {
             this.unlocked = new Set(unlocked);
             for (const id of this.unlocked) {
