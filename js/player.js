@@ -38,6 +38,8 @@ class Player {
         this.coyoteTimer = 0;
         this.jumpBufferTime = 0.1;
         this.jumpBufferTimer = 0;
+        this.maxJumps = 2;
+        this.jumpsRemaining = this.maxJumps;
 
         // Combat state
         this.isAttacking = false;
@@ -160,9 +162,19 @@ class Player {
     }
 
     jump() {
-        if ((this.onGround || this.coyoteTimer > 0) && this.hitStunTimer <= 0) {
+        if (this.hitStunTimer > 0) return;
+
+        const canGroundJump = this.onGround || this.coyoteTimer > 0;
+        const canAirJump = !canGroundJump && this.jumpsRemaining > 0;
+
+        if (canGroundJump || canAirJump) {
             this.velocityY = -this.jumpForce;
             this.coyoteTimer = 0;
+            if (canGroundJump) {
+                this.jumpsRemaining = Math.max(0, this.maxJumps - 1);
+            } else {
+                this.jumpsRemaining = Math.max(0, this.jumpsRemaining - 1);
+            }
             if (this.audioManager) {
                 this.audioManager.playSound('jump', 0.6);
             }
@@ -281,6 +293,7 @@ class Player {
         this.velocityX = 0;
         this.velocityY = 0;
         this.targetVelocityX = 0;
+        this.jumpsRemaining = this.maxJumps;
         this.comboCount = 0;
         this.hitStunTimer = 0;
         this.invulnerableTimer = 0;
@@ -412,6 +425,7 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            this.jumpsRemaining = this.maxJumps;
             
             // Play landing sound if falling from significant height.
             // Note: velocity is positive when falling (downwards).
@@ -438,7 +452,7 @@ class Player {
         }
 
         // Handle jump buffering
-        if (this.jumpBufferTimer > 0 && (this.onGround || this.coyoteTimer > 0)) {
+        if (this.jumpBufferTimer > 0 && (this.onGround || this.coyoteTimer > 0 || this.jumpsRemaining > 0)) {
             this.jump();
             this.jumpBufferTimer = 0;
         }
