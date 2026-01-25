@@ -36,7 +36,7 @@ class Player {
         // Jump mechanics
         this.coyoteTime = 0.15;
         this.coyoteTimer = 0;
-        this.jumpBufferTime = 0.1;
+        this.jumpBufferTime = 0.2;
         this.jumpBufferTimer = 0;
         this.jumpBufferCount = 0;
         this.maxJumps = 2;
