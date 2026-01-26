@@ -30,7 +30,7 @@ class SpriteLoader {
             'basic_idle': 4,
             'basic_walk': 4,
             'basic_attack': 4,
-            'basic_hurt': 2,
+            'basic_hurt': 4,
             'second_idle': 4,
             'second_walk': 4,
             'second_attack': 4,

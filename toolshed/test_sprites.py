@@ -44,7 +44,7 @@ def main():
         ("enemies/basic_idle.png", (48, 48), 4),
         ("enemies/basic_walk.png", (48, 48), 6),
         ("enemies/basic_attack.png", (48, 48), 4),
-        ("enemies/basic_hurt.png", (48, 48), 2),
+        ("enemies/basic_hurt.png", (48, 48), 4),
         ("enemies/fly_idle.png", (40, 40), 4),
         ("enemies/boss_idle.png", (128, 128), 4),
         ("enemies/boss2_idle.png", (128, 128), 4),

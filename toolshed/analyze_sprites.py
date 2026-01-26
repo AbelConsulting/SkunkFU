@@ -101,7 +101,7 @@ def analyze_all_sprites():
         'basic_idle.png': {'frames': 4, 'size': 48},
         'basic_walk.png': {'frames': 6, 'size': 48},
         'basic_attack.png': {'frames': 4, 'size': 48},
-        'basic_hurt.png': {'frames': 2, 'size': 48},
+        'basic_hurt.png': {'frames': 4, 'size': 48},
         'fly_idle.png': {'frames': 4, 'size': 40},
         'fly_move.png': {'frames': 6, 'size': 40},
         'fly_attack.png': {'frames': 4, 'size': 40},

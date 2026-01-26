@@ -86,7 +86,7 @@ def process_enemy_sprites():
         'basic_idle.png': {'frames': 4, 'target_size': 48, 'original': 2048},
         'basic_walk.png': {'frames': 6, 'target_size': 48, 'original': 2048},
         'basic_attack.png': {'frames': 4, 'target_size': 48, 'original': 2048},
-        'basic_hurt.png': {'frames': 2, 'target_size': 48, 'original': 2048},
+        'basic_hurt.png': {'frames': 4, 'target_size': 48, 'original': 2048},
         'fly_idle.png': {'frames': 4, 'target_size': 40, 'original': 1024},
         'fly_move.png': {'frames': 6, 'target_size': 40, 'original': 1024},
         'fly_attack.png': {'frames': 4, 'target_size': 40, 'original': 1024},
