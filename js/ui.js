@@ -192,7 +192,8 @@ class UI {
         const lifeIconGap = 6;
         const lifeIconsY = healthBarY + healthBarHeight + 8;
         const maxDisplayLives = 9; // Don't crowd the UI
-        const livesToShow = Math.min(lives || 1, maxDisplayLives);
+        const safeLives = Number.isFinite(lives) ? lives : 0;
+        const livesToShow = Math.min(Math.max(0, safeLives), maxDisplayLives);
         
         for (let i = 0; i < livesToShow; i++) {
             const lifeX = healthBarX + (i * (lifeIconSize + lifeIconGap));
