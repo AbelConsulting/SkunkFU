@@ -841,6 +841,12 @@ try {
         pauseBtn.addEventListener('click', (e) => {
             e.preventDefault();
             try {
+                // If resuming from pause, attempt fullscreen on the same gesture
+                const wasPaused = !!(window.game && window.game.state === 'PAUSED');
+                if (wasPaused && typeof requestFullscreen === 'function') {
+                    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+                    if (!isFs) requestFullscreen();
+                }
                 if (window.game && typeof window.game.togglePause === 'function') {
                     window.game.togglePause();
                 } else if (typeof window.toggleGamePause === 'function') {
