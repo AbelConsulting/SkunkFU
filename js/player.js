@@ -95,6 +95,9 @@ class Player {
 
         // Speed boost effect (applied by speed boost pickups)
         this.speedBoost = null;
+        
+        // Visual effects
+        this.speedTrailEffect = new SpeedTrailEffect();
 
         // Animation state
         this.animationState = "IDLE";
@@ -371,10 +374,23 @@ class Player {
         if (this.speedBoost) {
             this.speedBoost.timer += dt;
             
+            // Update speed trail visual effect
+            if (this.speedTrailEffect) {
+                this.speedTrailEffect.emitFromPlayer(this, dt);
+            }
+            
             // Remove effect when duration expires
             if (this.speedBoost.timer >= this.speedBoost.duration) {
                 this.speedBoost = null;
+                if (this.speedTrailEffect) {
+                    this.speedTrailEffect.clear();
+                }
             }
+        }
+        
+        // Always update speed trail effect particles (for fade out)
+        if (this.speedTrailEffect) {
+            this.speedTrailEffect.update(dt);
         }
 
         if (this.hitStunTimer > 0) this.hitStunTimer -= dt;
@@ -598,6 +614,11 @@ class Player {
     draw(ctx, cameraX = 0, cameraY = 0) {
         ctx.save();
         ctx.translate(-cameraX, -cameraY);
+        
+        // Draw speed trail effect (behind player)
+        if (this.speedTrailEffect && this.speedBoost) {
+            this.speedTrailEffect.draw(ctx);
+        }
 
         // Draw shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
@@ -613,6 +634,15 @@ class Player {
 
         // Draw sprite or colored rectangle
         if (this.currentAnimation) {
+            // Add speed boost glow effect
+            if (this.speedBoost) {
+                ctx.save();
+                ctx.shadowColor = '#00D9FF';
+                ctx.shadowBlur = 15 + Math.sin(Date.now() / 100) * 5; // Pulsing glow
+                ctx.globalCompositeOperation = 'lighter';
+                this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
+                ctx.restore();
+            }
             this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
         } else {
             ctx.fillStyle = this.color;

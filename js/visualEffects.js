@@ -409,3 +409,112 @@ class GameOverAnimation {
         return this.finished;
     }
 }
+
+/**
+ * SpeedTrailEffect: Creates a visual trail effect when the player has speed boost active.
+ * Emits colorful speed lines and particles that trail behind the player.
+ */
+class SpeedTrailEffect {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.maxParticles = opts.maxParticles || 120;
+        this.emitTimer = 0;
+        this.emitInterval = opts.emitInterval || 0.02; // Emit frequently for dense trail
+    }
+
+    emitSpeedParticle(x, y, velocityX, facingRight) {
+        if (this.particles.length >= this.maxParticles) {
+            this.particles.shift();
+        }
+
+        // Create speed lines behind the player
+        const colors = ['#00D9FF', '#00F5FF', '#5CFFFF', '#FFFFFF', '#FFD700'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Speed lines trail backwards relative to movement direction
+        const direction = facingRight ? -1 : 1;
+        const speedMagnitude = Math.abs(velocityX) * 0.3;
+        
+        this.particles.push({
+            x: x + Utils.randomFloat(-10, 10),
+            y: y + Utils.randomFloat(-5, 5),
+            vx: direction * Utils.randomFloat(speedMagnitude * 0.5, speedMagnitude) + Utils.randomFloat(-20, 20),
+            vy: Utils.randomFloat(-30, 30),
+            length: Utils.randomFloat(15, 35),
+            width: Utils.randomFloat(2, 4),
+            life: Utils.randomFloat(0.2, 0.4),
+            age: 0,
+            color: randomColor,
+            alpha: 1
+        });
+    }
+
+    emitFromPlayer(player, dt) {
+        if (!player || !player.speedBoost) return;
+        
+        const speed = Math.abs(player.velocityX || 0);
+        if (speed < 50) return; // Only emit when actually moving
+
+        this.emitTimer -= dt;
+        if (this.emitTimer <= 0) {
+            const baseY = player.y + (player.height || 64) * 0.5;
+            const baseX = player.x + (player.width || 64) * 0.5;
+            
+            // Emit 2-3 particles per interval for a dense trail
+            const emitCount = Math.floor(Utils.randomFloat(2, 4));
+            for (let i = 0; i < emitCount; i++) {
+                this.emitSpeedParticle(baseX, baseY, player.velocityX, player.facingRight);
+            }
+            
+            this.emitTimer = this.emitInterval;
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.92; // Friction
+            p.vy *= 0.92;
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            
+            if (p.age >= p.life) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha * 0.8;
+            ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow effect
+            
+            // Draw speed line
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = p.width;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - p.vx * 0.08, p.y - p.vy * 0.08);
+            ctx.stroke();
+            
+            // Add a glow dot at the front
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.width * 2);
+            gradient.addColorStop(0, p.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.width * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    }
+
+    clear() {
+        this.particles = [];
+    }
+}
