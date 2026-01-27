@@ -53,6 +53,11 @@ class SpriteLoader {
         };
     }
 
+    _appendQuery(path, extraQuery) {
+        if (!extraQuery) return path;
+        return path.includes('?') ? (path + '&' + extraQuery) : (path + '?' + extraQuery);
+    }
+
     /**
      * Load an image by trying a list of candidate paths (useful for backgrounds)
      * Tries combinations of suffixes (@1x,@2x) and extensions (.webp,.png).
@@ -60,7 +65,9 @@ class SpriteLoader {
      * Returns the stored image (ImageBitmap or HTMLImageElement or canvas placeholder).
      */
     async loadSpriteBest(name, basePathNoExt) {
-        const cacheBuster = this._cacheBuster ? ('?cb=' + this._cacheBuster) : '';
+        const v = (typeof Config !== 'undefined' && Config.ASSET_VERSION) ? ('v=' + encodeURIComponent(Config.ASSET_VERSION)) : '';
+        const cb = this._cacheBuster ? ('cb=' + this._cacheBuster) : '';
+        const query = [v, cb].filter(Boolean).join('&');
         const suffixes = ['', '@1x', '@2x'];
         // Try PNG first to avoid noisy .webp 404s on hosts without WebP variants
         const exts = ['.png', '.webp'];
@@ -79,7 +86,8 @@ class SpriteLoader {
         // Loop ext first (png variants for all suffixes), then webp variants
         for (const e of exts) {
             for (const s of suffixes) {
-                const path = `${basePathNoExt}${s}${e}${cacheBuster}`;
+                const raw = `${basePathNoExt}${s}${e}`;
+                const path = this._appendQuery(raw, query);
                 try {
                     const img = await tryLoad(path);
                     // Prefer ImageBitmap when available
@@ -275,9 +283,15 @@ class SpriteLoader {
             // the global preload list so Level can request only what it needs.
         ];
 
-        // Optionally add a cache-buster to asset paths when debugging to avoid stale caches
+        const versionQuery = (typeof Config !== 'undefined' && Config.ASSET_VERSION)
+            ? ('v=' + encodeURIComponent(Config.ASSET_VERSION))
+            : '';
+        const cacheQuery = this._cacheBuster ? ('cb=' + this._cacheBuster) : '';
+        const query = [versionQuery, cacheQuery].filter(Boolean).join('&');
+
+        // Add version/cache query params to asset paths (helps with aggressive CDN caching)
         const spritesToLoad = baseList.map(([n, p]) => {
-            if (this._cacheBuster) return [n, p + '?cb=' + this._cacheBuster];
+            if (query) return [n, this._appendQuery(p, query)];
             return [n, p];
         });
 
