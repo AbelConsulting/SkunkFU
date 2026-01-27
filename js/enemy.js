@@ -97,20 +97,32 @@ class Enemy {
               this.enemyType === "BOSS3" ? "boss3" :
               this.enemyType === "BOSS4" ? "boss4" : "boss";
 
-        const getSpriteSafe = (key, fallbackKey = null) => {
+        const getSpriteKeySafe = (key, fallbackKey = null) => {
             try {
                 if (typeof spriteLoader !== 'undefined' && spriteLoader.getSprite) {
                     let spr = spriteLoader.getSprite(key);
-                    if (!spr && fallbackKey) spr = spriteLoader.getSprite(fallbackKey);
-                    return spr;
+                    if (spr) return { key, sprite: spr };
+                    if (fallbackKey) {
+                        spr = spriteLoader.getSprite(fallbackKey);
+                        if (spr) return { key: fallbackKey, sprite: spr };
+                    }
                 }
             } catch (e) {}
-            return null;
+            return { key, sprite: null };
+        };
+
+        const makeAnim = (resolved, frameCount, frameDuration) => {
+            try {
+                if (resolved && resolved.key && typeof spriteLoader !== 'undefined' && spriteLoader.createAnimation) {
+                    return spriteLoader.createAnimation(resolved.key, frameCount, frameDuration);
+                }
+            } catch (e) {}
+            return new Animation(resolved ? resolved.sprite : null, frameCount, frameDuration);
         };
 
         const fallbackPrefix = (prefix === 'boss4') ? 'boss3' : (prefix === 'boss3') ? 'boss2' : (prefix === 'boss2') ? 'boss' : null;
-        const idle_sprite = getSpriteSafe(`${prefix}_idle`, fallbackPrefix ? `${fallbackPrefix}_idle` : null);
-        const walk_sprite = getSpriteSafe(`${prefix}_walk`, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
+        const idle_sprite = getSpriteKeySafe(`${prefix}_idle`, fallbackPrefix ? `${fallbackPrefix}_idle` : null);
+        const walk_sprite = getSpriteKeySafe(`${prefix}_walk`, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
         
         // Handle naming variance for boss
         const attackName = (prefix === 'boss') ? 'boss_attack1'
@@ -124,22 +136,22 @@ class Enemy {
             : (fallbackPrefix === 'boss3') ? 'boss3_attack'
             : null
             : null;
-        const attack_sprite = getSpriteSafe(attackName, fallbackAttack);
+        const attack_sprite = getSpriteKeySafe(attackName, fallbackAttack);
         
-        const hurt_sprite = getSpriteSafe(`${prefix}_hurt`, fallbackPrefix ? `${fallbackPrefix}_hurt` : null);
+        const hurt_sprite = getSpriteKeySafe(`${prefix}_hurt`, fallbackPrefix ? `${fallbackPrefix}_hurt` : null);
 
         // Some enemy sets (boss) don't have a dedicated hurt sheet.
         // Fall back to the idle sheet to avoid missing animations.
         const isBossType = (this.enemyType === 'BOSS' || this.enemyType === 'BOSS2' || this.enemyType === 'BOSS3' || this.enemyType === 'BOSS4');
         const hurtFrames = isBossType ? 4 : 2;
-        const hurtAnim = hurt_sprite
-            ? new Animation(hurt_sprite, hurtFrames, 0.1)
-            : new Animation(idle_sprite, 4, 0.12);
+        const hurtAnim = (hurt_sprite && hurt_sprite.sprite)
+            ? makeAnim(hurt_sprite, hurtFrames, 0.1)
+            : makeAnim(idle_sprite, 4, 0.12);
 
         this.animations = {
-            idle: new Animation(idle_sprite, 4, 0.2),
-            walk: new Animation(walk_sprite, 4, 0.15),
-            attack: new Animation(attack_sprite, 4, 0.1),
+            idle: makeAnim(idle_sprite, 4, 0.2),
+            walk: makeAnim(walk_sprite, 4, 0.15),
+            attack: makeAnim(attack_sprite, 4, 0.1),
             hurt: hurtAnim
         };
 
