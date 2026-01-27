@@ -965,6 +965,23 @@ class Game {
             const collected = this.itemManager.checkPlayerCollision(this.player);
             for (const item of collected) {
                 const result = this.itemManager.applyItemEffect(this.player, item);
+                
+                // Add visual effect for extra life collection
+                if (result && result.type === 'EXTRA_LIFE' && result.success) {
+                    // Create golden sparkle burst
+                    const burst = new HitSpark(item.x, item.y, {
+                        particleCount: 16,
+                        speedMin: 120,
+                        speedMax: 250
+                    });
+                    // Override particle colors for golden effect
+                    for (const particle of burst.particles) {
+                        particle.color = Math.random() > 0.5 ? '#FFD700' : '#FFF700';
+                        particle.size = Utils.randomFloat(3, 6);
+                    }
+                    this.effects.push(burst);
+                }
+                
                 // Grant extra life if applicable
                 if (result && result.type === 'EXTRA_LIFE' && result.success) {
                     this.lives = Math.min(this.lives + (result.lives || 1), 9);

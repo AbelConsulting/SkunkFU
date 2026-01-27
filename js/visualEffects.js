@@ -92,15 +92,27 @@ class HitSpark {
         ctx.globalAlpha = alpha;
 
         for (const particle of this.particles) {
-            const gradient = ctx.createRadialGradient(
-                this.x + particle.x, this.y + particle.y, 0,
-                this.x + particle.x, this.y + particle.y, particle.size
-            );
-            gradient.addColorStop(0, '#FFFFFF');
-            gradient.addColorStop(0.5, '#FFAA00');
-            gradient.addColorStop(1, '#FF4444');
+            // Use custom color if provided, otherwise default gradient
+            if (particle.color) {
+                const gradient = ctx.createRadialGradient(
+                    this.x + particle.x, this.y + particle.y, 0,
+                    this.x + particle.x, this.y + particle.y, particle.size
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.6, particle.color);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = gradient;
+            } else {
+                const gradient = ctx.createRadialGradient(
+                    this.x + particle.x, this.y + particle.y, 0,
+                    this.x + particle.x, this.y + particle.y, particle.size
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.5, '#FFAA00');
+                gradient.addColorStop(1, '#FF4444');
+                ctx.fillStyle = gradient;
+            }
 
-            ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(this.x + particle.x, this.y + particle.y, particle.size, 0, Math.PI * 2);
             ctx.fill();
