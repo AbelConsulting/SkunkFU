@@ -51,7 +51,9 @@ class ItemManager {
             bounceSpeed: 1.5,
             // Pulse effect
             scale: 1.0,
-            pulseSpeed: 3.0
+            pulseSpeed: 3.0,
+            // Sparkle particles for visual appeal
+            sparkles: []
         };
         this.items.push(item);
         return item;
@@ -140,6 +142,31 @@ class ItemManager {
                 
                 // Pulse scale
                 item.scale = 1.0 + Math.sin(item.pulseSpeed * Date.now() / 1000) * 0.1;
+                
+                // Update and generate sparkle particles
+                if (!item.sparkles) item.sparkles = [];
+                
+                // Add new sparkles occasionally
+                if (Math.random() < 0.15) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 20 + Math.random() * 15;
+                    item.sparkles.push({
+                        x: Math.cos(angle) * distance,
+                        y: Math.sin(angle) * distance,
+                        life: 1.0,
+                        age: 0,
+                        size: 2 + Math.random() * 3
+                    });
+                }
+                
+                // Update existing sparkles
+                for (let j = item.sparkles.length - 1; j >= 0; j--) {
+                    const sparkle = item.sparkles[j];
+                    sparkle.age += dt;
+                    if (sparkle.age >= sparkle.life) {
+                        item.sparkles.splice(j, 1);
+                    }
+                }
             } else if (item.type === 'GOLDEN_IDOL') {
                 item.bounceOffset = Math.sin(item.bounceSpeed * Date.now() / 1000) * 5;
                 item.y = item.baseY + item.bounceOffset;
@@ -273,6 +300,44 @@ class ItemManager {
             } else if (item.type === 'SPEED_BOOST') {
                 Utils.drawSpeedBoostItem(ctx, -item.width / 2, -item.height / 2, item.width);
             } else if (item.type === 'EXTRA_LIFE') {
+                // Draw golden glow behind extra life
+                ctx.save();
+                const glowSize = item.width * 0.8;
+                const glowPulse = 0.3 + Math.sin(Date.now() / 200) * 0.2;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, `rgba(255, 215, 0, ${glowPulse})`);
+                gradient.addColorStop(0.5, `rgba(255, 223, 0, ${glowPulse * 0.5})`);
+                gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                
+                // Draw sparkles around extra life
+                if (item.sparkles && item.sparkles.length > 0) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'lighter';
+                    for (const sparkle of item.sparkles) {
+                        const alpha = 1 - (sparkle.age / sparkle.life);
+                        ctx.globalAlpha = alpha * 0.8;
+                        
+                        // Draw sparkle as a small star
+                        const sparkleGrad = ctx.createRadialGradient(
+                            sparkle.x, sparkle.y, 0,
+                            sparkle.x, sparkle.y, sparkle.size
+                        );
+                        sparkleGrad.addColorStop(0, '#FFFFFF');
+                        sparkleGrad.addColorStop(0.4, '#FFD700');
+                        sparkleGrad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                        ctx.fillStyle = sparkleGrad;
+                        ctx.beginPath();
+                        ctx.arc(sparkle.x, sparkle.y, sparkle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+                
                 Utils.drawExtraLifeItem(ctx, -item.width / 2, -item.height / 2, item.width);
             } else if (item.type === 'GOLDEN_IDOL') {
                 Utils.drawGoldenIdol(ctx, -item.width / 2, -item.height / 2, item.width);
