@@ -54,10 +54,14 @@ const Config = {
     IDOL_ITEM_SIZE: 30,
     IDOL_SCORE: 250,
     IDOL_SET_BONUS: 1000,
+    SPEED_BOOST_ITEM_SIZE: 32,
+    SPEED_BOOST_DURATION: 8.0, // seconds
+    SPEED_BOOST_MULTIPLIER: 1.5, // 150% speed
 
     // Item drop rates (0.0 - 1.0, where 1.0 = 100% chance)
     HEALTH_REGEN_DROP_RATE: 0.15, // 15% chance per enemy
     EXTRA_LIFE_DROP_RATE: 0.03,   // 3% chance per enemy
+    SPEED_BOOST_DROP_RATE: 0.12,  // 12% chance per enemy
 
     // Colors
     WHITE: '#FFFFFF',

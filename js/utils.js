@@ -122,6 +122,58 @@ class Utils {
     }
 
     /**
+     * Draw the speed boost pickup icon.
+     * Uses the loaded sprite `speed_boost_item` when available; otherwise draws
+     * a lightning bolt icon on cyan background.
+     */
+    static drawSpeedBoostItem(ctx, x, y, size = 32, opts = {}) {
+        if (!ctx) return;
+
+        const loader = opts.spriteLoader || ((typeof spriteLoader !== 'undefined') ? spriteLoader : null);
+        const key = opts.spriteKey || 'speed_boost_item';
+        const sprite = (loader && typeof loader.getSprite === 'function') ? loader.getSprite(key) : null;
+
+        const pixelSnap = (typeof Config !== 'undefined' && Config.PIXEL_SNAP) ? true : false;
+        const dx = pixelSnap ? Math.round(x) : x;
+        const dy = pixelSnap ? Math.round(y) : y;
+        const ds = pixelSnap ? Math.round(size) : size;
+
+        // Draw sprite when available
+        try {
+            if (sprite && sprite.width && sprite.height) {
+                ctx.drawImage(sprite, dx, dy, ds, ds);
+                return;
+            }
+        } catch (e) {
+            // fall through to placeholder
+        }
+
+        // Placeholder: cyan tile + lightning bolt
+        const prevSmooth = ctx.imageSmoothingEnabled;
+        try { ctx.imageSmoothingEnabled = false; } catch (e) {}
+
+        ctx.fillStyle = '#0e7490';
+        ctx.fillRect(dx, dy, ds, ds);
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(dx + 1, dy + 1, Math.max(0, ds - 2), Math.max(0, ds - 2));
+
+        // Lightning bolt (simplified zigzag)
+        const unit = Math.max(1, Math.floor(ds / 16));
+        const cx = dx + Math.floor(ds / 2);
+        const cy = dy + Math.floor(ds / 2);
+
+        ctx.fillStyle = '#ffff00';
+        // Top part
+        ctx.fillRect(cx, cy - 7 * unit, 2 * unit, 5 * unit);
+        // Middle diagonal part
+        ctx.fillRect(cx - 2 * unit, cy - 2 * unit, 5 * unit, 2 * unit);
+        // Bottom part
+        ctx.fillRect(cx - 1 * unit, cy, 2 * unit, 6 * unit);
+
+        try { ctx.imageSmoothingEnabled = prevSmooth; } catch (e) {}
+    }
+
+    /**
      * Draw the extra life pickup icon.
      * Uses the loaded sprite `extra_life` when available; otherwise draws
      * a simple red tile with a heart icon.

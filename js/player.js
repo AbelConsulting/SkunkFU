@@ -93,6 +93,9 @@ class Player {
         // Health regeneration effect (applied by health regen pickups)
         this.healthRegen = null;
 
+        // Speed boost effect (applied by speed boost pickups)
+        this.speedBoost = null;
+
         // Animation state
         this.animationState = "IDLE";
         this.currentAnimation = null;
@@ -364,6 +367,16 @@ class Player {
             }
         }
 
+        // Update speed boost effect
+        if (this.speedBoost) {
+            this.speedBoost.timer += dt;
+            
+            // Remove effect when duration expires
+            if (this.speedBoost.timer >= this.speedBoost.duration) {
+                this.speedBoost = null;
+            }
+        }
+
         if (this.hitStunTimer > 0) this.hitStunTimer -= dt;
         if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
 
@@ -381,6 +394,11 @@ class Player {
                 this.targetVelocityX = this.speed;
                 if (!this.isAttacking) this.facingRight = true;
             }
+        }
+
+        // Apply speed boost multiplier if active
+        if (this.speedBoost && this.speedBoost.multiplier) {
+            this.targetVelocityX *= this.speedBoost.multiplier;
         }
 
         // Smooth acceleration/deceleration

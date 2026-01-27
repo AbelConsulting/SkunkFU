@@ -85,6 +85,33 @@ class ItemManager {
     }
 
     /**
+     * Spawn a speed boost pickup at the specified location
+     */
+    spawnSpeedBoost(x, y) {
+        const item = {
+            id: this.nextItemId++,
+            type: 'SPEED_BOOST',
+            x: x,
+            y: y,
+            width: Config.SPEED_BOOST_ITEM_SIZE || 32,
+            height: Config.SPEED_BOOST_ITEM_SIZE || 32,
+            collected: false,
+            // Fast bounce for energy feel
+            baseY: y,
+            bounceOffset: 0,
+            bounceSpeed: 3.5,
+            // Rapid rotation
+            rotation: 0,
+            rotationSpeed: 4.0,
+            // Fast pulse
+            scale: 1.0,
+            pulseSpeed: 5.0
+        };
+        this.items.push(item);
+        return item;
+    }
+
+    /**
      * Update all items (animations, lifetime, etc.)
      */
     update(dt) {
@@ -119,6 +146,15 @@ class ItemManager {
                 item.rotation += item.rotationSpeed * dt;
                 if (item.rotation > Math.PI * 2) item.rotation -= Math.PI * 2;
                 item.scale = 1.0 + Math.sin(item.pulseSpeed * Date.now() / 1000) * 0.06;
+            } else if (item.type === 'SPEED_BOOST') {
+                // Fast energetic bounce
+                item.bounceOffset = Math.sin(item.bounceSpeed * Date.now() / 1000) * 10;
+                item.y = item.baseY + item.bounceOffset;
+                // Rapid rotation for dynamic feel
+                item.rotation += item.rotationSpeed * dt;
+                if (item.rotation > Math.PI * 2) item.rotation -= Math.PI * 2;
+                // Fast pulse
+                item.scale = 1.0 + Math.sin(item.pulseSpeed * Date.now() / 1000) * 0.15;
             }
         }
     }
@@ -158,6 +194,9 @@ class ItemManager {
                     } else if (item.type === 'GOLDEN_IDOL') {
                         const rate = 0.97 + Math.random() * 0.10; // 0.97..1.07
                         this.audioManager.playSound('coin_collect', { volume: 0.7, rate });
+                    } else if (item.type === 'SPEED_BOOST') {
+                        const rate = 1.05 + Math.random() * 0.10; // 1.05..1.15 (higher pitch)
+                        this.audioManager.playSound('item_pickup', { volume: 0.7, rate });
                     }
                 }
             }
@@ -186,6 +225,19 @@ class ItemManager {
                 player.healthRegen.timer = 0;
             }
             return { type: 'HEALTH_REGEN', success: true };
+        } else if (item.type === 'SPEED_BOOST') {
+            // Start speed boost effect on player
+            if (!player.speedBoost) {
+                player.speedBoost = {
+                    duration: Config.SPEED_BOOST_DURATION || 8.0,
+                    multiplier: Config.SPEED_BOOST_MULTIPLIER || 1.5,
+                    timer: 0
+                };
+            } else {
+                // Refresh duration if already active
+                player.speedBoost.timer = 0;
+            }
+            return { type: 'SPEED_BOOST', success: true };
         } else if (item.type === 'EXTRA_LIFE') {
             return { type: 'EXTRA_LIFE', success: true, lives: 1 };
         } else if (item.type === 'GOLDEN_IDOL') {
@@ -218,6 +270,8 @@ class ItemManager {
             if (item.type === 'HEALTH_REGEN') {
                 // Use the utility helper to draw the sprite or placeholder
                 Utils.drawHealthRegenItem(ctx, -item.width / 2, -item.height / 2, item.width);
+            } else if (item.type === 'SPEED_BOOST') {
+                Utils.drawSpeedBoostItem(ctx, -item.width / 2, -item.height / 2, item.width);
             } else if (item.type === 'EXTRA_LIFE') {
                 Utils.drawExtraLifeItem(ctx, -item.width / 2, -item.height / 2, item.width);
             } else if (item.type === 'GOLDEN_IDOL') {
