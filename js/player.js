@@ -98,6 +98,7 @@ class Player {
         
         // Visual effects
         this.speedTrailEffect = new SpeedTrailEffect();
+        this.healthRegenEffect = new HealthRegenEffect();
 
         // Animation state
         this.animationState = "IDLE";
@@ -364,10 +365,23 @@ class Player {
             const healAmount = this.healthRegen.hpPerSecond * dt;
             this.health = Math.min(this.maxHealth, this.health + healAmount);
             
+            // Update healing visual effect
+            if (this.healthRegenEffect) {
+                this.healthRegenEffect.emitFromPlayer(this, dt);
+            }
+            
             // Remove effect when duration expires
             if (this.healthRegen.timer >= this.healthRegen.duration) {
                 this.healthRegen = null;
+                if (this.healthRegenEffect) {
+                    this.healthRegenEffect.clear();
+                }
             }
+        }
+        
+        // Always update health regen effect particles (for fade out)
+        if (this.healthRegenEffect) {
+            this.healthRegenEffect.update(dt);
         }
 
         // Update speed boost effect
@@ -619,6 +633,11 @@ class Player {
         if (this.speedTrailEffect && this.speedBoost) {
             this.speedTrailEffect.draw(ctx);
         }
+        
+        // Draw health regen effect (behind player)
+        if (this.healthRegenEffect && this.healthRegen) {
+            this.healthRegenEffect.draw(ctx);
+        }
 
         // Draw shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
@@ -639,6 +658,15 @@ class Player {
                 ctx.save();
                 ctx.shadowColor = '#00D9FF';
                 ctx.shadowBlur = 15 + Math.sin(Date.now() / 100) * 5; // Pulsing glow
+                ctx.globalCompositeOperation = 'lighter';
+                this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
+                ctx.restore();
+            }
+            // Add health regen glow effect
+            if (this.healthRegen) {
+                ctx.save();
+                ctx.shadowColor = '#00FF88';
+                ctx.shadowBlur = 12 + Math.sin(Date.now() / 120) * 4; // Pulsing green glow
                 ctx.globalCompositeOperation = 'lighter';
                 this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
                 ctx.restore();

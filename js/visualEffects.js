@@ -518,3 +518,112 @@ class SpeedTrailEffect {
         this.particles = [];
     }
 }
+
+/**
+ * HealthRegenEffect: Creates a visual healing effect when the player has health regen active.
+ * Emits green healing particles that float upward around the player.
+ */
+class HealthRegenEffect {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.maxParticles = opts.maxParticles || 80;
+        this.emitTimer = 0;
+        this.emitInterval = opts.emitInterval || 0.08; // Emit healing particles periodically
+    }
+
+    emitHealingParticle(x, y) {
+        if (this.particles.length >= this.maxParticles) {
+            this.particles.shift();
+        }
+
+        // Create healing particles - green/white sparkles that float upward
+        const colors = ['#00FF88', '#00FFAA', '#88FFAA', '#AAFFCC', '#FFFFFF'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        this.particles.push({
+            x: x + Utils.randomFloat(-20, 20),
+            y: y + Utils.randomFloat(-10, 10),
+            vx: Utils.randomFloat(-30, 30),
+            vy: Utils.randomFloat(-80, -40), // Float upward
+            size: Utils.randomFloat(3, 8),
+            life: Utils.randomFloat(0.8, 1.4),
+            age: 0,
+            color: randomColor,
+            alpha: 1,
+            pulseSpeed: Utils.randomFloat(4, 8)
+        });
+    }
+
+    emitFromPlayer(player, dt) {
+        if (!player || !player.healthRegen) return;
+
+        this.emitTimer -= dt;
+        if (this.emitTimer <= 0) {
+            const baseY = player.y + (player.height || 64) * 0.5;
+            const baseX = player.x + (player.width || 64) * 0.5;
+            
+            // Emit 2-3 healing particles per interval
+            const emitCount = Math.floor(Utils.randomFloat(2, 4));
+            for (let i = 0; i < emitCount; i++) {
+                this.emitHealingParticle(baseX, baseY);
+            }
+            
+            this.emitTimer = this.emitInterval;
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.95; // Light friction
+            p.vy *= 0.98; // Slight upward deceleration
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            
+            if (p.age >= p.life) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            
+            // Pulsing alpha for sparkle effect
+            const pulse = 0.7 + Math.sin(p.age * p.pulseSpeed) * 0.3;
+            ctx.globalAlpha = p.alpha * pulse;
+            ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow
+            
+            // Draw sparkle with gradient
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            gradient.addColorStop(0, '#FFFFFF');
+            gradient.addColorStop(0.5, p.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add cross sparkle
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            const sparkleSize = p.size * 0.8;
+            ctx.beginPath();
+            ctx.moveTo(p.x - sparkleSize, p.y);
+            ctx.lineTo(p.x + sparkleSize, p.y);
+            ctx.moveTo(p.x, p.y - sparkleSize);
+            ctx.lineTo(p.x, p.y + sparkleSize);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+    }
+
+    clear() {
+        this.particles = [];
+    }
+}
