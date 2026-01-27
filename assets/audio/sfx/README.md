@@ -4,6 +4,7 @@
 - jump.wav
 - attack1.wav, attack2.wav, attack3.wav
 - shadow_strike.wav
+- shadow_strike_hit.wav
 - player_hit.wav
 - land.wav
 - footstep.wav
@@ -30,6 +31,7 @@
 - pause.wav
 - level_complete.wav
 - game_over.wav
+- victory.wav
 - powerup.wav
 - coin_collect.wav
 - metal_pad.wav

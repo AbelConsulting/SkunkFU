@@ -209,6 +209,10 @@ class EnemyManager {
                     const knockbackDir = player.facingRight ? 1 : -1;
                     const isShadow = !!player.isShadowStriking;
                     const damage = isShadow ? 30 : player.attackDamage;
+
+                    if (isShadow && this.audioManager && typeof this.audioManager.playSound === 'function' && enemiesHit === 0) {
+                        this.audioManager.playSound('shadow_strike_hit', { volume: 0.78, rate: 1.02 });
+                    }
                     
                     if (isShadow) {
                         enemy.takeDamage(damage, knockbackDir, { knockback: 420, hitStun: 0.45 });

@@ -23,6 +23,7 @@ class AudioManager {
             jump: 2,
             land: 2,
             shadow_strike: 1,
+            shadow_strike_hit: 1,
             combo: 1,
             combo_level_up: 1,
             item_pickup: 2,
@@ -36,7 +37,8 @@ class AudioManager {
             menu_move: 2,
             menu_select: 2,
             ui_confirm: 2,
-            ui_back: 2
+            ui_back: 2,
+            victory: 1
         };
         this.soundCooldownsMs = {
             footstep: 120,
@@ -49,6 +51,7 @@ class AudioManager {
             jump: 120,
             land: 160,
             shadow_strike: 200,
+            shadow_strike_hit: 140,
             combo: 200,
             combo_level_up: 250,
             item_pickup: 120,
@@ -62,7 +65,8 @@ class AudioManager {
             menu_move: 80,
             menu_select: 120,
             ui_confirm: 120,
-            ui_back: 120
+            ui_back: 120,
+            victory: 800
         };
         this._lastPlayTimes = {};
         this._activeSfx = [];
