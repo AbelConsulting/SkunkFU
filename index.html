@@ -861,6 +861,11 @@ try {
         resumeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             try {
+                // Attempt fullscreen on resume (same user gesture as resume click)
+                if (typeof requestFullscreen === 'function') {
+                    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+                    if (!isFs) requestFullscreen();
+                }
                 if (window.game && typeof window.game.togglePause === 'function') {
                     window.game.togglePause();
                 } else if (typeof window.toggleGamePause === 'function') {
