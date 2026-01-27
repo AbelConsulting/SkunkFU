@@ -179,7 +179,8 @@ class Player {
                 this.jumpsRemaining = Math.max(0, this.jumpsRemaining - 1);
             }
             if (this.audioManager) {
-                this.audioManager.playSound('jump', 0.6);
+                const rate = 0.97 + Math.random() * 0.08; // 0.97..1.05
+                this.audioManager.playSound('jump', { volume: 0.6, rate });
             }
         }
     }
@@ -441,7 +442,10 @@ class Player {
             // Play landing sound if falling from significant height.
             // Note: velocity is positive when falling (downwards).
             if (!wasOnGround && preCollisionVY > 450) {
-                if (this.audioManager) this.audioManager.playSound('land', 0.6);
+                if (this.audioManager) {
+                    const rate = 0.96 + Math.random() * 0.06; // 0.96..1.02 (subtle)
+                    this.audioManager.playSound('land', { volume: 0.6, rate });
+                }
             }
         } else {
             this.onGround = false;
@@ -457,7 +461,9 @@ class Player {
         // Play footstep sounds when walking on ground
         if (this.onGround && Math.abs(this.velocityX) > 50 && this.footstepTimer <= 0 && !this.isAttacking && !this.isShadowStriking) {
             if (this.audioManager) {
-                this.audioManager.playSound('footstep', 0.3);
+                // Subtle variation prevents “machine-gun” repetition.
+                const rate = 0.96 + Math.random() * 0.08; // 0.96..1.04
+                this.audioManager.playSound('footstep', { volume: 0.3, rate });
             }
             this.footstepTimer = this.footstepInterval;
         }

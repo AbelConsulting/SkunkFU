@@ -178,7 +178,8 @@ class Enemy {
                 } else if (this.enemyType === 'BOSS2' || this.enemyType === 'BOSS3' || this.enemyType === 'BOSS4') {
                     this.audioManager.playSound('boss2_hurt', 0.6);
                 } else {
-                    this.audioManager.playSound('enemy_hit', 0.5);
+                    const rate = 0.94 + Math.random() * 0.12; // 0.94..1.06
+                    this.audioManager.playSound('enemy_hit', { volume: 0.5, rate });
                 }
             }
         }

@@ -150,11 +150,14 @@ class ItemManager {
                 // Play pickup sound
                 if (this.audioManager) {
                     if (item.type === 'HEALTH_REGEN') {
-                        this.audioManager.playSound('item_pickup', 0.6);
+                        const rate = 0.96 + Math.random() * 0.10; // 0.96..1.06
+                        this.audioManager.playSound('item_pickup', { volume: 0.6, rate });
                     } else if (item.type === 'EXTRA_LIFE') {
-                        this.audioManager.playSound('item_pickup', 0.8);
+                        const rate = 0.95 + Math.random() * 0.10; // 0.95..1.05
+                        this.audioManager.playSound('item_pickup', { volume: 0.8, rate });
                     } else if (item.type === 'GOLDEN_IDOL') {
-                        this.audioManager.playSound('item_pickup', 0.7);
+                        const rate = 0.97 + Math.random() * 0.10; // 0.97..1.07
+                        this.audioManager.playSound('coin_collect', { volume: 0.7, rate });
                     }
                 }
             }

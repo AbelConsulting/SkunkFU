@@ -18,7 +18,25 @@ class AudioManager {
             attack2: 2,
             attack3: 2,
             enemy_hit: 3,
-            player_hit: 1
+            enemy_death: 2,
+            enemy_attack: 2,
+            jump: 2,
+            land: 2,
+            shadow_strike: 1,
+            combo: 1,
+            combo_level_up: 1,
+            item_pickup: 2,
+            coin_collect: 2,
+            powerup: 1,
+            level_complete: 1,
+            player_hit: 1,
+            player_death: 1,
+            pause: 1,
+            game_over: 1,
+            menu_move: 2,
+            menu_select: 2,
+            ui_confirm: 2,
+            ui_back: 2
         };
         this.soundCooldownsMs = {
             footstep: 120,
@@ -26,7 +44,25 @@ class AudioManager {
             attack2: 80,
             attack3: 80,
             enemy_hit: 60,
-            player_hit: 120
+            enemy_death: 120,
+            enemy_attack: 180,
+            jump: 120,
+            land: 160,
+            shadow_strike: 200,
+            combo: 200,
+            combo_level_up: 250,
+            item_pickup: 120,
+            coin_collect: 80,
+            powerup: 250,
+            level_complete: 500,
+            player_hit: 180,
+            player_death: 500,
+            pause: 250,
+            game_over: 700,
+            menu_move: 80,
+            menu_select: 120,
+            ui_confirm: 120,
+            ui_back: 120
         };
         this._lastPlayTimes = {};
         this._activeSfx = [];
@@ -262,19 +298,41 @@ class AudioManager {
 
         const gainNode = this._getGainNode();
         if (!gainNode) return;
-        gainNode.gain.value = volumeScale;
 
-        // Optional panning support: pass { pan: -1..1 } via volumeScale object
-        let panner = null;
-        if (volumeScale && typeof volumeScale === 'object' && typeof volumeScale.pan === 'number') {
-            const vol = typeof volumeScale.volume === 'number' ? volumeScale.volume : 1.0;
-            gainNode.gain.value = vol;
-            if (this.audioCtx.createStereoPanner) {
-                panner = this.audioCtx.createStereoPanner();
-                panner.pan.value = Math.max(-1, Math.min(1, volumeScale.pan));
-                source.connect(panner);
-                panner.connect(gainNode);
+        // Support either a numeric volume scale OR an options object:
+        //   playSound('jump', 0.8)
+        //   playSound('jump', { volume: 0.8, pan: -0.2, rate: 1.02, detune: -50 })
+        let vol = 1.0;
+        let pan = null;
+        let rate = null;
+        let detune = null;
+        if (volumeScale && typeof volumeScale === 'object') {
+            vol = (typeof volumeScale.volume === 'number') ? volumeScale.volume : 1.0;
+            pan = (typeof volumeScale.pan === 'number') ? volumeScale.pan : null;
+            rate = (typeof volumeScale.rate === 'number') ? volumeScale.rate : null;
+            detune = (typeof volumeScale.detune === 'number') ? volumeScale.detune : null;
+        } else if (typeof volumeScale === 'number') {
+            vol = volumeScale;
+        }
+        gainNode.gain.value = vol;
+
+        try {
+            if (rate !== null && Number.isFinite(rate)) source.playbackRate.value = Math.max(0.25, Math.min(4.0, rate));
+            if (detune !== null && Number.isFinite(detune) && typeof source.detune !== 'undefined') {
+                const safeDetune = (typeof Utils !== 'undefined' && Utils && typeof Utils.clamp === 'function')
+                    ? Utils.clamp(detune, -2400, 2400)
+                    : detune;
+                source.detune.value = safeDetune;
             }
+        } catch (e) {}
+
+        // Optional panning support
+        let panner = null;
+        if (pan !== null && this.audioCtx.createStereoPanner) {
+            panner = this.audioCtx.createStereoPanner();
+            panner.pan.value = Math.max(-1, Math.min(1, pan));
+            source.connect(panner);
+            panner.connect(gainNode);
         }
 
         if (!panner) source.connect(gainNode);
