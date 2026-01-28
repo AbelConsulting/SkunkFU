@@ -1483,13 +1483,13 @@ window.addEventListener('gameStateChange', function(e) {
     const tcNow = document.getElementById('touch-controls');
     if (!tcNow) return;
 
-    // If not mobile / not landscape, ensure controls are hidden
-    if (!isMobile()) {
+    // If not mobile / not landscape, ensure controls are hidden (unless forced)
+    if (!isMobile() && !window._forceTouchControls) {
         tcNow.style.display = 'none'; tcNow.style.pointerEvents = 'none';
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_nonmobile', {}); } catch (e) {}
         return;
     }
-    if (!isLandscape()) {
+    if (!isLandscape() && !window._forceTouchControls) {
         tcNow.style.display = 'none'; tcNow.style.pointerEvents = 'none';
         try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_portrait', {}); } catch (e) {}
         return;
