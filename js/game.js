@@ -1087,7 +1087,7 @@ class Game {
                     const levelId = result.levelId || this.currentLevelId || 'level_unknown';
                     if (!this.idolProgress[levelId]) this.idolProgress[levelId] = [false, false, false];
                     const idx = (typeof result.idolIndex === 'number') ? result.idolIndex : null;
-                    if (idx !== null && this.idolProgress[levelId][idx] !== true) {
+                    if (idx !== null && idx >= 0 && idx < this.idolProgress[levelId].length && this.idolProgress[levelId][idx] !== true) {
                         this.idolProgress[levelId][idx] = true;
                         this.gameStats.idolsCollected = (this.gameStats.idolsCollected || 0) + 1;
                         this.score += (Config.IDOL_SCORE || 250);
