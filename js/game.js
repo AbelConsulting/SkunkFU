@@ -81,6 +81,10 @@ class Game {
             accuracy: 0
         };
 
+        // Level timer
+        this.levelStartTime = 0;
+        this.levelTime = 0;
+
         // Visual effects
         this.screenShake = null;
         this.hitPauseTimer = 0;
@@ -670,6 +674,11 @@ class Game {
             this.isRespawning = false;
             this.respawnTimer = 0;
             this._pendingRespawn = null;
+            
+            // Reset level timer
+            this.levelStartTime = 0;
+            this.levelTime = 0;
+            
             // Reset music playback rate when loading new level
             if (this.audioManager && this.audioManager.resetMusicPlaybackRate) {
                 this.audioManager.resetMusicPlaybackRate();
@@ -920,6 +929,12 @@ class Game {
             }
 
             // Update game statistics
+            // Start level timer on first frame of gameplay
+            if (this.levelStartTime === 0) {
+                this.levelStartTime = Date.now() / 1000;
+            }
+            this.levelTime = (Date.now() / 1000) - this.levelStartTime;
+            
             this.gameStats.timeSurvived += dt;
 
             // Update screen shake
@@ -1612,7 +1627,7 @@ class Game {
             }
 
             const idolStatus = (this.currentLevelId && this.idolProgress[this.currentLevelId]) ? this.idolProgress[this.currentLevelId] : null;
-            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo, this.lives, idolStatus);
+            this.ui.drawHUD(this.ctx, this.player, this.score, this.player.comboCount, this._scorePulse || 0, this.currentLevelIndex + 1, objectiveInfo, this.lives, idolStatus, this.levelTime);
         } else if (this.state === "LEVEL_COMPLETE") {
             // Draw Level Complete screen
             if (this.ui && typeof this.ui.drawLevelComplete === 'function') {
@@ -1620,7 +1635,7 @@ class Game {
             }
         } else if (this.state === "VICTORY") {
              if (this.ui && typeof this.ui.drawVictory === 'function') {
-                this.ui.drawVictory(this.ctx, this.score);
+                this.ui.drawVictory(this.ctx, this.score, this.gameStats);
              }
         } else if (this.state === "MENU") {
             this.ui.drawMenu(this.ctx);
@@ -1631,7 +1646,7 @@ class Game {
                 this.ui.drawPauseMenu(this.ctx);
             }
         } else if (this.state === "GAME_OVER") {
-            this.ui.drawGameOver(this.ctx, this.score, this.enemyManager.enemiesDefeated);
+            this.ui.drawGameOver(this.ctx, this.score, this.gameStats);
         }
 
         this.ctx.restore();

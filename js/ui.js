@@ -82,27 +82,102 @@ class UI {
         ctx.fillText('Press ESC to Resume', this.width / 2, this.height / 2 + 60);
     }
 
-    drawGameOver(ctx, score, enemiesDefeated) {
-        // Background overlay
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    drawGameOver(ctx, score, gameStats = {}) {
+        // Background overlay with gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, this.height);
+        gradient.addColorStop(0, 'rgba(20, 0, 0, 0.85)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.95)');
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, this.width, this.height);
 
-        // Title
+        // Title with shadow
+        ctx.save();
         ctx.font = 'bold 64px Arial';
         ctx.fillStyle = '#FF4444';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 80);
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 15;
+        ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 160);
+        ctx.restore();
 
-        // Stats
-        ctx.font = '32px Arial';
+        // Score - Large and prominent
+        ctx.save();
+        ctx.font = 'bold 48px Arial';
+        ctx.fillStyle = '#FFD700';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 10;
+        ctx.fillText(`SCORE: ${score}`, this.width / 2, this.height / 2 - 80);
+        ctx.restore();
+
+        // Stats breakdown in a box
+        const boxW = 500;
+        const boxH = 240;
+        const boxX = this.width / 2 - boxW / 2;
+        const boxY = this.height / 2 - 30;
+
+        // Stats box background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        // Stats title
+        ctx.font = 'bold 24px Arial';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(`Score: ${score}`, this.width / 2, this.height / 2);
-        ctx.fillText(`Enemies Defeated: ${enemiesDefeated}`, this.width / 2, this.height / 2 + 50);
+        ctx.textAlign = 'center';
+        ctx.fillText('PERFORMANCE', this.width / 2, boxY + 25);
+
+        // Individual stats with icons and colors
+        const statsStartY = boxY + 60;
+        const lineHeight = 35;
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'left';
+
+        const stats = [
+            { label: '⚔️  Enemies Defeated', value: gameStats.enemiesDefeated || 0, color: '#FF6B6B' },
+            { label: '⏱️  Time Survived', value: this.formatTime(gameStats.timeSurvived || 0), color: '#4ECDC4' },
+            { label: '🔥 Max Combo', value: `x${gameStats.maxCombo || 0}`, color: '#FFD93D' },
+            { label: '🎯 Accuracy', value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`, color: '#95E1D3' },
+            { label: '🏺 Idols Collected', value: gameStats.idolsCollected || 0, color: '#F38181' }
+        ];
+
+        stats.forEach((stat, index) => {
+            const y = statsStartY + (index * lineHeight);
+            
+            // Label
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillText(stat.label, boxX + 30, y);
+            
+            // Value - right aligned with color
+            ctx.textAlign = 'right';
+            ctx.fillStyle = stat.color;
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText(String(stat.value), boxX + boxW - 30, y);
+            ctx.textAlign = 'left';
+            ctx.font = '20px Arial';
+        });
 
         // Instructions
+        ctx.save();
         ctx.font = '24px Arial';
-        ctx.fillText('Press ENTER or Tap to Restart', this.width / 2, this.height / 2 + 120);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        const instructY = boxY + boxH + 50;
+        
+        // Blinking effect
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.fillText('Press ENTER or Tap to Restart', this.width / 2, instructY);
+        }
+        ctx.restore();
+    }
+
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
     drawLevelComplete(ctx, levelNum) {
@@ -121,29 +196,158 @@ class UI {
         ctx.fillText(`Proceeding to Stage ${levelNum + 1}...`, this.width / 2, this.height / 2 + 30);
     }
 
-    drawVictory(ctx, score) {
-        // Background overlay
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+    drawVictory(ctx, score, gameStats = {}) {
+        // Background overlay with golden gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, this.height);
+        gradient.addColorStop(0, 'rgba(40, 30, 0, 0.90)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.95)');
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, this.width, this.height);
 
+        // Animated golden particles effect
+        const time = Date.now() / 1000;
+        ctx.save();
+        for (let i = 0; i < 20; i++) {
+            const x = (Math.sin(time + i * 0.5) * 0.3 + 0.5) * this.width;
+            const y = ((time * 50 + i * 100) % this.height);
+            const size = Math.sin(time * 2 + i) * 2 + 3;
+            ctx.fillStyle = `rgba(255, 215, 0, ${0.3 + Math.sin(time * 3 + i) * 0.2})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        // Title with pulsing glow
+        ctx.save();
         ctx.font = 'bold 72px Arial';
-        ctx.fillStyle = '#FFD700'; // Gold
+        ctx.fillStyle = '#FFD700';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('MISSION ACCOMPLISHED!', this.width / 2, this.height / 2 - 60);
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 20 + Math.sin(Date.now() / 200) * 10;
+        ctx.fillText('MISSION ACCOMPLISHED!', this.width / 2, this.height / 2 - 180);
+        ctx.restore();
 
-        ctx.font = '36px Arial';
+        // Final Score - Large and prominent
+        ctx.save();
+        ctx.font = 'bold 52px Arial';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(`Final Score: ${score}`, this.width / 2, this.height / 2 + 20);
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 15;
+        ctx.fillText(`FINAL SCORE: ${score}`, this.width / 2, this.height / 2 - 100);
+        ctx.restore();
+
+        // Stats box
+        const boxW = 600;
+        const boxH = 200;
+        const boxX = this.width / 2 - boxW / 2;
+        const boxY = this.height / 2 - 40;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        // Victory stats
+        ctx.font = 'bold 22px Arial';
+        ctx.fillStyle = '#FFD700';
+        ctx.textAlign = 'center';
+        ctx.fillText('FINAL STATISTICS', this.width / 2, boxY + 25);
+
+        const statsY = boxY + 60;
+        const col1X = boxX + 150;
+        const col2X = boxX + 450;
+        const lineH = 35;
+        
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'left';
+        
+        // Left column
+        const leftStats = [
+            { label: '⚔️  Total Kills', value: gameStats.enemiesDefeated || 0, color: '#FF6B6B' },
+            { label: '⏱️  Time', value: this.formatTime(gameStats.timeSurvived || 0), color: '#4ECDC4' },
+            { label: '🔥 Best Combo', value: `x${gameStats.maxCombo || 0}`, color: '#FFD93D' }
+        ];
+        
+        leftStats.forEach((stat, i) => {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillText(stat.label, col1X - 130, statsY + i * lineH);
+            ctx.fillStyle = stat.color;
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(String(stat.value), col1X + 20, statsY + i * lineH);
+            ctx.font = '18px Arial';
+        });
+        
+        // Right column
+        const rightStats = [
+            { label: '🎯 Accuracy', value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`, color: '#95E1D3' },
+            { label: '🏺 Idols', value: `${gameStats.idolsCollected || 0}/30`, color: '#F38181' },
+            { label: '💎 Sets', value: gameStats.idolSetsCompleted || 0, color: '#A8E6CF' }
+        ];
+        
+        rightStats.forEach((stat, i) => {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillText(stat.label, col2X - 130, statsY + i * lineH);
+            ctx.fillStyle = stat.color;
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(String(stat.value), col2X + 20, statsY + i * lineH);
+            ctx.font = '18px Arial';
+        });
+
+        // Footer messages
+        ctx.save();
+        ctx.font = '20px Arial';
+        ctx.fillStyle = '#AAAAAA';
+        ctx.textAlign = 'center';
+        ctx.fillText('The Skunk Squad is safe... for now.', this.width / 2, boxY + boxH + 40);
         
         ctx.font = '24px Arial';
-        ctx.fillStyle = '#AAAAAA';
-        ctx.fillText('The Skunk Squad is safe... for now.', this.width / 2, this.height / 2 + 80);
-        ctx.fillText('Press ENTER to Play Again', this.width / 2, this.height / 2 + 130);
+        ctx.fillStyle = '#FFFFFF';
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.fillText('Press ENTER to Play Again', this.width / 2, boxY + boxH + 80);
+        }
+        ctx.restore();
     }
 
-    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null, lives = 1, idolStatus = null) {
+    drawHUD(ctx, player, score, combo, pulse, levelNumber = 1, objectiveInfo = null, lives = 1, idolStatus = null, levelTime = 0) {
         const padding = 12;
+
+        // Level timer (top-left, below health bar area)
+        try {
+            const timerBoxW = 140;
+            const timerBoxH = 32;
+            const timerBoxX = padding;
+            const timerBoxY = padding + 150; // Below health/idol icons
+
+            ctx.save();
+            
+            // Background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(timerBoxX, timerBoxY, timerBoxW, timerBoxH);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(timerBoxX, timerBoxY, timerBoxW, timerBoxH);
+
+            // Timer icon and text
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            
+            // Clock emoji/icon
+            ctx.font = '16px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillText('⏱️', timerBoxX + 8, timerBoxY + timerBoxH / 2);
+            
+            // Time display
+            ctx.font = 'bold 18px Arial';
+            ctx.fillStyle = '#4ECDC4'; // Cyan color
+            const timeText = this.formatTime(levelTime);
+            ctx.fillText(timeText, timerBoxX + 32, timerBoxY + timerBoxH / 2);
+            
+            ctx.restore();
+        } catch (e) {}
 
         // Health bar (compact)
         const iconSize = 14;
@@ -461,9 +665,9 @@ class UI {
             const boxX = this.width - padding - boxW;
             const boxY = padding;
 
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillRect(boxX, boxY, boxW, boxH);
-            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
             ctx.lineWidth = 1;
             ctx.strokeRect(boxX, boxY, boxW, boxH);
 
@@ -471,11 +675,109 @@ class UI {
             ctx.font = labelFont;
             ctx.fillText(label, boxX + boxW - scorePadX, boxY + scorePadY - 2);
 
-            ctx.fillStyle = p > 0 ? '#7CFF6B' : '#39FF14';
+            // Pulse effect on score when increasing
+            const pulseScale = 1 + (p * 0.15);
+            ctx.save();
+            if (p > 0) {
+                const textX = boxX + boxW - scorePadX;
+                const textY = boxY + scorePadY + 10;
+                ctx.translate(textX, textY);
+                ctx.scale(pulseScale, pulseScale);
+                ctx.translate(-textX, -textY);
+                ctx.fillStyle = '#FFD700'; // Gold when pulsing
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 8;
+            } else {
+                ctx.fillStyle = '#39FF14'; // Neon green normal
+            }
             ctx.font = valueFont;
             ctx.fillText(s, boxX + boxW - scorePadX, boxY + scorePadY + 10);
+            ctx.restore();
 
             ctx.restore();
+        } catch (e) {}
+
+        // Combo counter (below score, top-right area)
+        try {
+            if (combo && combo > 1) {
+                const comboBoxW = 120;
+                const comboBoxH = 28;
+                const comboBoxX = this.width - padding - comboBoxW;
+                const comboBoxY = padding + 40; // Below score
+
+                ctx.save();
+                
+                // Animated background based on combo level
+                const comboIntensity = Math.min(combo / 10, 1);
+                const bgAlpha = 0.6 + (comboIntensity * 0.2);
+                ctx.fillStyle = `rgba(255, ${Math.floor(100 * (1 - comboIntensity))}, 0, ${bgAlpha})`;
+                ctx.fillRect(comboBoxX, comboBoxY, comboBoxW, comboBoxH);
+                
+                // Glowing border for high combos
+                if (combo >= 5) {
+                    ctx.strokeStyle = '#FF6600';
+                    ctx.shadowColor = '#FF6600';
+                    ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 5;
+                } else {
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                }
+                ctx.lineWidth = 2;
+                ctx.strokeRect(comboBoxX, comboBoxY, comboBoxW, comboBoxH);
+
+                // Combo text
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 18px Arial';
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 3;
+                ctx.fillText(`COMBO x${combo}`, comboBoxX + comboBoxW / 2, comboBoxY + comboBoxH / 2);
+                
+                ctx.restore();
+            }
+        } catch (e) {}
+
+        // Idol bonuses indicator (below combo if active)
+        try {
+            if (player && player.idolBonuses && player.idolBonuses.count > 0) {
+                const bonusBoxW = 140;
+                const bonusBoxH = 44;
+                const bonusBoxX = this.width - padding - bonusBoxW;
+                const bonusBoxY = combo > 1 ? (padding + 74) : (padding + 40);
+
+                ctx.save();
+                
+                // Golden background with pulsing glow
+                const pulse = Math.sin(Date.now() / 300) * 0.15 + 0.85;
+                ctx.fillStyle = `rgba(218, 165, 32, ${0.7 * pulse})`;
+                ctx.fillRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
+                
+                ctx.strokeStyle = '#FFD700';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 8;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
+
+                // Title
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 11px Arial';
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 2;
+                ctx.fillText(`IDOL BONUS (${player.idolBonuses.count}/3)`, bonusBoxX + bonusBoxW / 2, bonusBoxY + 4);
+                
+                // Bonuses
+                const speedPercent = Math.round(player.idolBonuses.speed * 100);
+                const damagePercent = Math.round(player.idolBonuses.damage * 100);
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#00FFFF';
+                ctx.fillText(`+${speedPercent}% SPD`, bonusBoxX + 35, bonusBoxY + 24);
+                ctx.fillStyle = '#FF6666';
+                ctx.fillText(`+${damagePercent}% DMG`, bonusBoxX + 105, bonusBoxY + 24);
+                
+                ctx.restore();
+            }
         } catch (e) {}
 
         // (Removed) Attack cooldown debug bar
