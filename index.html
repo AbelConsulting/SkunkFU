@@ -922,11 +922,19 @@ try {
     try { const saved = localStorage.getItem('mobilePerfMode'); if (saved) idx = modes.indexOf(saved) !== -1 ? modes.indexOf(saved) : idx; } catch (e) {}
     const updateText = () => { btn.textContent = 'Perf: ' + modes[idx]; };
     updateText();
-    btn.addEventListener('click', (e) => {
-        try { e && e.preventDefault(); } catch (e) {}
+    const applyPerfMode = (e) => {
+        try { e && e.preventDefault(); e && e.stopPropagation(); } catch (e) {}
+        btn._lastPerfPress = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
         idx = (idx + 1) % modes.length;
         updateText();
         try { if (typeof window.setMobilePerformanceMode === 'function') window.setMobilePerformanceMode(modes[idx]); } catch (e) { console.warn('perf mode click failed', e); }
+    };
+    btn.addEventListener('touchstart', applyPerfMode, { passive: false });
+    btn.addEventListener('pointerdown', applyPerfMode);
+    btn.addEventListener('click', (e) => {
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (btn._lastPerfPress && (now - btn._lastPerfPress) < 350) return;
+        applyPerfMode(e);
     });
     // Show button only on mobile
     try { if (isMobile()) { btn.style.display = 'flex'; btn.style.alignItems = 'center'; } } catch (e) {}
@@ -1145,8 +1153,9 @@ window.requestShowTouchControls = function(durationMs = 1000, options = {}) {
                 // Already visible: just ensure opacity is set without toggling class/display
                 if (tc.style.opacity !== '1') tc.style.opacity = '1';
             }
-            // Respect force option: allow callers to force pointer interactions even if container would otherwise be inert
-            try { tc.style.pointerEvents = options && options.force ? 'auto' : 'none'; } catch (e) {}
+            // Keep container non-blocking so pause/perf UI remains interactive.
+            // Child buttons remain clickable via their own pointer-events.
+            try { tc.style.pointerEvents = 'none'; } catch (e) {}
         }
     } catch (e) {}
 
@@ -1384,7 +1393,7 @@ document.addEventListener('fullscreenchange', () => {
         const tc = document.getElementById('touch-controls');
         if (!tc) return;
         if (window.game && window.game.state === 'PLAYING' && isMobile() && isLandscape()) {
-            tc.style.display = 'flex'; tc.style.pointerEvents = 'auto'; void tc.offsetWidth; tc.classList.add('visible');
+            tc.style.display = 'flex'; tc.style.pointerEvents = 'none'; void tc.offsetWidth; tc.classList.add('visible');
         }
     }, 200);
 });
@@ -1525,7 +1534,7 @@ window.addEventListener('gameStateChange', function(e) {
         // Ensure controls are ready to show with proper display and pointer events
         // Force display and pointer events when entering PLAYING state
         tcNow.style.display = 'flex'; 
-        tcNow.style.pointerEvents = 'auto'; 
+        tcNow.style.pointerEvents = 'none'; 
         void tcNow.offsetWidth; 
         tcNow.classList.add('visible');
         tcNow.style.opacity = '1';
@@ -1551,7 +1560,7 @@ window.addEventListener('gameStateChange', function(e) {
                 if (!cur) { clearInterval(tid); return; }
                 try {
                     cur.style.display = 'flex'; 
-                    cur.style.pointerEvents = 'auto'; 
+                    cur.style.pointerEvents = 'none'; 
                     void cur.offsetWidth; 
                     cur.classList.add('visible');
                     cur.style.opacity = '1';
