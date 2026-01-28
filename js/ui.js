@@ -718,9 +718,6 @@ class UI {
 
         // Active buffs indicator (below score)
         try {
-            const idolCount = player && player.idolBonuses && typeof player.idolBonuses.count === 'number'
-                ? player.idolBonuses.count
-                : 0;
             const speedBonus = player && player.idolBonuses && typeof player.idolBonuses.speed === 'number'
                 ? player.idolBonuses.speed
                 : 0;
@@ -733,7 +730,13 @@ class UI {
             const damageBoostMultiplier = player && player.damageBoost && typeof player.damageBoost.multiplier === 'number'
                 ? player.damageBoost.multiplier
                 : 1;
-            if (player) {
+            const totalSpeedMultiplier = Math.max(0, speedBoostMultiplier) * (1 + Math.max(0, speedBonus));
+            const totalDamageMultiplier = Math.max(0, damageBoostMultiplier) * (1 + Math.max(0, damageBonus));
+            const speedPercent = Math.max(0, Math.round((totalSpeedMultiplier - 1) * 100));
+            const damagePercent = Math.max(0, Math.round((totalDamageMultiplier - 1) * 100));
+            const hasBuffs = speedPercent > 0 || damagePercent > 0;
+            const buffIntensity = Math.min(1, (Math.max(speedPercent, damagePercent)) / 60);
+            if (player && hasBuffs) {
                 const bonusBoxW = 140;
                 const bonusBoxH = 44;
                 const bonusBoxX = this.width - padding - bonusBoxW;
@@ -742,16 +745,14 @@ class UI {
                 ctx.save();
                 
                 // Background + glow (stronger when any buffs are active)
-                const hasBuffs = speedPercent > 0 || damagePercent > 0;
                 const pulse = hasBuffs ? (Math.sin(Date.now() / 220) * 0.18 + 0.82) : 0.85;
-                ctx.fillStyle = hasBuffs
-                    ? `rgba(0, 180, 255, ${0.35 + 0.35 * pulse})`
-                    : `rgba(20, 20, 20, 0.6)`;
+                const glowAlpha = 0.25 + (0.45 * buffIntensity);
+                ctx.fillStyle = `rgba(0, 180, 255, ${glowAlpha + 0.2 * pulse})`;
                 ctx.fillRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
 
-                ctx.strokeStyle = hasBuffs ? '#00D9FF' : 'rgba(255,255,255,0.2)';
-                ctx.shadowColor = hasBuffs ? '#00D9FF' : 'transparent';
-                ctx.shadowBlur = hasBuffs ? 10 : 0;
+                ctx.strokeStyle = `rgba(0, 217, 255, ${0.4 + 0.4 * buffIntensity})`;
+                ctx.shadowColor = `rgba(0, 217, 255, ${0.6 + 0.4 * buffIntensity})`;
+                ctx.shadowBlur = 8 + Math.floor(8 * buffIntensity);
                 ctx.lineWidth = 2;
                 ctx.strokeRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
 
@@ -762,19 +763,15 @@ class UI {
                 ctx.font = 'bold 11px Arial';
                 ctx.shadowColor = 'black';
                 ctx.shadowBlur = 2;
-                const label = hasBuffs ? 'TOTAL BUFFS ⚡' : 'TOTAL BUFFS';
+                const label = 'TOTAL BUFFS';
                 ctx.fillText(label, bonusBoxX + bonusBoxW / 2, bonusBoxY + 4);
                 
                 // Bonuses
-                const totalSpeedMultiplier = Math.max(0, speedBoostMultiplier) * (1 + Math.max(0, speedBonus));
-                const totalDamageMultiplier = Math.max(0, damageBoostMultiplier) * (1 + Math.max(0, damageBonus));
-                const speedPercent = Math.max(0, Math.round((totalSpeedMultiplier - 1) * 100));
-                const damagePercent = Math.max(0, Math.round((totalDamageMultiplier - 1) * 100));
                 ctx.font = 'bold 12px Arial';
-                ctx.fillStyle = hasBuffs ? '#00F0FF' : 'rgba(0,240,255,0.7)';
-                ctx.fillText(`+${speedPercent}% SPD`, bonusBoxX + 35, bonusBoxY + 24);
-                ctx.fillStyle = hasBuffs ? '#FF6666' : 'rgba(255,102,102,0.7)';
-                ctx.fillText(`+${damagePercent}% DMG`, bonusBoxX + 105, bonusBoxY + 24);
+                ctx.fillStyle = `rgba(0, 240, 255, ${0.65 + 0.35 * buffIntensity})`;
+                ctx.fillText(`⚡ +${speedPercent}%`, bonusBoxX + 24, bonusBoxY + 24);
+                ctx.fillStyle = `rgba(255, 102, 102, ${0.65 + 0.35 * buffIntensity})`;
+                ctx.fillText(`💥 +${damagePercent}%`, bonusBoxX + 84, bonusBoxY + 24);
                 
                 ctx.restore();
             }
