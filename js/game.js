@@ -152,6 +152,22 @@ class Game {
                             this.itemManager.spawnGoldenIdol(spawn.x, spawn.y, idx, this.currentLevelId);
                         }
                     });
+                    
+                    // Spawn speed boost power-ups
+                    const speedBoostSpawns = Array.isArray(config.speedBoosts) ? config.speedBoosts : [];
+                    speedBoostSpawns.forEach((spawn) => {
+                        if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                            this.itemManager.spawnSpeedBoost(spawn.x, spawn.y);
+                        }
+                    });
+                    
+                    // Spawn damage boost power-ups
+                    const damageBoostSpawns = Array.isArray(config.damageBoosts) ? config.damageBoosts : [];
+                    damageBoostSpawns.forEach((spawn) => {
+                        if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                            this.itemManager.spawnDamageBoost(spawn.x, spawn.y);
+                        }
+                    });
                 }
             }
         } catch (e) {}
@@ -627,6 +643,22 @@ class Game {
                     const alreadyCollected = this.idolProgress[this.currentLevelId] && this.idolProgress[this.currentLevelId][idx];
                     if (!alreadyCollected && spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
                         this.itemManager.spawnGoldenIdol(spawn.x, spawn.y, idx, this.currentLevelId);
+                    }
+                });
+                
+                // Spawn speed boost power-ups
+                const speedBoostSpawns = Array.isArray(config.speedBoosts) ? config.speedBoosts : [];
+                speedBoostSpawns.forEach((spawn) => {
+                    if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                        this.itemManager.spawnSpeedBoost(spawn.x, spawn.y);
+                    }
+                });
+                
+                // Spawn damage boost power-ups
+                const damageBoostSpawns = Array.isArray(config.damageBoosts) ? config.damageBoosts : [];
+                damageBoostSpawns.forEach((spawn) => {
+                    if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
+                        this.itemManager.spawnDamageBoost(spawn.x, spawn.y);
                     }
                 });
             }

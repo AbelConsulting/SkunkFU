@@ -79,6 +79,13 @@ const LEVEL_CONFIGS = [
             { x: 3100, y: 470 },
             { x: 8500, y: 490 }
         ],
+        speedBoosts: [
+            { x: 1800, y: 520 },  // Early speed boost on platform
+            { x: 7700, y: 430 }   // Late speed boost before boss
+        ],
+        damageBoosts: [
+            { x: 4500, y: 520 }   // Mid-level damage boost
+        ],
         enemyConfig: {
             spawnInterval: 3.0,
             maxEnemies: 5,
@@ -169,6 +176,14 @@ const LEVEL_CONFIGS = [
             { x: 560, y: 370 },
             { x: 3500, y: 470 },
             { x: 8300, y: 400 }
+        ],
+        speedBoosts: [
+            { x: 2200, y: 440 },   // Early city speed boost
+            { x: 6950, y: 290 }    // Rooftop speed boost
+        ],
+        damageBoosts: [
+            { x: 4800, y: 470 },   // Mid-city damage boost
+            { x: 9700, y: 470 }    // Late damage boost before boss
         ],
         enemyConfig: {
             spawnInterval: 2.2,
@@ -268,6 +283,15 @@ const LEVEL_CONFIGS = [
             { x: 1500, y: 370 },
             { x: 5600, y: 320 },
             { x: 11250, y: 330 }
+        ],
+        speedBoosts: [
+            { x: 3000, y: 370 },    // Before gauntlet
+            { x: 8750, y: 330 }     // Inner temple
+        ],
+        damageBoosts: [
+            { x: 1600, y: 370 },    // Early training hall
+            { x: 12000, y: 330 },   // Upper ridge
+            { x: 14400, y: 420 }    // Just before boss
         ],
         enemyConfig: {
             spawnInterval: 1.8,
@@ -370,6 +394,14 @@ const LEVEL_CONFIGS = [
             { x: 2700, y: 490 },
             { x: 10600, y: 330 }
         ],
+        speedBoosts: [
+            { x: 2200, y: 420 },    // Underground river
+            { x: 8600, y: 370 }     // Mushroom grove
+        ],
+        damageBoosts: [
+            { x: 5300, y: 420 },    // Crystal chamber
+            { x: 13200, y: 450 }    // Before boss
+        ],
         enemyConfig: {
             spawnInterval: 1.5,
             maxEnemies: 10,
@@ -452,6 +484,16 @@ const LEVEL_CONFIGS = [
             { x: 5700, y: 350 },
             { x: 12150, y: 430 }
         ],
+        speedBoosts: [
+            { x: 900, y: 320 },     // Entrance
+            { x: 7800, y: 470 },    // Deep section
+            { x: 12600, y: 530 }    // Late game
+        ],
+        damageBoosts: [
+            { x: 3650, y: 370 },    // Mid section
+            { x: 10700, y: 330 },   // Upper ledges
+            { x: 14500, y: 470 }    // Pre-boss
+        ],
         enemyConfig: {
             spawnInterval: 1.2,
             maxEnemies: 12,
@@ -524,6 +566,14 @@ const LEVEL_CONFIGS = [
             { x: 1200, y: 470 },
             { x: 6400, y: 490 },
             { x: 9800, y: 470 }
+        ],
+        speedBoosts: [
+            { x: 2300, y: 370 },    // Early neon district
+            { x: 7100, y: 390 }     // Rooftop section
+        ],
+        damageBoosts: [
+            { x: 3500, y: 470 },    // Mid crossroads
+            { x: 10900, y: 430 }    // Before boss
         ],
         enemyConfig: {
             spawnInterval: 1.6,
@@ -606,6 +656,16 @@ const LEVEL_CONFIGS = [
             { x: 7600, y: 470 },
             { x: 13500, y: 350 }
         ],
+        speedBoosts: [
+            { x: 2100, y: 420 },    // Early ridge
+            { x: 5900, y: 250 },    // High chasm
+            { x: 10800, y: 330 }    // Upper ledges
+        ],
+        damageBoosts: [
+            { x: 4500, y: 520 },    // Crystal area
+            { x: 8600, y: 470 },    // Mushroom section
+            { x: 15100, y: 420 }    // Just before boss
+        ],
         enemyConfig: {
             spawnInterval: 1.4,
             maxEnemies: 11,
@@ -687,6 +747,18 @@ const LEVEL_CONFIGS = [
             { x: 7700, y: 470 },
             { x: 14300, y: 470 }
         ],
+        speedBoosts: [
+            { x: 1500, y: 520 },    // Early depths
+            { x: 5300, y: 420 },    // Mid section
+            { x: 9500, y: 420 },    // Floating crystals
+            { x: 13200, y: 450 }    // Late section
+        ],
+        damageBoosts: [
+            { x: 3700, y: 370 },    // Underground section
+            { x: 8600, y: 470 },    // Grove area
+            { x: 12200, y: 430 },   // Upper section
+            { x: 15200, y: 420 }    // Pre-boss
+        ],
         enemyConfig: {
             spawnInterval: 1.2,
             maxEnemies: 12,
@@ -759,6 +831,17 @@ const LEVEL_CONFIGS = [
             { x: 6650, y: 390 },
             { x: 10750, y: 530 }
         ],
+        speedBoosts: [
+            { x: 1300, y: 470 },    // Early nexus
+            { x: 4900, y: 370 },    // Mid section
+            { x: 8500, y: 400 }     // Late nexus
+        ],
+        damageBoosts: [
+            { x: 2700, y: 370 },    // Early boost
+            { x: 5600, y: 470 },    // Mid nexus
+            { x: 9700, y: 470 },    // Late section
+            { x: 11200, y: 430 }    // Just before boss
+        ],
         enemyConfig: {
             spawnInterval: 1.5,
             maxEnemies: 10,
@@ -830,6 +913,19 @@ const LEVEL_CONFIGS = [
             { x: 2300, y: 270 },
             { x: 7600, y: 390 },
             { x: 11250, y: 430 }
+        ],
+        speedBoosts: [
+            { x: 1300, y: 470 },    // Early final stretch
+            { x: 3600, y: 470 },    // Mid section
+            { x: 6950, y: 290 },    // Rooftop
+            { x: 9700, y: 470 }     // Late section
+        ],
+        damageBoosts: [
+            { x: 2300, y: 370 },    // Early power
+            { x: 5100, y: 470 },    // Mid boost
+            { x: 8500, y: 400 },    // Pre-final
+            { x: 10900, y: 530 },   // Late boost
+            { x: 11300, y: 430 }    // Just before final boss
         ],
         enemyConfig: {
             spawnInterval: 1.3,

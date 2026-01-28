@@ -271,15 +271,11 @@ class EnemyManager {
         const isBoss = this.isBossType(enemy.enemyType);
         const healthRegenRate = isBoss ? 0.5 : (Config.HEALTH_REGEN_DROP_RATE || 0.15);
         const extraLifeRate = isBoss ? 0.3 : (Config.EXTRA_LIFE_DROP_RATE || 0.05);
-        const speedBoostRate = isBoss ? 0.4 : (Config.SPEED_BOOST_DROP_RATE || 0.12);
+        // Speed boost and damage boost are placed in levels, not dropped
 
         // Roll for extra life first (rarest)
         if (Math.random() < extraLifeRate) {
             this.itemManager.spawnExtraLife(dropX, dropY);
-        }
-        // Then roll for speed boost
-        else if (Math.random() < speedBoostRate) {
-            this.itemManager.spawnSpeedBoost(dropX, dropY);
         }
         // Then roll for health regen
         else if (Math.random() < healthRegenRate) {
