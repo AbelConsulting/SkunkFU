@@ -973,9 +973,11 @@ class Game {
         }
 
         // Update damage numbers and effects
-        this.damageNumbers = this.damageNumbers.filter(dn => dn.isAlive());
+        this.damageNumbers = this.damageNumbers.filter(dn => dn && typeof dn.isAlive === 'function' && dn.isAlive());
         for (const dn of this.damageNumbers) {
-            dn.update(dt);
+            if (dn && typeof dn.update === 'function') {
+                dn.update(dt);
+            }
         }
 
         this.hitSparks = this.hitSparks.filter(hs => hs.isAlive());
@@ -1506,7 +1508,9 @@ class Game {
             this.movementFX.draw(this.ctx);
         }
         for (const dn of this.damageNumbers) {
-            dn.draw(this.ctx);
+            if (dn && typeof dn.draw === 'function') {
+                dn.draw(this.ctx);
+            }
         }
         for (const hs of this.hitSparks) {
             hs.draw(this.ctx);
