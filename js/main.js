@@ -20,6 +20,13 @@ class GameApp {
         // loading screen snappy (especially on mobile).
         this._deferredSoundList = null;
 
+        // Gamepad state tracking (VR/Oculus controllers)
+        this._gamepadKeys = {};
+        this._gamepadLast = {
+            left: { left: false, right: false, trigger: false },
+            right: { a: false, b: false, trigger: false }
+        };
+
         this.init();
     }
 
@@ -254,6 +261,90 @@ class GameApp {
                 setTimeout(() => { try { if (rafId) cancelAnimationFrame(rafId); } catch (e) {}; resolve(null); }, duration + 1200);
             } catch (e) { resolve(null); }
         });
+    }
+
+    _sendKeyEvent(key, type) {
+        try {
+            if (typeof window.triggerKeyEvent === 'function') {
+                window.triggerKeyEvent(key, type);
+                return;
+            }
+        } catch (e) {}
+        try {
+            const event = new KeyboardEvent(type, { key, bubbles: true, cancelable: true });
+            window.dispatchEvent(event);
+        } catch (e) {}
+    }
+
+    _setKeyState(key, isDown) {
+        const k = String(key || '');
+        const prev = !!this._gamepadKeys[k];
+        if (prev === isDown) return;
+        this._gamepadKeys[k] = isDown;
+        this._sendKeyEvent(k, isDown ? 'keydown' : 'keyup');
+    }
+
+    _getButtonPressed(gamepad, index) {
+        if (!gamepad || !gamepad.buttons || !gamepad.buttons[index]) return false;
+        const btn = gamepad.buttons[index];
+        return !!(btn && (btn.pressed || btn.value > 0.5));
+    }
+
+    _pickGamepads() {
+        const pads = (navigator.getGamepads && navigator.getGamepads()) ? Array.from(navigator.getGamepads()) : [];
+        let leftPad = null;
+        let rightPad = null;
+
+        for (const gp of pads) {
+            if (!gp) continue;
+            const hand = (gp.hand || gp.handedness || '').toLowerCase();
+            if (hand === 'left') leftPad = gp;
+            if (hand === 'right') rightPad = gp;
+        }
+
+        if (!leftPad || !rightPad) {
+            for (const gp of pads) {
+                if (!gp || !gp.id) continue;
+                const id = gp.id.toLowerCase();
+                if (!leftPad && id.includes('left')) leftPad = gp;
+                if (!rightPad && id.includes('right')) rightPad = gp;
+            }
+        }
+
+        // Fallback: if still missing, use first two gamepads in order
+        if (!leftPad && pads[0]) leftPad = pads[0];
+        if (!rightPad && pads[1]) rightPad = pads[1];
+
+        return { leftPad, rightPad };
+    }
+
+    _handleGamepadInput() {
+        if (typeof navigator === 'undefined' || !navigator.getGamepads) return;
+        const { leftPad, rightPad } = this._pickGamepads();
+        if (!leftPad && !rightPad) return;
+
+        // Left controller thumbstick: move left/right
+        const axisX = leftPad && leftPad.axes && typeof leftPad.axes[0] === 'number' ? leftPad.axes[0] : 0;
+        const leftDown = axisX < -0.25;
+        const rightDown = axisX > 0.25;
+        this._setKeyState('ArrowLeft', leftDown);
+        this._setKeyState('ArrowRight', rightDown);
+
+        // Left trigger: special attack (KeyZ)
+        const leftTrigger = this._getButtonPressed(leftPad, 6) || this._getButtonPressed(leftPad, 4);
+        this._setKeyState('z', leftTrigger);
+
+        // Right controller buttons
+        const aPressed = this._getButtonPressed(rightPad, 0);
+        const bPressed = this._getButtonPressed(rightPad, 1);
+        const rightTrigger = this._getButtonPressed(rightPad, 7) || this._getButtonPressed(rightPad, 5);
+
+        // A: jump (Space)
+        this._setKeyState(' ', aPressed);
+        // Right trigger: attack (KeyX)
+        this._setKeyState('x', rightTrigger);
+        // B: pause (Escape)
+        this._setKeyState('Escape', bPressed);
     }
 
     async init() {
@@ -727,6 +818,9 @@ class GameApp {
 
     gameLoop(currentTime) {
         if (!this.running) return;
+
+        // Poll gamepads once per frame before update
+        try { this._handleGamepadInput(); } catch (e) {}
 
         // Throttle to target FPS to save CPU on mobile
         const step = 1 / Config.FPS;
