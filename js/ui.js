@@ -462,28 +462,7 @@ class UI {
                 ctx.restore();
             }
             
-            // Show active idol bonuses if any idols collected
-            const collectedCount = idolIcons.filter(Boolean).length;
-            if (collectedCount > 0 && player.idolBonuses) {
-                const bonusY = idolY + idolSize + 4;
-                ctx.font = 'bold 11px Arial';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
-                
-                // Show speed bonus
-                const speedPercent = Math.round(player.idolBonuses.speed * 100);
-                ctx.fillStyle = '#00FFFF';
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 3;
-                ctx.strokeText(`+${speedPercent}% Speed`, idolX, bonusY);
-                ctx.fillText(`+${speedPercent}% Speed`, idolX, bonusY);
-                
-                // Show damage bonus
-                const damagePercent = Math.round(player.idolBonuses.damage * 100);
-                ctx.fillStyle = '#FF9900';
-                ctx.strokeText(`+${damagePercent}% Damage`, idolX, bonusY + 14);
-                ctx.fillText(`+${damagePercent}% Damage`, idolX, bonusY + 14);
-            }
+            // Bonus values are shown in the box below the score instead
         } catch (e) {}
 
         // Optional numeric HP (only when low, small + subtle)
@@ -737,9 +716,24 @@ class UI {
             }
         } catch (e) {}
 
-        // Idol bonuses indicator (below combo if active)
+        // Active buffs indicator (below score)
         try {
-            if (player && player.idolBonuses && player.idolBonuses.count > 0) {
+            const idolCount = player && player.idolBonuses && typeof player.idolBonuses.count === 'number'
+                ? player.idolBonuses.count
+                : 0;
+            const speedBonus = player && player.idolBonuses && typeof player.idolBonuses.speed === 'number'
+                ? player.idolBonuses.speed
+                : 0;
+            const damageBonus = player && player.idolBonuses && typeof player.idolBonuses.damage === 'number'
+                ? player.idolBonuses.damage
+                : 0;
+            const speedBoostMultiplier = player && player.speedBoost && typeof player.speedBoost.multiplier === 'number'
+                ? player.speedBoost.multiplier
+                : 1;
+            const damageBoostMultiplier = player && player.damageBoost && typeof player.damageBoost.multiplier === 'number'
+                ? player.damageBoost.multiplier
+                : 1;
+            if (player) {
                 const bonusBoxW = 140;
                 const bonusBoxH = 44;
                 const bonusBoxX = this.width - padding - bonusBoxW;
@@ -747,14 +741,17 @@ class UI {
 
                 ctx.save();
                 
-                // Golden background with pulsing glow
-                const pulse = Math.sin(Date.now() / 300) * 0.15 + 0.85;
-                ctx.fillStyle = `rgba(218, 165, 32, ${0.7 * pulse})`;
+                // Background + glow (stronger when any buffs are active)
+                const hasBuffs = speedPercent > 0 || damagePercent > 0;
+                const pulse = hasBuffs ? (Math.sin(Date.now() / 220) * 0.18 + 0.82) : 0.85;
+                ctx.fillStyle = hasBuffs
+                    ? `rgba(0, 180, 255, ${0.35 + 0.35 * pulse})`
+                    : `rgba(20, 20, 20, 0.6)`;
                 ctx.fillRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
-                
-                ctx.strokeStyle = '#FFD700';
-                ctx.shadowColor = '#FFD700';
-                ctx.shadowBlur = 8;
+
+                ctx.strokeStyle = hasBuffs ? '#00D9FF' : 'rgba(255,255,255,0.2)';
+                ctx.shadowColor = hasBuffs ? '#00D9FF' : 'transparent';
+                ctx.shadowBlur = hasBuffs ? 10 : 0;
                 ctx.lineWidth = 2;
                 ctx.strokeRect(bonusBoxX, bonusBoxY, bonusBoxW, bonusBoxH);
 
@@ -765,15 +762,18 @@ class UI {
                 ctx.font = 'bold 11px Arial';
                 ctx.shadowColor = 'black';
                 ctx.shadowBlur = 2;
-                ctx.fillText(`IDOL BONUS (${player.idolBonuses.count}/3)`, bonusBoxX + bonusBoxW / 2, bonusBoxY + 4);
+                const label = hasBuffs ? 'TOTAL BUFFS ⚡' : 'TOTAL BUFFS';
+                ctx.fillText(label, bonusBoxX + bonusBoxW / 2, bonusBoxY + 4);
                 
                 // Bonuses
-                const speedPercent = Math.round(player.idolBonuses.speed * 100);
-                const damagePercent = Math.round(player.idolBonuses.damage * 100);
-                ctx.font = '12px Arial';
-                ctx.fillStyle = '#00FFFF';
+                const totalSpeedMultiplier = Math.max(0, speedBoostMultiplier) * (1 + Math.max(0, speedBonus));
+                const totalDamageMultiplier = Math.max(0, damageBoostMultiplier) * (1 + Math.max(0, damageBonus));
+                const speedPercent = Math.max(0, Math.round((totalSpeedMultiplier - 1) * 100));
+                const damagePercent = Math.max(0, Math.round((totalDamageMultiplier - 1) * 100));
+                ctx.font = 'bold 12px Arial';
+                ctx.fillStyle = hasBuffs ? '#00F0FF' : 'rgba(0,240,255,0.7)';
                 ctx.fillText(`+${speedPercent}% SPD`, bonusBoxX + 35, bonusBoxY + 24);
-                ctx.fillStyle = '#FF6666';
+                ctx.fillStyle = hasBuffs ? '#FF6666' : 'rgba(255,102,102,0.7)';
                 ctx.fillText(`+${damagePercent}% DMG`, bonusBoxX + 105, bonusBoxY + 24);
                 
                 ctx.restore();
