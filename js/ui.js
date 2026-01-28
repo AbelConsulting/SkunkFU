@@ -257,6 +257,29 @@ class UI {
                 ctx.strokeRect(ix, iy, idolSize, idolSize);
                 ctx.restore();
             }
+            
+            // Show active idol bonuses if any idols collected
+            const collectedCount = idolIcons.filter(Boolean).length;
+            if (collectedCount > 0 && player.idolBonuses) {
+                const bonusY = idolY + idolSize + 4;
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                
+                // Show speed bonus
+                const speedPercent = Math.round(player.idolBonuses.speed * 100);
+                ctx.fillStyle = '#00FFFF';
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.strokeText(`+${speedPercent}% Speed`, idolX, bonusY);
+                ctx.fillText(`+${speedPercent}% Speed`, idolX, bonusY);
+                
+                // Show damage bonus
+                const damagePercent = Math.round(player.idolBonuses.damage * 100);
+                ctx.fillStyle = '#FF9900';
+                ctx.strokeText(`+${damagePercent}% Damage`, idolX, bonusY + 14);
+                ctx.fillText(`+${damagePercent}% Damage`, idolX, bonusY + 14);
+            }
         } catch (e) {}
 
         // Optional numeric HP (only when low, small + subtle)
