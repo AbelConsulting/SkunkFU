@@ -58,8 +58,11 @@
 
         /* --- TOUCH CONTROLS UI --- */
         #touch-controls {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            left: 0; right: 0;
+            bottom: calc(12px + var(--safe-bottom));
+            top: auto;
+            height: 240px;
             pointer-events: none; /* Let touches pass through empty areas */
             z-index: 100;
             display: none; /* Hidden by default, shown via JS if mobile */
@@ -1153,9 +1156,8 @@ window.requestShowTouchControls = function(durationMs = 1000, options = {}) {
                 // Already visible: just ensure opacity is set without toggling class/display
                 if (tc.style.opacity !== '1') tc.style.opacity = '1';
             }
-            // Keep container non-blocking so pause/perf UI remains interactive.
-            // Child buttons remain clickable via their own pointer-events.
-            try { tc.style.pointerEvents = 'none'; } catch (e) {}
+            // Keep container non-blocking by default; allow pointer events when forced.
+            try { tc.style.pointerEvents = options && options.force ? 'auto' : 'none'; } catch (e) {}
         }
     } catch (e) {}
 
@@ -1393,7 +1395,7 @@ document.addEventListener('fullscreenchange', () => {
         const tc = document.getElementById('touch-controls');
         if (!tc) return;
         if (window.game && window.game.state === 'PLAYING' && isMobile() && isLandscape()) {
-            tc.style.display = 'flex'; tc.style.pointerEvents = 'none'; void tc.offsetWidth; tc.classList.add('visible');
+            tc.style.display = 'flex'; tc.style.pointerEvents = window._forceTouchControls ? 'auto' : 'none'; void tc.offsetWidth; tc.classList.add('visible');
         }
     }, 200);
 });
@@ -1534,7 +1536,7 @@ window.addEventListener('gameStateChange', function(e) {
         // Ensure controls are ready to show with proper display and pointer events
         // Force display and pointer events when entering PLAYING state
         tcNow.style.display = 'flex'; 
-        tcNow.style.pointerEvents = 'none'; 
+        tcNow.style.pointerEvents = window._forceTouchControls ? 'auto' : 'none'; 
         void tcNow.offsetWidth; 
         tcNow.classList.add('visible');
         tcNow.style.opacity = '1';
@@ -1560,7 +1562,7 @@ window.addEventListener('gameStateChange', function(e) {
                 if (!cur) { clearInterval(tid); return; }
                 try {
                     cur.style.display = 'flex'; 
-                    cur.style.pointerEvents = 'none'; 
+                    cur.style.pointerEvents = window._forceTouchControls ? 'auto' : 'none'; 
                     void cur.offsetWidth; 
                     cur.classList.add('visible');
                     cur.style.opacity = '1';
