@@ -1334,7 +1334,12 @@ function updateMobileUI() {
                 try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_hidden_init_not_playing', {}); } catch (e) {}
             } else {
                 // Ensure controls remain visible when gameplay is active
-                showTouchControls(800);
+                // Use forced visibility if controls should always be on
+                if (window._forceTouchControls) {
+                    showTouchControlsImmediate({ force: true, durationMs: 3600000, persistent: true });
+                } else {
+                    showTouchControls(800);
+                }
                 try { window && window.logTouchControlEvent && window.logTouchControlEvent('touchControls_keep_visible', {}); } catch (e) {}
             }
         }
