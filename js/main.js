@@ -423,14 +423,20 @@ class GameApp {
 
     _handleGamepadInput() {
         if (typeof navigator === 'undefined' || !navigator.getGamepads) return;
+        const pads = (navigator.getGamepads && navigator.getGamepads()) ? Array.from(navigator.getGamepads()) : [];
+        const hasXboxPad = pads.some((gp) => {
+            if (!gp || !gp.id) return false;
+            const id = gp.id.toLowerCase();
+            return id.includes('xbox') || id.includes('xinput');
+        });
         try {
             const enabled = (typeof window !== 'undefined') && (
                 window._vrControllersEnabled === true ||
                 (typeof localStorage !== 'undefined' && localStorage.getItem('vrControllers') === '1')
             );
-            if (!enabled) return;
+            if (!enabled && !hasXboxPad) return;
         } catch (e) {
-            return;
+            if (!hasXboxPad) return;
         }
         const { leftPad, rightPad } = this._pickGamepads();
         if (!leftPad && !rightPad) return;
@@ -439,6 +445,7 @@ class GameApp {
         const actionPad = rightPad || leftPad;
         const leftIsXr = !!(leftPad && leftPad.mapping === 'xr-standard');
         const rightIsXr = !!(actionPad && actionPad.mapping === 'xr-standard');
+        const isStandard = !!(actionPad && actionPad.mapping === 'standard');
 
         // Left controller thumbstick: move left/right
         const axisX = this._getAxisX(movePad);
@@ -464,10 +471,18 @@ class GameApp {
             ? this._getButtonPressed(actionPad, 0)
             : (this._getButtonPressed(actionPad, 7) || this._getButtonPressed(actionPad, 5));
 
+        // Xbox (standard mapping) extra buttons
+        const xPressed = isStandard ? this._getButtonPressed(actionPad, 2) : false;
+        const yPressed = isStandard ? this._getButtonPressed(actionPad, 3) : false;
+
         // A: jump (Space)
         this._setKeyState(' ', aPressed);
         // Right trigger: attack (KeyX)
         this._setKeyState('x', rightTrigger);
+        // X: alternate attack (KeyX) when using standard mapping
+        if (isStandard) this._setKeyState('x', rightTrigger || xPressed);
+        // Y: special (KeyZ) on standard mapping
+        if (isStandard) this._setKeyState('z', leftTrigger || yPressed);
         // B: pause (Escape)
         this._setKeyState('Escape', bPressed);
     }
